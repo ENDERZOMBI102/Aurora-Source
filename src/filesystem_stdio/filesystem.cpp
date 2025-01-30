@@ -583,8 +583,8 @@ bool CFileSystemStdio::RenameFile( char const* pOldPath, char const* pNewPath, c
 void CFileSystemStdio::CreateDirHierarchy( const char* path, const char* pathID ) { AssertUnreachable(); }
 
 bool CFileSystemStdio::IsDirectory( const char* pFileName, const char* pPathID ) {
-	// TODO: If path is absolute, avoid the `Open` call
 	// try to open the file
+	// TODO: If path is absolute, avoid the `Open` call
 	const auto desc{ static_cast<FileDescriptor*>( Open( pFileName, "r", pPathID ) ) };
 	if ( desc ) {
 		desc->m_Driver->AddRef();
@@ -602,12 +602,12 @@ void CFileSystemStdio::FileTimeToString( char* pStrip, int maxCharsIncludingTerm
 // ---- Open file operations ----
 void CFileSystemStdio::SetBufferSize( FileHandle_t file, unsigned nBytes ) { AssertUnreachable(); }
 
-bool CFileSystemStdio::IsOk( FileHandle_t file ) {
+bool CFileSystemStdio::IsOk( const FileHandle_t file ) {
 	return file != nullptr;
 }
 
-bool CFileSystemStdio::EndOfFile( FileHandle_t file ) {
-	return static_cast<FileDescriptor*>( file )->m_Offset == Size( file );
+bool CFileSystemStdio::EndOfFile( const FileHandle_t file ) {
+	return static_cast<const FileDescriptor*>( file )->m_Offset == Size( file );
 }
 
 char* CFileSystemStdio::ReadLine( char* pOutput, int maxChars, FileHandle_t file ) { AssertUnreachable(); return {}; }
@@ -622,8 +622,7 @@ CSysModule* CFileSystemStdio::LoadModule( const char* pFileName, const char* pPa
 
 	// try from search paths TODO: Handle extraction if needed
 	char* absolute;
-	const auto handle{ OpenEx( filepath, "rb", 0, pPathID, &absolute ) };
-	if ( handle ) {
+	if ( const auto handle = OpenEx( filepath, "rb", 0, pPathID, &absolute ) ) {
 		Close( handle );
 		const auto res{ Sys_LoadModule( absolute ) };
 		delete[] absolute;
