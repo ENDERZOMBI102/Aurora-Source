@@ -309,7 +309,16 @@ bool CFileSystemStdio::ReadFile( const char* pFileName, const char* pPath, CUtlB
 	Close( handle );
 	return res;
 }
-bool CFileSystemStdio::WriteFile( const char* pFileName, const char* pPath, CUtlBuffer& buf ) { AssertUnreachable(); return {}; }
+bool CFileSystemStdio::WriteFile( const char* pFileName, const char* pPath, CUtlBuffer& buf ) {
+	const auto handle{ Open( pFileName, "w", pPath ) };
+	if ( handle == nullptr ) {
+		return false;
+	}
+	// read all to a buffer
+	const auto res{ Write( buf.Base(), buf.Size(), handle ) == buf.Size() };
+	Close( handle );
+	return res;
+}
 bool CFileSystemStdio::UnzipFile( const char* pFileName, const char* pPath, const char* pDestination ) { AssertUnreachable(); return {}; }
 
 
