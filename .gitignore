@@ -1,19 +1,14 @@
-# Files to ignore when considering what GIT should commit.
-# Build directories
+# Build config
 /build/
 /cmake-*/
-/.dub/
-/.vs/
-
-# CMake
 CMakeUserPresets.json
 
-# CLion
-/.idea
-
-# Visual Studio
+# IDEs
+/.idea/
+/.vs/
 *.vcxproj
 *.sln
+.lldbinit
 
 # Build products
 *.obj
@@ -40,6 +35,6 @@ obj*/
 /game/**/*_temp.*
 /game/**/*.cache
 /game/**/cfg/commandline.cfg*
+/game/timestamped.log
 config.cfg
 *.tmp
-/game/timestamped.log
