@@ -13,15 +13,15 @@ enum NormalDecodeMode_t {
 	NORMAL_DECODE_ATI2N_ALPHA = 2
 };
 
-//-----------------------------------------------------------------------------
-// The various image format types
-//-----------------------------------------------------------------------------
 
 // don't bitch that inline functions aren't used!!!!
 #if _MSC_VER
 	#pragma warning( push )
 	#pragma warning( disable : 4514 )
 #endif
+//-----------------------------------------------------------------------------
+// The various image format types
+//-----------------------------------------------------------------------------
 enum ImageFormat {
 	IMAGE_FORMAT_UNKNOWN = -1,
 	IMAGE_FORMAT_RGBA8888 = 0,
@@ -51,22 +51,22 @@ enum ImageFormat {
 	IMAGE_FORMAT_RGBA16161616F,
 	IMAGE_FORMAT_RGBA16161616,
 	IMAGE_FORMAT_UVLX8888,
-	IMAGE_FORMAT_R32F,// Single-channel 32-bit floating point
+	IMAGE_FORMAT_R32F,  // Single-channel 32-bit floating point
 	IMAGE_FORMAT_RGB323232F,
 	IMAGE_FORMAT_RGBA32323232F,
 
 	// Depth-stencil texture formats for shadow depth mapping
-	IMAGE_FORMAT_NV_DST16, //
-	IMAGE_FORMAT_NV_DST24, //
-	IMAGE_FORMAT_NV_INTZ,  // Vendor-specific depth-stencil texture
-	IMAGE_FORMAT_NV_RAWZ,  // formats for shadow depth mapping
-	IMAGE_FORMAT_ATI_DST16,//
-	IMAGE_FORMAT_ATI_DST24,//
-	IMAGE_FORMAT_NV_NULL,  // Dummy format which takes no video memory
+	IMAGE_FORMAT_NV_DST16,   //
+	IMAGE_FORMAT_NV_DST24,   //
+	IMAGE_FORMAT_NV_INTZ,    // Vendor-specific depth-stencil texture
+	IMAGE_FORMAT_NV_RAWZ,    // formats for shadow depth mapping
+	IMAGE_FORMAT_ATI_DST16,  //
+	IMAGE_FORMAT_ATI_DST24,  //
+	IMAGE_FORMAT_NV_NULL,    // Dummy format which takes no video memory
 
 	// Compressed normal map formats
-	IMAGE_FORMAT_ATI2N,// One-surface ATI2N / DXN format
-	IMAGE_FORMAT_ATI1N,// Two-surface ATI1N format
+	IMAGE_FORMAT_ATI2N,  // One-surface ATI2N / DXN format
+	IMAGE_FORMAT_ATI1N,  // Two-surface ATI1N format
 
 	IMAGE_FORMAT_DXT1_RUNTIME,
 	IMAGE_FORMAT_DXT5_RUNTIME,
@@ -260,8 +260,8 @@ struct RGBX5551_t {
 //-----------------------------------------------------------------------------
 // some important constants
 //-----------------------------------------------------------------------------
-#define ARTWORK_GAMMA (2.2f)
-#define IMAGE_MAX_DIM (2048)
+constexpr auto ARTWORK_GAMMA{ 2.2f };
+constexpr auto IMAGE_MAX_DIM{ 2048 };
 
 
 //-----------------------------------------------------------------------------
@@ -294,8 +294,7 @@ namespace ImageLoader {
 	// return false if the conversion cannot be performed.
 	// Strides denote the number of bytes per each line,
 	// by default assumes width * # of bytes per pixel
-	bool ConvertImageFormat( const unsigned char* src, ImageFormat srcImageFormat,
-							 unsigned char* dst, ImageFormat dstImageFormat,
+	bool ConvertImageFormat( const unsigned char* src, ImageFormat srcImageFormat, unsigned char* dst, ImageFormat dstImageFormat,
 							 int32 width, int32 height, int32 srcStride = 0, int32 dstStride = 0 );
 
 	// must be used in conjunction with ConvertImageFormat() to pre-swap and post-swap
@@ -322,48 +321,40 @@ namespace ImageLoader {
 	};
 
 	struct ResampleInfo_t {
-		ResampleInfo_t() : m_nSrcDepth( 1 ), m_nDestDepth( 1 ), m_flAlphaThreshhold( 0.4f ), m_flAlphaHiFreqThreshhold( 0.4f ), m_nFlags( 0 ) { // NOLINT(*-pro-type-member-init)
-			m_flColorScale[ 0 ] = 1.0f, m_flColorScale[ 1 ] = 1.0f, m_flColorScale[ 2 ] = 1.0f, m_flColorScale[ 3 ] = 1.0f;
-			m_flColorGoal[ 0 ] = 0.0f, m_flColorGoal[ 1 ] = 0.0f, m_flColorGoal[ 2 ] = 0.0f, m_flColorGoal[ 3 ] = 0.0f;
-		}
+		ResampleInfo_t() = default;
 
 		unsigned char* m_pSrc;
 		unsigned char* m_pDest;
 
 		int32 m_nSrcWidth;
 		int32 m_nSrcHeight;
-		int32 m_nSrcDepth;
+		int32 m_nSrcDepth{1};
 
 		int32 m_nDestWidth;
 		int32 m_nDestHeight;
-		int32 m_nDestDepth;
+		int32 m_nDestDepth{1};
 
 		float m_flSrcGamma;
 		float m_flDestGamma;
 
-		float m_flColorScale[4];  // Color scale factors RGBA
-		float m_flColorGoal[4];   // Color goal values RGBA    DestColor = ColorGoal + scale * (SrcColor - ColorGoal)
+		float m_flColorScale[4] { 1.0f };  // Color scale factors RGBA
+		float m_flColorGoal[4] { 0.0f };   // Color goal values RGBA    DestColor = ColorGoal + scale * (SrcColor - ColorGoal)
 
-		float m_flAlphaThreshhold;
-		float m_flAlphaHiFreqThreshhold;
+		float m_flAlphaThreshhold{ 0.4f };
+		float m_flAlphaHiFreqThreshhold{ 0.4f };
 
-		int32 m_nFlags;
+		int32 m_nFlags{0};
 	};
 
 	bool ResampleRGBA8888( const ResampleInfo_t& info );
 	bool ResampleRGBA16161616( const ResampleInfo_t& info );
 	bool ResampleRGB323232F( const ResampleInfo_t& info );
 
-	void ConvertNormalMapRGBA8888ToDUDVMapUVLX8888( const unsigned char* src, int32 width, int32 height,
-													unsigned char* dst_ );
-	void ConvertNormalMapRGBA8888ToDUDVMapUVWQ8888( const unsigned char* src, int32 width, int32 height,
-													unsigned char* dst_ );
-	void ConvertNormalMapRGBA8888ToDUDVMapUV88( const unsigned char* src, int32 width, int32 height,
-												unsigned char* dst_ );
+	void ConvertNormalMapRGBA8888ToDUDVMapUVLX8888( const unsigned char* src, int32 width, int32 height, unsigned char* dst_ );
+	void ConvertNormalMapRGBA8888ToDUDVMapUVWQ8888( const unsigned char* src, int32 width, int32 height, unsigned char* dst_ );
+	void ConvertNormalMapRGBA8888ToDUDVMapUV88( const unsigned char* src, int32 width, int32 height, unsigned char* dst_ );
 
-	void ConvertIA88ImageToNormalMapRGBA8888( const unsigned char* src, int32 width,
-											  int32 height, unsigned char* dst,
-											  float bumpScale );
+	void ConvertIA88ImageToNormalMapRGBA8888( const unsigned char* src, int32 width, int32 height, unsigned char* dst, float bumpScale );
 
 	void NormalizeNormalMapRGBA8888( unsigned char* src, int32 numTexels );
 
@@ -371,8 +362,7 @@ namespace ImageLoader {
 	//-----------------------------------------------------------------------------
 	// Gamma correction
 	//-----------------------------------------------------------------------------
-	void GammaCorrectRGBA8888( unsigned char* src, unsigned char* dst,
-							   int32 width, int32 height, int32 depth, float srcGamma, float dstGamma );
+	void GammaCorrectRGBA8888( unsigned char* src, unsigned char* dst, int32 width, int32 height, int32 depth, float srcGamma, float dstGamma );
 
 
 	//-----------------------------------------------------------------------------
@@ -384,28 +374,23 @@ namespace ImageLoader {
 	//-----------------------------------------------------------------------------
 	// Gamma corrects using a previously constructed gamma table
 	//-----------------------------------------------------------------------------
-	void GammaCorrectRGBA8888( unsigned char* pSrc, unsigned char* pDst,
-							   int32 width, int32 height, int32 depth, unsigned char* pGammaTable );
+	void GammaCorrectRGBA8888( unsigned char* pSrc, unsigned char* pDst, int32 width, int32 height, int32 depth, unsigned char* pGammaTable );
 
 
 	//-----------------------------------------------------------------------------
 	// Generates a number of mipmap levels
 	//-----------------------------------------------------------------------------
-	void GenerateMipmapLevels( unsigned char* pSrc, unsigned char* pDst, int32 width,
-							   int32 height, int32 depth, ImageFormat imageFormat, float srcGamma, float dstGamma,
-							   int32 numLevels = 0 );
+	void GenerateMipmapLevels( unsigned char* pSrc, unsigned char* pDst, int32 width, int32 height, int32 depth,
+		                       ImageFormat imageFormat, float srcGamma, float dstGamma, int32 numLevels = 0 );
 
 	// Low quality mipmap generation, but way faster.
-	void GenerateMipmapLevelsLQ( unsigned char* pSrc, unsigned char* pDst, int32 width, int32 height,
-								 ImageFormat imageFormat, int32 numLevels );
+	void GenerateMipmapLevelsLQ( unsigned char* pSrc, unsigned char* pDst, int32 width, int32 height, ImageFormat imageFormat, int32 numLevels );
 
 	//-----------------------------------------------------------------------------
 	// operations on square images (src and dst can be the same)
 	//-----------------------------------------------------------------------------
-	bool RotateImageLeft( const unsigned char* src, unsigned char* dst,
-						  int32 widthHeight, ImageFormat imageFormat );
-	bool RotateImage180( const unsigned char* src, unsigned char* dst,
-						 int32 widthHeight, ImageFormat imageFormat );
+	bool RotateImageLeft( const unsigned char* src, unsigned char* dst, int32 widthHeight, ImageFormat imageFormat );
+	bool RotateImage180( const unsigned char* src, unsigned char* dst, int32 widthHeight, ImageFormat imageFormat );
 	bool FlipImageVertically( void* pSrc, void* pDst, int32 nWidth, int32 nHeight, ImageFormat imageFormat, int32 nDstStride = 0 );
 	bool FlipImageHorizontally( void* pSrc, void* pDst, int32 nWidth, int32 nHeight, ImageFormat imageFormat, int32 nDstStride = 0 );
 	bool SwapAxes( unsigned char* src, int32 widthHeight, ImageFormat imageFormat );
@@ -435,7 +420,7 @@ namespace ImageLoader {
 	//-----------------------------------------------------------------------------
 	// Does the image format support transparency?
 	//-----------------------------------------------------------------------------
-	inline bool IsTransparent( ImageFormat fmt ) {
+	inline bool IsTransparent( const ImageFormat fmt ) {
 		return ImageFormatInfo( fmt ).m_NumAlphaBits > 0;
 	}
 
@@ -443,20 +428,20 @@ namespace ImageLoader {
 	//-----------------------------------------------------------------------------
 	// Is the image format compressed?
 	//-----------------------------------------------------------------------------
-	inline bool IsCompressed( ImageFormat fmt ) {
+	inline bool IsCompressed( const ImageFormat fmt ) {
 		return ImageFormatInfo( fmt ).m_IsCompressed;
 	}
 
 	//-----------------------------------------------------------------------------
 	// Is any channel > 8 bits?
 	//-----------------------------------------------------------------------------
-	inline bool HasChannelLargerThan8Bits( ImageFormat fmt ) {
-		ImageFormatInfo_t info = ImageFormatInfo( fmt );
-		return ( info.m_NumRedBits > 8 || info.m_NumGreeBits > 8 || info.m_NumBlueBits > 8 || info.m_NumAlphaBits > 8 );
+	inline bool HasChannelLargerThan8Bits( const ImageFormat fmt ) {
+		const ImageFormatInfo_t info = ImageFormatInfo( fmt );
+		return info.m_NumRedBits > 8 or info.m_NumGreeBits > 8 or info.m_NumBlueBits > 8 or info.m_NumAlphaBits > 8;
 	}
 
-	inline bool IsRuntimeCompressed( ImageFormat fmt ) {
-		return ( fmt == IMAGE_FORMAT_DXT1_RUNTIME ) || ( fmt == IMAGE_FORMAT_DXT5_RUNTIME );
+	inline bool IsRuntimeCompressed( const ImageFormat fmt ) {
+		return fmt == IMAGE_FORMAT_DXT1_RUNTIME or fmt == IMAGE_FORMAT_DXT5_RUNTIME;
 	}
 }
 

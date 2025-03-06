@@ -91,48 +91,47 @@ private:
 	void Reset();
 
 	/// Dimensions
-	int32 m_nWidth;
-	int32 m_nHeight;
+	int32 m_nWidth{};
+	int32 m_nHeight{};
 
 	/// Size, in bytes, of one pixel
-	int32 m_nPixelSize;
+	int32 m_nPixelSize{};
 
 	/// Image row stride, in bytes
-	int32 m_nStride;
+	int32 m_nStride{};
 
 	// Do we own this buffer?
-	bool m_bOwnsBuffer;
+	bool m_bOwnsBuffer{ false };
 
 	/// Pixel format
-	ImageFormat m_ImageFormat;
+	ImageFormat m_ImageFormat{ IMAGE_FORMAT_UNKNOWN };
 
-	/// Bitmap data.  Must be allocated with malloc/free.  Don't use
-	/// new/delete
-	unsigned char* m_pBits;
+	/// Bitmap data.  Must be allocated with malloc/free.  Don't use new/delete
+	unsigned char* m_pBits{ nullptr };
 };
 
 inline void Bitmap_t::Reset() {
 	m_nWidth = 0;
 	m_nHeight = 0;
+	m_nPixelSize = 0;
+	m_nStride = 0;
+	m_bOwnsBuffer = false;
 	m_ImageFormat = IMAGE_FORMAT_UNKNOWN;
 	m_pBits = nullptr;
-	m_nPixelSize = 0;
-	m_bOwnsBuffer = false;
-	m_nStride = 0;
 }
 
-inline unsigned char* Bitmap_t::GetPixel( int32 x, int32 y ) {
-	if ( !m_pBits ) {
+inline unsigned char* Bitmap_t::GetPixel( const int32 x, const int32 y ) {
+	if ( not m_pBits ) {
 		return nullptr;
 	}
 
-	return m_pBits + ( y * m_nStride ) + x * m_nPixelSize;
+	return m_pBits + y * m_nStride + x * m_nPixelSize;
 }
 
-inline const unsigned char* Bitmap_t::GetPixel( int32 x, int32 y ) const {
-	if ( !m_pBits ) {
+inline const unsigned char* Bitmap_t::GetPixel( const int32 x, const int32 y ) const {
+	if ( not m_pBits ) {
 		return nullptr;
 	}
 
-	return m_pBits + ( y * m_nStride ) + x * m_nPixelSize;
+	return m_pBits + y * m_nStride + x * m_nPixelSize;
 }
