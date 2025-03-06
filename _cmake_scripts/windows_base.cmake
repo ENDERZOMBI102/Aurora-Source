@@ -24,15 +24,3 @@ list( APPEND ADDITIONAL_SOURCES_DLL
 list( APPEND ADDITIONAL_SOURCES_LIB
 	"$<$<NOT:${IS_SOURCESDK}>:${SRCDIR}/common/debug_lib_check.cpp>"
 )
-
-list( APPEND ADDITIONAL_LINK_LIBRARIES_EXE
-	# tier0
-	tier1
-	# vstdlib
-)
-
-list( APPEND ADDITIONAL_LINK_LIBRARIES_DLL
-	# tier0
-	tier1
-	# vstdlib
-)

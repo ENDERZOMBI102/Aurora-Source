@@ -70,9 +70,3 @@ add_compile_options(
 	$<${IS_LINUX}:-march=pentium4>
 	-msse2 -mfpmath=sse -mtune=core2
 )
-
-list( APPEND ADDITIONAL_LINK_LIBRARIES_DLL
-#	tier0
-#	tier1
-#	vstdlib
-)
