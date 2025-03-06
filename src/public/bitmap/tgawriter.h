@@ -5,15 +5,14 @@
 // $NoKeywords: $
 //===========================================================================//
 #pragma once
-#include "bitmap/imageformat.h"//ImageFormat enum definition
+#include "bitmap/imageformat.h"
 #include "tier1/interface.h"
 
 class CUtlBuffer;
 
 
 namespace TGAWriter {
-	bool WriteToBuffer( unsigned char* pImageData, CUtlBuffer& buffer, int32 width, int32 height,
-						ImageFormat srcFormat, ImageFormat dstFormat );
+	bool WriteToBuffer( const unsigned char* pImageData, CUtlBuffer& buffer, int32 width, int32 height, ImageFormat srcFormat, ImageFormat dstFormat );
 
 	// write out a simple tga file from a memory buffer.
 	bool WriteTGAFile( const char* fileName, int32 width, int32 height, ImageFormat srcFormat, uint8 const* srcData, int32 nStride );
