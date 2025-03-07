@@ -3,7 +3,6 @@
 // Purpose: SSE Math primitives.
 //
 //=====================================================================================//
-
 #include <cmath>
 #include <cfloat>	// Needed for FLT_EPSILON
 #include "basetypes.h"
@@ -12,9 +11,14 @@
 #include "mathlib/mathlib.h"
 #include "mathlib/vector.h"
 #include "sse.h"
-
+#if IsWindows()
+	#include <intrin.h>
+#else
+	#include <pmmintrin.h>
+#endif
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
+
 
 #if !defined( COMPILER_MSVC64 )
 	// Implement for 64-bit Windows if needed.
@@ -62,10 +66,10 @@
 	_PS_EXTERN_CONST(am_2_o_pi, (float)(2.0 / M_PI));
 	_PS_EXTERN_CONST(am_pi_o_4, (float)(M_PI / 4.0));
 	_PS_EXTERN_CONST(am_4_o_pi, (float)(4.0 / M_PI));
-	_PS_EXTERN_CONST_TYPE(am_sign_mask, int32, 0x80000000);
+	_PS_EXTERN_CONST_TYPE(am_sign_mask, uint32, 0x80000000);
 	_PS_EXTERN_CONST_TYPE(am_inv_sign_mask, int32, ~0x80000000);
-	_PS_EXTERN_CONST_TYPE(am_min_norm_pos,int32, 0x00800000);
-	_PS_EXTERN_CONST_TYPE(am_mant_mask, int32, 0x7f800000);
+	_PS_EXTERN_CONST_TYPE(am_min_norm_pos, uint32, 0x00800000);
+	_PS_EXTERN_CONST_TYPE(am_mant_mask, uint32, 0x7f800000);
 	_PS_EXTERN_CONST_TYPE(am_inv_mant_mask, int32, ~0x7f800000);
 
 	_EPI32_CONST(1, 1);
@@ -192,84 +196,105 @@
 	{
 		Assert( s_bMathlibInitialized );
 
-		// NOTE: This is necessary to prevent an memory overwrite...
-		// sice vec only has 3 floats, we can't "movaps" directly into it.
-	#if IsWindows()
-		__declspec(align(16)) float result[4];
-	#elif  IsPosix()
-		 float result[4] __attribute__((aligned(16)));
-	#endif
+		#if 1
+			// NOTE: This is necessary to prevent an memory overwrite...
+			// sice vec only has 3 floats, we can't "movaps" directly into it.
+			#if IsWindows()
+				__declspec(align(16)) float result[4];
+			#elif  IsPosix()
+				 float result[4] __attribute__((aligned(16)));
+			#endif
 
-		float *v = &vec[0];
-	#if IsWindows()
-		float *r = &result[0];
-	#endif
+			float *v = &vec[0];
+			float *r = &result[0];
 
-		float	radius = 0.f;
-		// Blah, get rid of these comparisons ... in reality, if you have all 3 as zero, it shouldn't
-		// be much of a performance win, considering you will very likely miss 3 branch predicts in a row.
-		if ( v[0] || v[1] || v[2] )
-		{
-	#if IsWindows()
-		_asm
+			float	radius = 0.f;
+			// Blah, get rid of these comparisons ... in reality, if you have all 3 as zero, it shouldn't
+			// be much of a performance win, considering you will very likely miss 3 branch predicts in a row.
+			if ( v[0] || v[1] || v[2] )
 			{
-				mov			eax, v
-				mov			edx, r
-	#ifdef ALIGNED_VECTOR
-				movaps		xmm4, [eax]			// r4 = vx, vy, vz, X
-				movaps		xmm1, xmm4			// r1 = r4
-	#else
-				movups		xmm4, [eax]			// r4 = vx, vy, vz, X
-				movaps		xmm1, xmm4			// r1 = r4
-	#endif
-				mulps		xmm1, xmm4			// r1 = vx * vx, vy * vy, vz * vz, X
-				movhlps		xmm3, xmm1			// r3 = vz * vz, X, X, X
-				movaps		xmm2, xmm1			// r2 = r1
-				shufps		xmm2, xmm2, 1		// r2 = vy * vy, X, X, X
-				addss		xmm1, xmm2			// r1 = (vx * vx) + (vy * vy), X, X, X
-				addss		xmm1, xmm3			// r1 = (vx * vx) + (vy * vy) + (vz * vz), X, X, X
-				sqrtss		xmm1, xmm1			// r1 = sqrt((vx * vx) + (vy * vy) + (vz * vz)), X, X, X
-				movss		radius, xmm1		// radius = sqrt((vx * vx) + (vy * vy) + (vz * vz))
-				rcpss		xmm1, xmm1			// r1 = 1/radius, X, X, X
-				shufps		xmm1, xmm1, 0		// r1 = 1/radius, 1/radius, 1/radius, X
-				mulps		xmm4, xmm1			// r4 = vx * 1/radius, vy * 1/radius, vz * 1/radius, X
-				movaps		[edx], xmm4			// v = vx * 1/radius, vy * 1/radius, vz * 1/radius, X
+				#if IsWindows()
+					_asm {
+						mov			eax, v
+						mov			edx, r
+						#ifdef ALIGNED_VECTOR
+							movaps	xmm4, [eax]			// r4 = vx, vy, vz, X
+							movaps	xmm1, xmm4			// r1 = r4
+						#else
+							movups	xmm4, [eax]			// r4 = vx, vy, vz, X
+							movaps	xmm1, xmm4			// r1 = r4
+						#endif
+						mulps		xmm1, xmm4			// r1 = vx * vx, vy * vy, vz * vz, X
+						movhlps		xmm3, xmm1			// r3 = vz * vz, X, X, X
+						movaps		xmm2, xmm1			// r2 = r1
+						shufps		xmm2, xmm2, 1		// r2 = vy * vy, X, X, X
+						addss		xmm1, xmm2			// r1 = (vx * vx) + (vy * vy), X, X, X
+						addss		xmm1, xmm3			// r1 = (vx * vx) + (vy * vy) + (vz * vz), X, X, X
+						sqrtss		xmm1, xmm1			// r1 = sqrt((vx * vx) + (vy * vy) + (vz * vz)), X, X, X
+						movss		radius, xmm1		// radius = sqrt((vx * vx) + (vy * vy) + (vz * vz))
+						rcpss		xmm1, xmm1			// r1 = 1/radius, X, X, X
+						shufps		xmm1, xmm1, 0		// r1 = 1/radius, 1/radius, 1/radius, X
+						mulps		xmm4, xmm1			// r4 = vx * 1/radius, vy * 1/radius, vz * 1/radius, X
+						movaps		[edx], xmm4			// v = vx * 1/radius, vy * 1/radius, vz * 1/radius, X
+					}
+				#elif  IsPosix()
+					__asm__ __volatile__(
+						#ifdef ALIGNED_VECTOR
+							"movaps      %2, %%xmm4 \n\t"
+							"movaps      %%xmm4, %%xmm1 \n\t"
+						#else
+							"movups      %2, %%xmm4 \n\t"
+							"movaps      %%xmm4, %%xmm1 \n\t"
+						#endif
+						"mulps           %%xmm4, %%xmm1 \n\t"
+						"movhlps         %%xmm1, %%xmm3 \n\t"
+						"movaps          %%xmm1, %%xmm2 \n\t"
+						"shufps          $1, %%xmm2, %%xmm2 \n\t"
+						"addss           %%xmm2, %%xmm1 \n\t"
+						"addss           %%xmm3, %%xmm1 \n\t"
+						"sqrtss          %%xmm1, %%xmm1 \n\t"
+						"movss           %%xmm1, %0 \n\t"
+						"rcpss           %%xmm1, %%xmm1 \n\t"
+						"shufps          $0, %%xmm1, %%xmm1 \n\t"
+						"mulps           %%xmm1, %%xmm4 \n\t"
+						"movaps          %%xmm4, %1 \n\t"
+						: "=m" (radius), "=m" (result)
+						: "m" (*v)
+						: "xmm1", "xmm2", "xmm3", "xmm4"
+					);
+				#else
+					#error "Not Implemented"
+				#endif
+				vec.x = result[0];
+				vec.y = result[1];
+				vec.z = result[2];
 			}
-	#elif  IsPosix()
-			__asm__ __volatile__(
-	#ifdef ALIGNED_VECTOR
-				"movaps          %2, %%xmm4 \n\t"
-				"movaps          %%xmm4, %%xmm1 \n\t"
-	#else
-				"movups          %2, %%xmm4 \n\t"
-				"movaps          %%xmm4, %%xmm1 \n\t"
-	#endif
-				"mulps           %%xmm4, %%xmm1 \n\t"
-				"movhlps         %%xmm1, %%xmm3 \n\t"
-				"movaps          %%xmm1, %%xmm2 \n\t"
-				"shufps          $1, %%xmm2, %%xmm2 \n\t"
-				"addss           %%xmm2, %%xmm1 \n\t"
-				"addss           %%xmm3, %%xmm1 \n\t"
-				"sqrtss          %%xmm1, %%xmm1 \n\t"
-				"movss           %%xmm1, %0 \n\t"
-				"rcpss           %%xmm1, %%xmm1 \n\t"
-				"shufps          $0, %%xmm1, %%xmm1 \n\t"
-				"mulps           %%xmm1, %%xmm4 \n\t"
-				"movaps          %%xmm4, %1 \n\t"
-				: "=m" (radius), "=m" (result)
-				: "m" (*v)
-				: "xmm1", "xmm2", "xmm3", "xmm4"
-			);
-	#else
-		#error "Not Implemented"
-	#endif
-			vec.x = result[0];
-			vec.y = result[1];
-			vec.z = result[2];
+			return radius;
+		#else
+		   // length = sqrt((x*x) + (y*y) + (z*z))
+		   alignas(16) float v[4];
+		   alignas(16) float length;
+		   __m128 zero = _mm_load_ps(_ps_am_0);
 
-		}
+		   /* The following code uses the horizontal add instruction from SSE3 instead of incessant shuffles */
+		   __m128 v128 = _mm_loadu_ps(vec.Base());     // Load the vector itself
+		   v128[3] = 0.f;                              // Need to zero out the top because we're loading from a 3 component vector
+		   __m128 squared = _mm_mul_ps(v128, v128);    // Square x, y, z
+		   __m128 res = _mm_hadd_ps(squared, zero);    // Horizontal add: [0] = (x+y) [1] = (z+0)
+		   res = _mm_hadd_ps(res, zero);               // Horizontal add: [0] = (z+0+x+y) [1] = shit we dont care about
 
-		return radius;
+		   __m128 mlen = _mm_sqrt_ss(res);             // Sqrt of the bottom value
+		   res = _mm_shuffle_ps(mlen, mlen, 0);        // Extend the lowest value to all positions
+		   __m128 final = _mm_div_ps(v128, res);       // Final value
+
+		   _mm_store_ps(v, final);                     // Store the vector itself in final
+		   _mm_store_ss(&length, res);                 // Store the length
+
+		   vec[0] = v[0];
+		   vec[1] = v[1];
+		   vec[2] = v[2];
+		   return length;
+		#endif
 	}
 
 	void FASTCALL _SSE_VectorNormalizeFast (Vector& vec)
@@ -338,8 +363,8 @@
 	// #define _PS_CONST(Name, Val) static const ALIGN16 float _ps_##Name[4] ALIGN16_POST = { Val, Val, Val, Val }
 	#define _PS_CONST_TYPE(Name, Type, Val) static const ALIGN16 Type _ps_##Name[4] ALIGN16_POST = { Val, Val, Val, Val }
 
-	_PS_CONST_TYPE(sign_mask, int, 0x80000000);
-	_PS_CONST_TYPE(inv_sign_mask, int, ~0x80000000);
+	_PS_CONST_TYPE(sign_mask, uint32, 0x80000000);
+	_PS_CONST_TYPE(inv_sign_mask, uint32, ~0x80000000);
 
 
 	#define _PI32_CONST(Name, Val)  static const ALIGN16 int _pi32_##Name[4]  ALIGN16_POST = { Val, Val, Val, Val }
@@ -1100,4 +1125,4 @@
 		}
 	}
 	*/
-#endif // COMPILER_MSVC64 
+#endif

@@ -527,7 +527,7 @@ void VectorToColorRGBExp32( const Vector& vin, ColorRGBExp32 &c )
 	}
 
 	// We can totally wind up above 255 and that's okay--but above 256 would be right out.
-	Assert(vin.x * scalar < 256.0f && 
+	Assert(vin.x * scalar < 256.0f &&
 		   vin.y * scalar < 256.0f && 
 		   vin.z * scalar < 256.0f);
 

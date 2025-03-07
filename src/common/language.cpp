@@ -26,7 +26,7 @@ struct Language_t {
 // zh_CN - validate that SC date formats come through
 // bt_BR - assume we should use Brazilian rather than Iberian portguese
 
-static const Language_t s_LanguageNames[] {
+static constexpr Language_t s_LanguageNames[] {
 	{	"None",					"none",			"None",									"none",		k_Lang_None,		0 },
 	{	"English",				"english",		"#GameUI_Language_English",				"en_US",	k_Lang_English,		1033 },
 	{	"German",				"german",		"#GameUI_Language_German",				"de_DE",	k_Lang_German,		1031 } ,

@@ -11,7 +11,7 @@
 #include "convar.h"
 #include "IEffects.h"
 #include "vphysics/object_hash.h"
-#include "mathlib/IceKey.H"
+#include "mathlib/IceKey.h"
 #include "checksum_crc.h"
 #ifdef TF_CLIENT_DLL
 #include "cdll_util.h"

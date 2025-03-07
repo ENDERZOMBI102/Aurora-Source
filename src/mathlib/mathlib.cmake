@@ -33,7 +33,7 @@ set( MATHLIB_SOURCE_FILES
 	"${SRCDIR}/public/mathlib/compressed_light_cube.h"
 	"${SRCDIR}/public/mathlib/compressed_vector.h"
 	"${SRCDIR}/public/mathlib/halton.h"
-	"${SRCDIR}/public/mathlib/IceKey.H"
+	"${SRCDIR}/public/mathlib/IceKey.h"
 	"${SRCDIR}/public/mathlib/lightdesc.h"
 	"${SRCDIR}/public/mathlib/math_pfns.h"
 	"${SRCDIR}/public/mathlib/mathlib.h"

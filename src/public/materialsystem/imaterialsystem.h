@@ -6,13 +6,6 @@
 //
 //===========================================================================//
 #pragma once
-
-
-#define OVERBRIGHT 2.0f
-#define OO_OVERBRIGHT ( 1.0f / 2.0f )
-#define GAMMA 2.2f
-#define TEXGAMMA 2.2f
-
 #include "appframework/IAppSystem.h"
 #include "bitmap/imageformat.h"
 #include "materialsystem/IColorCorrection.h"
@@ -25,6 +18,12 @@
 #include "tier1/interface.h"
 #include "tier1/refcount.h"
 #include "vtf/vtf.h"
+
+
+#define OVERBRIGHT 2.0f
+#define OO_OVERBRIGHT ( 1.0f / OVERBRIGHT )
+#define GAMMA 2.2f
+#define TEXGAMMA 2.2f
 
 
 //-----------------------------------------------------------------------------
@@ -368,23 +367,6 @@ struct MaterialVideoMode_t {
 
 // fixme: should move this into something else.
 struct FlashlightState_t {
-	FlashlightState_t() {
-		m_bEnableShadows = false;// Provide reasonable defaults for shadow depth mapping parameters
-		m_bDrawShadowFrustum = false;
-		m_flShadowMapResolution = 1024.0f;
-		m_flShadowFilterSize = 3.0f;
-		m_flShadowSlopeScaleDepthBias = 16.0f;
-		m_flShadowDepthBias = 0.0005f;
-		m_flShadowJitterSeed = 0.0f;
-		m_flShadowAtten = 0.0f;
-		m_bScissor = false;
-		m_nLeft = -1;
-		m_nTop = -1;
-		m_nRight = -1;
-		m_nBottom = -1;
-		m_nShadowQuality = 0;
-	}
-
 	Vector m_vecLightOrigin;
 	Quaternion m_quatOrientation;
 	float m_NearZ;
@@ -395,19 +377,19 @@ struct FlashlightState_t {
 	float m_fLinearAtten;
 	float m_fConstantAtten;
 	float m_Color[ 4 ];
-	ITexture* m_pSpotlightTexture;
+	ITexture* m_pSpotlightTexture{ nullptr };
 	int m_nSpotlightTextureFrame;
 
 	// Shadow depth mapping parameters
-	bool m_bEnableShadows;
-	bool m_bDrawShadowFrustum;
-	float m_flShadowMapResolution;
-	float m_flShadowFilterSize;
-	float m_flShadowSlopeScaleDepthBias;
-	float m_flShadowDepthBias;
-	float m_flShadowJitterSeed;
-	float m_flShadowAtten;
-	int m_nShadowQuality;
+	bool m_bEnableShadows{ false };
+	bool m_bDrawShadowFrustum{ false };
+	float m_flShadowMapResolution{ 2048 };
+	float m_flShadowFilterSize{ 0.5f };
+	float m_flShadowSlopeScaleDepthBias{ 16 };
+	float m_flShadowDepthBias{ 0.0005f };
+	float m_flShadowJitterSeed{ 0 };
+	float m_flShadowAtten{ 0 };
+	int m_nShadowQuality{ 0 };
 
 	// Getters for scissor members
 	[[nodiscard]] bool DoScissor() const { return m_bScissor; }
@@ -419,11 +401,11 @@ struct FlashlightState_t {
 private:
 	friend class CShadowMgr;
 
-	bool m_bScissor;
-	int m_nLeft;
-	int m_nTop;
-	int m_nRight;
-	int m_nBottom;
+	bool m_bScissor{ false };
+	int m_nLeft{ -1 };
+	int m_nTop{ -1 };
+	int m_nRight{ -1 };
+	int m_nBottom{ -1 };
 };
 
 // Passed as the callback object to Async functions in the material system
