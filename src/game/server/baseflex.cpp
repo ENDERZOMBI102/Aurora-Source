@@ -2471,7 +2471,7 @@ void CFlexCycler::Think( void )
 			for ( LocalFlexController_t i = LocalFlexController_t(0); i < GetNumFlexControllers(); i++ )
 			{
 				// Throw a differently offset sine wave on all of the flex controllers
-				float fFlexTime = i * (1.0f / (float)GetNumFlexControllers()) + gpGlobals->curtime;
+				float fFlexTime = i * (1.0f / static_cast<float32>( static_cast<int32>( GetNumFlexControllers() ) ) ) + gpGlobals->curtime;
 				m_flextarget[i] = sinf( fFlexTime ) * 0.5f + 0.5f;
 				SetFlexWeight( i, m_flextarget[i] );
 			}
