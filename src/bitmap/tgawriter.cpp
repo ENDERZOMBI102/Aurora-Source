@@ -21,7 +21,7 @@ namespace TGAWriter {
 			return false;
 		}
 
-		header.idLength = 0;      // comment length
+		header.idLength = 0;  // comment length
 		header.colorMapType = TGA::ColorMapType::None;  // ???
 
 		// Brian?: FIXME: should use BGR, etc, so that we can just fwrite the data.

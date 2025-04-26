@@ -43,9 +43,9 @@ wchar_t* _V_wcsupr  ( const char* file, int line, wchar_t *star );
 // ASCII-optimized functions which fall back to CRT only when necessary
 char* V_strupr  ( char *start );
 char* V_strlower( char *start );
-int   V_stricmp ( const char *s1, const char *s2 );
-int   V_strncmp ( const char *s1, const char *s2, int count );
-int   V_strnicmp( const char *s1, const char *s2, int n );
+int   V_stricmp ( const char *str1, const char *str2 );
+int   V_strncmp ( const char *str1, const char *str2, int count );
+int   V_strnicmp( const char *str1, const char *str2, int n );
 
 #if IsPosix()
 	inline char *strupr( char *start ) {

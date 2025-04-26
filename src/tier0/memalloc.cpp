@@ -61,7 +61,7 @@
 	void CMemAlloc::DumpBlockStats( void * ) { AssertUnreachable(); }
 
 	#if defined( _MEMTEST )
-	void CMemAlloc::SetStatsExtraInfo( const char *pMapName, const char *pComment ) { AssertUnreachable(); }
+		void CMemAlloc::SetStatsExtraInfo( const char *pMapName, const char *pComment ) { AssertUnreachable(); }
 	#endif
 
 	// Returns 0 if no failure, otherwise the size_t of the last requested chunk

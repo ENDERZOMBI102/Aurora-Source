@@ -1201,16 +1201,16 @@ function( target_use_client_base target EXCLUDE_SOURCES )
 			"$<$<AND:${IS_WINDOWS},${BUILD_REPLAY}>:wsock32;Ws2_32>"
 			particles
 
+			tier0
+			vstdlib
 			bitmap
 			dmxloader
 #			${ASRC_tier02}
-			tier0
 			mathlib
 			matsys_controls
 			tier1
 			tier2
 #			${ASRC_vstdlib2}
-			vstdlib
 			tier3
 			vgui_controls
 			vtf

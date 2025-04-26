@@ -39,13 +39,13 @@ IGameEventManager* gameeventmanager_ = nullptr;// game events interface
 #ifndef GAME_DLL
 	#define gameeventmanager gameeventmanager_
 #endif
-IPlayerInfoManager* playerinfomanager = nullptr;// game dll interface to interact with players
-IEntityInfoManager* entityinfomanager = nullptr;// game dll interface to interact with all entities (like IPlayerInfo)
-IGameInfoManager* gameinfomanager = nullptr;    // game dll interface to get data from game rules directly
-IBotManager* botmanager = nullptr;              // game dll interface to interact with bots
-IServerPluginHelpers* helpers = nullptr;        // special 3rd party plugin helpers from the engine
-IUniformRandomStream* randomStr = nullptr;
-IEngineTrace* enginetrace = nullptr;
+IPlayerInfoManager* playerinfomanager{ nullptr };  // game dll interface to interact with players
+IEntityInfoManager* entityinfomanager{ nullptr };  // game dll interface to interact with all entities (like IPlayerInfo)
+IGameInfoManager* gameinfomanager{ nullptr };      // game dll interface to get data from game rules directly
+IBotManager* botmanager{ nullptr };                // game dll interface to interact with bots
+IServerPluginHelpers* helpers{ nullptr };          // special 3rd party plugin helpers from the engine
+IUniformRandomStream* randomStr{ nullptr };
+IEngineTrace* enginetrace{ nullptr };
 
 
 CGlobalVars* gpGlobals = nullptr;
@@ -56,13 +56,13 @@ void Bot_RunAll();
 // useful helper func
 #ifndef GAME_DLL
 	inline bool FStrEq( const char* sz1, const char* sz2 ) {
-		return ( Q_stricmp( sz1, sz2 ) == 0 );
+		return Q_stricmp( sz1, sz2 ) == 0;
 	}
 #endif
 //---------------------------------------------------------------------------------
 // Purpose: a sample 3rd party plugin class
 //---------------------------------------------------------------------------------
-class CEmptyServerPlugin : public IServerPluginCallbacks, public IGameEventListener {
+class CEmptyServerPlugin final : public IServerPluginCallbacks, public IGameEventListener {
 public:
 	CEmptyServerPlugin();
 	~CEmptyServerPlugin() override;
@@ -101,7 +101,7 @@ private:
 //
 // The plugin is a static singleton that is exported as an interface
 //
-CEmptyServerPlugin g_EmtpyServerPlugin;
+CEmptyServerPlugin g_EmtpyServerPlugin{};
 EXPOSE_SINGLE_INTERFACE_GLOBALVAR( CEmptyServerPlugin, IServerPluginCallbacks, INTERFACEVERSION_ISERVERPLUGINCALLBACKS, g_EmtpyServerPlugin );
 
 //---------------------------------------------------------------------------------
@@ -116,38 +116,38 @@ CEmptyServerPlugin::~CEmptyServerPlugin() = default;
 //---------------------------------------------------------------------------------
 // Purpose: called when the plugin is loaded, load the interface we need from the engine
 //---------------------------------------------------------------------------------
-bool CEmptyServerPlugin::Load( CreateInterfaceFn interfaceFactory, CreateInterfaceFn gameServerFactory ) {
+bool CEmptyServerPlugin::Load( CreateInterfaceFn interfaceFactory, const CreateInterfaceFn gameServerFactory ) {
 	ConnectTier1Libraries( &interfaceFactory, 1 );
 	ConnectTier2Libraries( &interfaceFactory, 1 );
 
-	entityinfomanager = (IEntityInfoManager*) gameServerFactory( INTERFACEVERSION_ENTITYINFOMANAGER, nullptr );
-	if ( !entityinfomanager ) {
+	entityinfomanager = static_cast<IEntityInfoManager*>( gameServerFactory( INTERFACEVERSION_ENTITYINFOMANAGER, nullptr ) );
+	if ( not entityinfomanager ) {
 		Warning( "Unable to load entityinfomanager, ignoring\n" );// this isn't fatal, we just won't be able to access entity data
 	}
 
-	playerinfomanager = (IPlayerInfoManager*) gameServerFactory( INTERFACEVERSION_PLAYERINFOMANAGER, nullptr );
-	if ( !playerinfomanager ) {
+	playerinfomanager = static_cast<IPlayerInfoManager*>( gameServerFactory( INTERFACEVERSION_PLAYERINFOMANAGER, nullptr ) );
+	if ( not playerinfomanager ) {
 		Warning( "Unable to load playerinfomanager, ignoring\n" );// this isn't fatal, we just won't be able to access specific player data
 	}
 
-	botmanager = (IBotManager*) gameServerFactory( INTERFACEVERSION_PLAYERBOTMANAGER, nullptr );
-	if ( !botmanager ) {
+	botmanager = static_cast<IBotManager*>( gameServerFactory( INTERFACEVERSION_PLAYERBOTMANAGER, nullptr ) );
+	if ( not botmanager ) {
 		Warning( "Unable to load botcontroller, ignoring\n" );// this isn't fatal, we just won't be able to access specific bot functions
 	}
-	gameinfomanager = (IGameInfoManager*) gameServerFactory( INTERFACEVERSION_GAMEINFOMANAGER, nullptr );
-	if ( !gameinfomanager ) {
+	gameinfomanager = static_cast<IGameInfoManager*>( gameServerFactory( INTERFACEVERSION_GAMEINFOMANAGER, nullptr ) );
+	if ( not gameinfomanager ) {
 		Warning( "Unable to load gameinfomanager, ignoring\n" );
 	}
 
-	engine = (IVEngineServer*) interfaceFactory( INTERFACEVERSION_VENGINESERVER, nullptr );
-	gameeventmanager = (IGameEventManager*) interfaceFactory( INTERFACEVERSION_GAMEEVENTSMANAGER, nullptr );
-	helpers = (IServerPluginHelpers*) interfaceFactory( INTERFACEVERSION_ISERVERPLUGINHELPERS, nullptr );
-	enginetrace = (IEngineTrace*) interfaceFactory( INTERFACEVERSION_ENGINETRACE_SERVER, nullptr );
-	randomStr = (IUniformRandomStream*) interfaceFactory( VENGINE_SERVER_RANDOM_INTERFACE_VERSION, nullptr );
+	engine = static_cast<IVEngineServer*>( interfaceFactory( INTERFACEVERSION_VENGINESERVER, nullptr ) );
+	gameeventmanager = static_cast<IGameEventManager*>( interfaceFactory( INTERFACEVERSION_GAMEEVENTSMANAGER, nullptr ) );
+	helpers = static_cast<IServerPluginHelpers*>( interfaceFactory( INTERFACEVERSION_ISERVERPLUGINHELPERS, nullptr ) );
+	enginetrace = static_cast<IEngineTrace*>( interfaceFactory( INTERFACEVERSION_ENGINETRACE_SERVER, nullptr ) );
+	randomStr = static_cast<IUniformRandomStream*>( interfaceFactory( VENGINE_SERVER_RANDOM_INTERFACE_VERSION, nullptr ) );
 
 	// get the interfaces we want to use
-	if ( !( engine && gameeventmanager && g_pFullFileSystem && helpers && enginetrace && randomStr ) ) {
-		return false;// we require all these interface to function
+	if ( not ( engine and gameeventmanager and g_pFullFileSystem and helpers and enginetrace and randomStr ) ) {
+		return false;  // we require all these interfaces to function
 	}
 
 	if ( playerinfomanager ) {
@@ -205,7 +205,7 @@ void CEmptyServerPlugin::ServerActivate( edict_t* pEdictList, int edictCount, in
 //---------------------------------------------------------------------------------
 // Purpose: called once per server frame, do recurring work here (like checking for timeouts)
 //---------------------------------------------------------------------------------
-void CEmptyServerPlugin::GameFrame( bool simulating ) {
+void CEmptyServerPlugin::GameFrame( const bool simulating ) {
 	if ( simulating ) {
 		Bot_RunAll();
 	}
@@ -273,7 +273,7 @@ void CEmptyServerPlugin::ClientSettingsChanged( edict_t* pEdict ) {
 		// CAN'T use Q_stricmp here, this dll is made by 3rd parties and may not link to tier0/vstdlib
 		// playerinfo may be nullptr if the MOD doesn't support access to player data
 		// OR if you are accessing the player before they are fully connected
-		if ( playerinfo && name && playerinfo->GetName() && stricmp( name, playerinfo->GetName() ) != 0 ) {
+		if ( playerinfo and name and playerinfo->GetName() and stricmp( name, playerinfo->GetName() ) != 0 ) {
 			ClientPrint( pEdict, "Your name changed to \"%s\" (from \"%s\"\n", name, playerinfo->GetName() );
 			// this is the bad way to check this, the better option it to listen for the "player_changename" event in FireGameEvent()
 			// this is here to give a real example of how to use the playerinfo interface
@@ -300,8 +300,7 @@ CON_COMMAND( DoAskConnect, "Server plugin example of using the ask connect dialo
 	kv->SetInt( "time", 3 );
 
 	for ( int i = 1; i < gpGlobals->maxClients; i++ ) {
-		edict_t* pEdict = engine->PEntityOfEntIndex( i );
-		if ( pEdict ) {
+		if ( edict_t* pEdict = engine->PEntityOfEntIndex( i ) ) {
 			helpers->CreateMessage( pEdict, DIALOG_ASKCONNECT, kv, &g_EmtpyServerPlugin );
 		}
 	}
@@ -331,7 +330,7 @@ bool TFPlayerHasCondition( int inBits, int condition ) {
 
 void SentryStatus( edict_t* pEntity ) {
 	IPlayerInfo* playerinfo = playerinfomanager->GetPlayerInfo( pEntity );
-	if ( !playerinfo ) {
+	if ( not playerinfo ) {
 		Msg( "couldn't get playerinfo\n" );
 		return;
 	}
@@ -342,7 +341,7 @@ void SentryStatus( edict_t* pEntity ) {
 	edict_t* pSentry = nullptr;
 	if ( playerinfo->GetCustomInfo( TFPLAYERINFO_ENTINDEX_SENTRY, value, emptyVariant ) ) {
 		pSentry = engine->PEntityOfEntIndex( value.Int() );
-		if ( !pSentry ) {
+		if ( not pSentry ) {
 			Warning( "couldn't attain sentry gun entity\n" );
 			return;
 		}
@@ -351,26 +350,29 @@ void SentryStatus( edict_t* pEntity ) {
 		return;
 	}
 	IEntityInfo* entinfo = entityinfomanager->GetEntityInfo( pSentry );
-	if ( !entinfo ) {
+	if ( not entinfo ) {
 		Warning( "couldn't get entinfo for sentry gun\n" );
 		return;
 	}
 
 	if ( playerinfo->GetCustomInfo( TFPLAYERINFO_BUILDING_SENTRY, value, emptyVariant ) ) {
-		if ( value.Bool() )
+		if ( value.Bool() ) {
 			Msg( "Sentry Under Construction...\n" );
+		}
 	}
 	if ( playerinfo->GetCustomInfo( TFPLAYERINFO_UPGRADING_SENTRY, value, emptyVariant ) ) {
-		if ( value.Bool() )
+		if ( value.Bool() ) {
 			Msg( "Sentry Upgrading...\n" );
+		}
 	}
 
 	int sentryLevel = 0;
 	if ( playerinfo->GetCustomInfo( TFPLAYERINFO_SENTRY_LEVEL, value, emptyVariant ) ) {
 		sentryLevel = value.Int();
 		Msg( "Sentry Level: %i\n", sentryLevel );
-	} else
+	} else {
 		Msg( "Unable to retrive sentry level\n" );
+	}
 
 	if ( playerinfo->GetCustomInfo( TFPLAYERINFO_SENTRY_PROGRESS, value, emptyVariant ) ) {
 		if ( sentryLevel < 3 ) {
@@ -378,16 +380,18 @@ void SentryStatus( edict_t* pEntity ) {
 			iRequiredMetal = value.Int() & 0xFF;
 			iMetal = ( value.Int() >> 8 ) & 0xFF;
 			Msg( "%i / %i Metal Required for Sentry Level %i\n", iMetal, iRequiredMetal, sentryLevel + 1 );
-		} else
+		} else {
 			Msg( "Sentry cannot be upgraded further.\n" );
+		}
 	}
 
 	Msg( "Health: %i\n", entinfo->GetHealth() );
 
-	if ( playerinfo->GetCustomInfo( TFPLAYERINFO_SENTRY_KILLS, value, emptyVariant ) )
+	if ( playerinfo->GetCustomInfo( TFPLAYERINFO_SENTRY_KILLS, value, emptyVariant ) ) {
 		Msg( "Kills: %i\n", value.Int() );
-	else
+	} else {
 		Msg( "Unable to retrieve sentry kills\n" );
+	}
 
 	if ( playerinfo->GetCustomInfo( TFPLAYERINFO_SENTRY_AMMO_SHELLS, value, emptyVariant ) ) {
 		int iShells, iMaxShells;
@@ -406,7 +410,7 @@ void SentryStatus( edict_t* pEntity ) {
 }
 void DispenserStatus( edict_t* pEntity ) {
 	IPlayerInfo* playerinfo = playerinfomanager->GetPlayerInfo( pEntity );
-	if ( !playerinfo ) {
+	if ( not playerinfo ) {
 		Msg( "couldn't get playerinfo\n" );
 		return;
 	}
@@ -417,7 +421,7 @@ void DispenserStatus( edict_t* pEntity ) {
 	edict_t* pDispenser = nullptr;
 	if ( playerinfo->GetCustomInfo( TFPLAYERINFO_ENTINDEX_DISPENSER, value, emptyVariant ) ) {
 		pDispenser = engine->PEntityOfEntIndex( value.Int() );
-		if ( !pDispenser ) {
+		if ( not pDispenser ) {
 			Warning( "couldn't attain dispenser entity\n" );
 			return;
 		}
@@ -426,21 +430,23 @@ void DispenserStatus( edict_t* pEntity ) {
 		return;
 	}
 	IEntityInfo* entinfo = entityinfomanager->GetEntityInfo( pDispenser );
-	if ( !entinfo ) {
+	if ( not entinfo ) {
 		Warning( "couldn't get entinfo for dispenser\n" );
 		return;
 	}
 	if ( playerinfo->GetCustomInfo( TFPLAYERINFO_BUILDING_DISPENSER, value, emptyVariant ) ) {
-		if ( value.Bool() )
+		if ( value.Bool() ) {
 			Msg( "Dispenser Under Construction...\n" );
+		}
 	}
 	Msg( "Health: %i\n", entinfo->GetHealth() );
-	if ( playerinfo->GetCustomInfo( TFPLAYERINFO_DISPENSER_METAL, value, emptyVariant ) )
+	if ( playerinfo->GetCustomInfo( TFPLAYERINFO_DISPENSER_METAL, value, emptyVariant ) ) {
 		Msg( "Metal: %i\n", value.Int() );
+	}
 }
 void TeleporterStatus( edict_t* pEntity ) {
 	IPlayerInfo* playerinfo = playerinfomanager->GetPlayerInfo( pEntity );
-	if ( !playerinfo ) {
+	if ( not playerinfo ) {
 		Msg( "couldn't get playerinfo\n" );
 		return;
 	}
@@ -453,7 +459,7 @@ void TeleporterStatus( edict_t* pEntity ) {
 	edict_t* pExit = nullptr;
 	if ( playerinfo->GetCustomInfo( TFPLAYERINFO_ENTINDEX_TELEPORTER_ENTRANCE, value, emptyVariant ) ) {
 		pEntrance = engine->PEntityOfEntIndex( value.Int() );
-		if ( !pEntrance ) {
+		if ( not pEntrance ) {
 			Warning( "couldn't attain entrance entity\n" );
 		}
 	} else {
@@ -461,41 +467,44 @@ void TeleporterStatus( edict_t* pEntity ) {
 	}
 	if ( playerinfo->GetCustomInfo( TFPLAYERINFO_ENTINDEX_TELEPORTER_EXIT, value, emptyVariant ) ) {
 		pExit = engine->PEntityOfEntIndex( value.Int() );
-		if ( !pExit ) {
+		if ( not pExit ) {
 			Warning( "couldn't attain exit entity\n" );
 		}
 	} else {
 		Msg( "No Teleporter Entrance built.\n" );
 	}
 	IEntityInfo* entranceInfo = entityinfomanager->GetEntityInfo( pEntrance );
-	if ( !entranceInfo ) {
+	if ( not entranceInfo ) {
 		Warning( "couldn't get entinfo for teleporter entrance\n" );
 	}
 	IEntityInfo* exitInfo = entityinfomanager->GetEntityInfo( pExit );
-	if ( !exitInfo ) {
+	if ( not exitInfo ) {
 		Warning( "couldn't get entinfo for teleporter exit\n" );
 	}
 
 	if ( pEntrance && entranceInfo ) {
 		if ( playerinfo->GetCustomInfo( TFPLAYERINFO_BUILDING_TELEPORTER_ENTRANCE, value, emptyVariant ) ) {
-			if ( value.Bool() )
+			if ( value.Bool() ) {
 				Msg( "Entrance Under Construction...\n" );
+			}
 		}
 		Msg( "Entrance Health: %i\n", entranceInfo->GetHealth() );
-		if ( playerinfo->GetCustomInfo( TFPLAYERINFO_TELEPORTER_USES, value, emptyVariant ) )
+		if ( playerinfo->GetCustomInfo( TFPLAYERINFO_TELEPORTER_USES, value, emptyVariant ) ) {
 			Msg( "Entrance Used %i Times.\n", value.Int() );
+		}
 	}
 	if ( pExit && exitInfo ) {
 		if ( playerinfo->GetCustomInfo( TFPLAYERINFO_BUILDING_TELEPORTER_EXIT, value, emptyVariant ) ) {
-			if ( value.Bool() )
+			if ( value.Bool() ) {
 				Msg( "Exit Under Construction...\n" );
+			}
 		}
 		Msg( "Exit Health: %i\n", exitInfo->GetHealth() );
 	}
 }
 void ClassStatus( edict_t* pEntity ) {
 	IPlayerInfo* playerinfo = playerinfomanager->GetPlayerInfo( pEntity );
-	if ( !playerinfo ) {
+	if ( not playerinfo ) {
 		Msg( "couldn't get playerinfo\n" );
 		return;
 	}
@@ -504,15 +513,18 @@ void ClassStatus( edict_t* pEntity ) {
 	Msg( "Player Class: %s\n", playerinfo->GetPlayerClassName() );
 	pluginvariant conditionValue;
 	pluginvariant emptyVariant;
-	if ( !playerinfo->GetCustomInfo( TFPLAYERINFO_CONDITIONS, conditionValue, emptyVariant ) ) {
+	if ( not playerinfo->GetCustomInfo( TFPLAYERINFO_CONDITIONS, conditionValue, emptyVariant ) ) {
 		Warning( "unable to retrieve conditions!\n" );
 	}
-	if ( TFPlayerHasCondition( conditionValue.Int(), TF_COND_INVULNERABLE ) )
+	if ( TFPlayerHasCondition( conditionValue.Int(), TF_COND_INVULNERABLE ) ) {
 		Msg( "You are Invulnerable!\n" );
-	if ( TFPlayerHasCondition( conditionValue.Int(), TF_COND_SELECTED_TO_TELEPORT ) )
+	}
+	if ( TFPlayerHasCondition( conditionValue.Int(), TF_COND_SELECTED_TO_TELEPORT ) ) {
 		Msg( "You are about to Teleport.\n" );
-	if ( TFPlayerHasCondition( conditionValue.Int(), TF_COND_TELEPORTED ) )
+	}
+	if ( TFPlayerHasCondition( conditionValue.Int(), TF_COND_TELEPORTED ) ) {
 		Msg( "You have recently been teleported.\n" );
+	}
 
 	switch ( playerClassId ) {
 		default:
@@ -528,18 +540,23 @@ void ClassStatus( edict_t* pEntity ) {
 			int disguiseClass = 0;
 			pluginvariant value;
 
-			if ( playerinfo->GetCustomInfo( TFPLAYERINFO_SPY_DISGUISEDAS, value, emptyVariant ) )
+			if ( playerinfo->GetCustomInfo( TFPLAYERINFO_SPY_DISGUISEDAS, value, emptyVariant ) ) {
 				disguiseClass = value.Int();
+			}
 
-			if ( TFPlayerHasCondition( conditionValue.Int(), TF_COND_DISGUISING ) )
+			if ( TFPlayerHasCondition( conditionValue.Int(), TF_COND_DISGUISING ) ) {
 				Msg( "Disguising..\n" );
-			else if ( TFPlayerHasCondition( conditionValue.Int(), TF_COND_DISGUISED ) )
-				Msg( "Disguised as: %s\n", classNames[ disguiseClass ] );
+			}
+			else if ( TFPlayerHasCondition( conditionValue.Int(), TF_COND_DISGUISED ) ) {
+				Msg( "Disguised as: %s\n", classNames[disguiseClass] );
+			}
 
-			if ( TFPlayerHasCondition( conditionValue.Int(), TF_COND_STEALTHED ) )
+			if ( TFPlayerHasCondition( conditionValue.Int(), TF_COND_STEALTHED ) ) {
 				Msg( "Cloaked!\n" );
-			if ( playerinfo->GetCustomInfo( TFPLAYERINFO_SPY_CLOAKCHARGELEVEL, value, emptyVariant ) )
+			}
+			if ( playerinfo->GetCustomInfo( TFPLAYERINFO_SPY_CLOAKCHARGELEVEL, value, emptyVariant ) ) {
 				Msg( "Cloak Charge Percent: %d\n", value.Float() );
+			}
 
 			break;
 		}
@@ -562,12 +579,12 @@ const char* ctf_flagstatus[] {
 };
 void FlagStatus( edict_t* pPlayer ) {
 	IPlayerInfo* pInfo = playerinfomanager->GetPlayerInfo( pPlayer );
-	if ( !pInfo ) {
+	if ( not pInfo ) {
 		Msg( "couldn't get playerinfo\n" );
 		return;
 	}
 	IGameInfo* gameInfo = gameinfomanager->GetGameInfo();
-	if ( !gameInfo ) {
+	if ( not gameInfo ) {
 		Msg( "couldn't get gameinfo\n" );
 	}
 
@@ -585,13 +602,15 @@ void FlagStatus( edict_t* pPlayer ) {
 	edict_t* pFlag = nullptr;
 	while ( ( pFlag = entityinfomanager->FindEntityByClassname( pFlag, "item_teamflag" ) ) != nullptr ) {
 		IEntityInfo* pFlagInfo = entityinfomanager->GetEntityInfo( pFlag );
-		if ( !pFlagInfo )
+		if ( not pFlagInfo ) {
 			continue;
+		}
 
 		Msg( "\nTeam %s's Flag\n", gameInfo->GetInfo_GetTeamName( pFlagInfo->GetTeamIndex() ) );
 		options.SetInt( engine->IndexOfEdict( pFlag ) );
-		if ( gameInfo->GetInfo_Custom( TFGAMEINFO_CTF_FLAG_TYPE, value, options ) )
-			Msg( "Type: %s\n", ctf_flagtype[ value.Int() ] );
+		if ( gameInfo->GetInfo_Custom( TFGAMEINFO_CTF_FLAG_TYPE, value, options ) ) {
+			Msg( "Type: %s\n", ctf_flagtype[value.Int()] );
+		}
 		if ( gameInfo->GetInfo_Custom( TFGAMEINFO_CTF_FLAG_STATUS, value, options ) ) {
 			Msg( "Status: %s\n", ctf_flagstatus[ value.Int() ] );
 			//Tony; if we're carried, find out who has us.
@@ -599,8 +618,9 @@ void FlagStatus( edict_t* pPlayer ) {
 				edict_t* pPlayer = pFlagInfo->GetOwner();
 				if ( pPlayer ) {
 					IPlayerInfo* pPlayerInfo = playerinfomanager->GetPlayerInfo( pPlayer );
-					if ( pPlayerInfo )
+					if ( pPlayerInfo ) {
 						Msg( "Carried by: %s\n", pPlayerInfo->GetName() );
+					}
 				}
 			}
 		}
@@ -617,7 +637,7 @@ void FlagStatus( edict_t* pPlayer ) {
 PLUGIN_RESULT CEmptyServerPlugin::ClientCommand( edict_t* pEntity, const CCommand& args ) {
 	const char* pcmd = args[ 0 ];
 
-	if ( !pEntity || pEntity->IsFree() ) {
+	if ( not pEntity or pEntity->IsFree() ) {
 		return PLUGIN_CONTINUE;
 	}
 
@@ -677,8 +697,9 @@ PLUGIN_RESULT CEmptyServerPlugin::ClientCommand( edict_t* pEntity, const CComman
 	#ifdef SAMPLE_TF2_PLUGIN
 		else if ( FStrEq( pcmd, "gameinfo" ) ) {
 			IGameInfo* gameInfo = gameinfomanager->GetGameInfo();
-			if ( !gameInfo )
+			if ( not gameInfo ) {
 				return PLUGIN_STOP;
+			}
 
 			Msg( "=== Game Information ===\n" );
 			Msg( "Game Type: %i / %s\n", gameInfo->GetInfo_GameType(), gameInfo->GetInfo_GameTypeName() );
@@ -688,8 +709,9 @@ PLUGIN_RESULT CEmptyServerPlugin::ClientCommand( edict_t* pEntity, const CComman
 			Msg( "Player Counts:\n" );
 			for ( int i = 0; i < teamCount; i++ ) {
 				//If this failes, we can assume the rest is invalid too.
-				if ( !gameInfo->GetInfo_GetTeamName( i ) )
+				if ( not gameInfo->GetInfo_GetTeamName( i ) ) {
 					continue;
+				}
 				Msg( "Team: %s, Players: %i\n", gameInfo->GetInfo_GetTeamName( i ), gameInfo->GetInfo_NumPlayersOnTeam( i ) );
 			}
 			return PLUGIN_STOP;
@@ -698,12 +720,13 @@ PLUGIN_RESULT CEmptyServerPlugin::ClientCommand( edict_t* pEntity, const CComman
 		// Sample to use the new CustomInfo added to TF2 for plugins
 		else if ( FStrEq( pcmd, "tfcond" ) ) {
 			IPlayerInfo* playerinfo = playerinfomanager->GetPlayerInfo( pEntity );
-			if ( !playerinfo )
+			if ( not playerinfo ) {
 				return PLUGIN_STOP;
+			}
 
 			pluginvariant conditionValue;
 			pluginvariant emptyVariant;
-			if ( !playerinfo->GetCustomInfo( TFPLAYERINFO_CONDITIONS, conditionValue, emptyVariant ) ) {
+			if ( not playerinfo->GetCustomInfo( TFPLAYERINFO_CONDITIONS, conditionValue, emptyVariant ) ) {
 				Msg( "unable to retrieve conditions!\n" );
 				return PLUGIN_STOP;
 			}
@@ -728,20 +751,22 @@ PLUGIN_RESULT CEmptyServerPlugin::ClientCommand( edict_t* pEntity, const CComman
 			return PLUGIN_STOP;
 		}
 		#ifdef GAME_DLL
-		else if ( FStrEq( pcmd, "cbe_test" ) ) {
-			IPlayerInfo* playerinfo = playerinfomanager->GetPlayerInfo( pEntity );
-			if ( !playerinfo )
+			else if ( FStrEq( pcmd, "cbe_test" ) ) {
+				IPlayerInfo* playerinfo = playerinfomanager->GetPlayerInfo( pEntity );
+				if ( not playerinfo ) {
+					return PLUGIN_STOP;
+				}
+
+				CBaseEntity* pEnt = static_cast<CBaseEntity*>( entityinfomanager->GetEntity( pEntity ) );
+				if ( pEnt ) {
+					Msg( "got a pointer to CBaseEntity..\n" );
+				}
+				Msg( "attempting to print this entities modelname directly..\n" );
+
+				Msg( "ModelName: %s\n", STRING( pEnt->GetModelName() ) );
+
 				return PLUGIN_STOP;
-
-			CBaseEntity* pEnt = static_cast<CBaseEntity*>( entityinfomanager->GetEntity( pEntity ) );
-			if ( pEnt )
-				Msg( "got a pointer to CBaseEntity..\n" );
-			Msg( "attempting to print this entities modelname directly..\n" );
-
-			Msg( "ModelName: %s\n", STRING( pEnt->GetModelName() ) );
-
-			return PLUGIN_STOP;
-		}
+			}
 		#endif
 	#endif
 

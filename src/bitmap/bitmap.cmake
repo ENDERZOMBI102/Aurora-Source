@@ -4,6 +4,7 @@ set( BITMAP_DIR ${CMAKE_CURRENT_LIST_DIR} )
 set( BITMAP_SOURCE_FILES
 	# Sources
 	"${BITMAP_DIR}/bitmap.cpp"
+	"${BITMAP_DIR}/imageformat.cpp"
 	"${BITMAP_DIR}/tgaloader.cpp"
 	"${BITMAP_DIR}/tgawriter.cpp"
 	"${BITMAP_DIR}/tgaspec.hpp"

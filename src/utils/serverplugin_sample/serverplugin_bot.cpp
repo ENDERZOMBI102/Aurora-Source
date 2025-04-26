@@ -10,8 +10,8 @@
 //
 // $NoKeywords: $
 //=============================================================================//
-#include "filesystem.h"
 #include "interface.h"
+#include "filesystem.h"
 #undef VECTOR_NO_SLOW_OPERATIONS
 #include "mathlib/vector.h"
 
@@ -23,7 +23,6 @@
 #include "game/server/iplayerinfo.h"
 #include "igameevents.h"
 #include "vstdlib/random.h"
-//#include "../../game_shared/util_shared.h"
 #include "engine/IEngineTrace.h"
 
 extern IBotManager* botmanager;
@@ -35,53 +34,46 @@ extern IServerPluginHelpers* helpers;        // special 3rd party plugin helpers
 
 extern CGlobalVars* gpGlobals;
 
-ConVar bot_forcefireweapon( "plugin_bot_forcefireweapon", "", 0, "Force bots with the specified weapon to fire." );
-ConVar bot_forceattack2( "plugin_bot_forceattack2", "0", 0, "When firing, use attack2." );
-ConVar bot_forceattackon( "plugin_bot_forceattackon", "0", 0, "When firing, don't tap fire, hold it down." );
-ConVar bot_flipout( "plugin_bot_flipout", "0", 0, "When on, all bots fire their guns." );
-ConVar bot_changeclass( "plugin_bot_changeclass", "0", 0, "Force all bots to change to the specified class." );
-static ConVar bot_mimic( "plugin_bot_mimic", "0", 0, "Bot uses usercmd of player by index." );
-static ConVar bot_mimic_yaw_offset( "plugin_bot_mimic_yaw_offset", "0", 0, "Offsets the bot yaw." );
+ConVar bot_forcefireweapon{ "plugin_bot_forcefireweapon", "", 0, "Force bots with the specified weapon to fire." };
+ConVar bot_forceattack2{ "plugin_bot_forceattack2", "0", 0, "When firing, use attack2." };
+ConVar bot_forceattackon{ "plugin_bot_forceattackon", "0", 0, "When firing, don't tap fire, hold it down." };
+ConVar bot_flipout{ "plugin_bot_flipout", "0", 0, "When on, all bots fire their guns." };
+ConVar bot_changeclass{ "plugin_bot_changeclass", "0", 0, "Force all bots to change to the specified class." };
+static ConVar bot_mimic{ "plugin_bot_mimic", "0", 0, "Bot uses usercmd of player by index." };
+static ConVar bot_mimic_yaw_offset{ "plugin_bot_mimic_yaw_offset", "0", 0, "Offsets the bot yaw." };
 
-ConVar bot_sendcmd( "plugin_bot_sendcmd", "", 0, "Forces bots to send the specified command." );
-ConVar bot_crouch( "plugin_bot_crouch", "0", 0, "Bot crouches" );
+ConVar bot_sendcmd{ "plugin_bot_sendcmd", "", 0, "Forces bots to send the specified command." };
+ConVar bot_crouch{ "plugin_bot_crouch", "0", 0, "Bot crouches" };
 
 
 // This is our bot class.
 class CPluginBot {
 public:
-	CPluginBot() : m_bBackwards( false ),
-				   m_flNextTurnTime( 0 ),
-				   m_bLastTurnToRight( false ),
-				   m_flNextStrafeTime( 0 ),
-				   m_flSideMove( 0 ),
-				   m_ForwardAngle(),
-				   m_LastAngles() {
-	}
+	CPluginBot() = default;
 
-	bool m_bBackwards;
+	bool m_bBackwards{ false };
 
-	float m_flNextTurnTime;
-	bool m_bLastTurnToRight;
+	float m_flNextTurnTime{ 0 };
+	bool m_bLastTurnToRight{ false };
 
-	float m_flNextStrafeTime;
-	float m_flSideMove;
+	float m_flNextStrafeTime{ 0 };
+	float m_flSideMove{ 0 };
 
-	QAngle m_ForwardAngle;
-	QAngle m_LastAngles;
+	QAngle m_ForwardAngle{};
+	QAngle m_LastAngles{};
 
-	IBotController* m_BotInterface;
-	IPlayerInfo* m_PlayerInfo;
-	edict_t* m_BotEdict;
+	IBotController* m_BotInterface{ nullptr };
+	IPlayerInfo* m_PlayerInfo{ nullptr };
+	edict_t* m_BotEdict{ nullptr };
 };
 
-CUtlVector<CPluginBot> s_Bots;
+CUtlVector<CPluginBot> s_Bots{};
 
 void Bot_Think( CPluginBot* pBot );
 
 // Handler for the "bot" command.
 void BotAdd_f() {
-	if ( !botmanager ) {
+	if ( not botmanager ) {
 		return;
 	}
 
@@ -90,8 +82,7 @@ void BotAdd_f() {
 	Q_snprintf( botName, sizeof( botName ), "Bot_%i", s_BotNum );
 	s_BotNum++;
 
-	edict_t* botEdict = botmanager->CreateBot( botName );
-	if ( botEdict ) {
+	if ( edict_t* botEdict = botmanager->CreateBot( botName ) ) {
 		int botIndex = s_Bots.AddToTail();
 		CPluginBot& bot = s_Bots[ botIndex ];
 		bot.m_BotInterface = botmanager->GetBotController( botEdict );
@@ -101,20 +92,20 @@ void BotAdd_f() {
 	}
 }
 
-ConCommand cc_Bot( "plugin_bot_add", BotAdd_f, "Add a bot." );
+ConCommand cc_Bot{ "plugin_bot_add", BotAdd_f, "Add a bot." };
 
 
 //-----------------------------------------------------------------------------
 // Purpose: Run through all the Bots in the game and let them think.
 //-----------------------------------------------------------------------------
 void Bot_RunAll() {
-	if ( !botmanager ) {
+	if ( not botmanager ) {
 		return;
 	}
 
 	for ( int i = 0; i < s_Bots.Count(); i++ ) {
 		CPluginBot& bot = s_Bots[ i ];
-		if ( bot.m_BotEdict->IsFree() || !bot.m_BotEdict->GetUnknown() || !bot.m_PlayerInfo->IsConnected() ) {
+		if ( bot.m_BotEdict->IsFree() or not bot.m_BotEdict->GetUnknown() or not bot.m_PlayerInfo->IsConnected() ) {
 			s_Bots.Remove( i );
 			--i;
 		} else {
@@ -133,7 +124,7 @@ bool Bot_RunMimicCommand( CBotCmd& cmd ) {
 	}
 
 	IPlayerInfo* playerInfo = playerinfomanager->GetPlayerInfo( engine->PEntityOfEntIndex( bot_mimic.GetInt() ) );
-	if ( !playerInfo ) {
+	if ( not playerInfo ) {
 		return false;
 	}
 
@@ -178,12 +169,12 @@ void Bot_UpdateDirection( CPluginBot* pBot ) {
 	QAngle angle( pBot->m_BotInterface->GetLocalAngles() );
 
 	trace_t trace;
-	Vector vecSrc, vecEnd, forward;
+	Vector forward;
 	while ( --maxtries >= 0 ) {
 		AngleVectors( angle, &forward );
 
-		vecSrc = pBot->m_BotInterface->GetLocalOrigin() + Vector( 0, 0, 36 );
-		vecEnd = vecSrc + forward * 10;
+		Vector vecSrc = pBot->m_BotInterface->GetLocalOrigin() + Vector( 0, 0, 36 );
+		Vector vecEnd = vecSrc + forward * 10;
 
 		Ray_t ray;
 		ray.Init( vecSrc, vecEnd, Vector( -16, -16, 0 ), Vector( 16, 16, 72 ) );
@@ -216,8 +207,8 @@ void Bot_UpdateDirection( CPluginBot* pBot ) {
 
 
 void Bot_FlipOut( CPluginBot* pBot, CBotCmd& cmd ) {
-	if ( bot_flipout.GetInt() > 0 && !pBot->m_PlayerInfo->IsDead() ) {
-		if ( bot_forceattackon.GetBool() || ( RandomFloat( 0.0, 1.0 ) > 0.5 ) ) {
+	if ( bot_flipout.GetInt() > 0 and not pBot->m_PlayerInfo->IsDead() ) {
+		if ( bot_forceattackon.GetBool() or RandomFloat( 0.0, 1.0 ) > 0.5 ) {
 			cmd.buttons |= bot_forceattack2.GetBool() ? IN_ATTACK2 : IN_ATTACK;
 		}
 
@@ -242,7 +233,7 @@ void Bot_FlipOut( CPluginBot* pBot, CBotCmd& cmd ) {
 }
 
 
-void Bot_HandleSendCmd( CPluginBot* pBot ) {
+void Bot_HandleSendCmd( const CPluginBot* pBot ) {
 	if ( strlen( bot_sendcmd.GetString() ) > 0 ) {
 		//send the cmd from this bot
 		helpers->ClientCommand( pBot->m_BotEdict, bot_sendcmd.GetString() );
@@ -253,21 +244,21 @@ void Bot_HandleSendCmd( CPluginBot* pBot ) {
 
 
 // If bots are being forced to fire a weapon, see if I have it
-void Bot_ForceFireWeapon( CPluginBot* pBot, CBotCmd& cmd ) {
+void Bot_ForceFireWeapon( const CPluginBot* pBot, CBotCmd& cmd ) {
 	if ( Q_strlen( bot_forcefireweapon.GetString() ) > 0 ) {
 		pBot->m_BotInterface->SetActiveWeapon( bot_forcefireweapon.GetString() );
 		bot_forcefireweapon.SetValue( "" );
 		// Start firing
 		// Some weapons require releases, so randomise firing
-		if ( bot_forceattackon.GetBool() || ( RandomFloat( 0.0, 1.0 ) > 0.5 ) ) {
+		if ( bot_forceattackon.GetBool() or RandomFloat( 0.0, 1.0 ) > 0.5 ) {
 			cmd.buttons |= bot_forceattack2.GetBool() ? IN_ATTACK2 : IN_ATTACK;
 		}
 	}
 }
 
 
-void Bot_SetForwardMovement( CPluginBot* pBot, CBotCmd& cmd ) {
-	if ( !pBot->m_BotInterface->IsEFlagSet( EFL_BOT_FROZEN ) ) {
+void Bot_SetForwardMovement( const CPluginBot* pBot, CBotCmd& cmd ) {
+	if ( not pBot->m_BotInterface->IsEFlagSet( EFL_BOT_FROZEN ) ) {
 		if ( pBot->m_PlayerInfo->GetHealth() == 100 ) {
 			cmd.forwardmove = 600.f * ( pBot->m_bBackwards ? -1.f : 1.f );
 			if ( pBot->m_flSideMove != 0.0f ) {
@@ -281,7 +272,7 @@ void Bot_SetForwardMovement( CPluginBot* pBot, CBotCmd& cmd ) {
 }
 
 
-void Bot_HandleRespawn( CPluginBot* pBot, CBotCmd& ) {
+void Bot_HandleRespawn( const CPluginBot* pBot, CBotCmd& ) {
 	// Wait for Reinforcement wave
 	if ( pBot->m_PlayerInfo->IsDead() ) {
 		if ( pBot->m_PlayerInfo->GetTeamIndex() == 0 ) {
@@ -301,14 +292,14 @@ void Bot_Think( CPluginBot* pBot ) {
 	Q_memset( &cmd, 0, sizeof( cmd ) );
 
 	// Finally, override all this stuff if the bot is being forced to mimic a player.
-	if ( !Bot_RunMimicCommand( cmd ) ) {
+	if ( not Bot_RunMimicCommand( cmd ) ) {
 		cmd.sidemove = pBot->m_flSideMove;
 
-		if ( !pBot->m_PlayerInfo->IsDead() ) {
+		if ( not pBot->m_PlayerInfo->IsDead() ) {
 			Bot_SetForwardMovement( pBot, cmd );
 
 			// Only turn if I haven't been hurt
-			if ( !pBot->m_BotInterface->IsEFlagSet( EFL_BOT_FROZEN ) && pBot->m_PlayerInfo->GetHealth() == 100 ) {
+			if ( not pBot->m_BotInterface->IsEFlagSet( EFL_BOT_FROZEN ) and pBot->m_PlayerInfo->GetHealth() == 100 ) {
 				Bot_UpdateDirection( pBot );
 				Bot_UpdateStrafing( pBot, cmd );
 			}

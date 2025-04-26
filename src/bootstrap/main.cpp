@@ -3,7 +3,6 @@
 //
 #include "basetypes.h"
 
-
 #include <SDL3/SDL_loadso.h>
 #include <cstdlib>
 #include <cstring>
