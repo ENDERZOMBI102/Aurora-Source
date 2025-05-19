@@ -7,8 +7,8 @@
 #include "appframework/IAppSystem.h"
 #include "tier0/platform.h"
 
-#include "inputsystem/Analogcode.h"
-#include "inputsystem/Buttoncode.h"
+#include "inputsystem/analogcode.h"
+#include "inputsystem/buttoncode.h"
 #include "inputsystem/inputenums.h"
 
 //-----------------------------------------------------------------------------
