@@ -8,7 +8,7 @@
 #pragma once
 #include "ehandle.h"
 #include "iinput.h"
-#include "inputsystem/AnalogCode.h"
+#include "inputsystem/analogcode.h"
 #include "kbutton.h"
 #include "mathlib/vector.h"
 

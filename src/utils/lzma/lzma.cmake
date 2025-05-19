@@ -1,3 +1,5 @@
+# lzma.cmake
+
 set( LZMA_DIR ${CMAKE_CURRENT_LIST_DIR} )
 
 set( LZMA_SOURCE_FILES

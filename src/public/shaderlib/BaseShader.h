@@ -6,7 +6,7 @@
 //
 //===========================================================================//
 #pragma once
-#include "materialsystem/IShader.h"
+#include "materialsystem/ishader.h"
 #include "materialsystem/imaterialsystemhardwareconfig.h"
 #include "materialsystem/imaterialvar.h"
 #include "materialsystem/ishaderapi.h"

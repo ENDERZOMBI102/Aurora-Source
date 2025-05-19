@@ -6,7 +6,7 @@
 //
 //===========================================================================//
 #pragma once
-#include "inputsystem/ButtonCode.h"
+#include "inputsystem/buttoncode.h"
 #include "tier1/utlstring.h"
 
 class CUtlBuffer;

@@ -12,7 +12,7 @@
 #include "icommandline.h"
 #include "KeyValues.h"
 #include "filesystem.h"
-#include "inputsystem/InputEnums.h"
+#include "inputsystem/inputenums.h"
 #include "usermessages.h"
 #include "fmtstr.h"
 #include "tier1/utlbuffer.h"

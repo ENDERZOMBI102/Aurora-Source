@@ -6,7 +6,7 @@
 // $NoKeywords: $
 //===========================================================================//
 #pragma once
-#include "inputsystem/ButtonCode.h"
+#include "inputsystem/buttoncode.h"
 
 namespace vgui {
 	typedef ButtonCode_t MouseCode;

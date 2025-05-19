@@ -4,3 +4,6 @@
 [submodule "thirdparty/sourcepp"]
 	path = thirdparty/sourcepp
 	url = https://github.com/craftablescience/sourcepp.git
+[submodule "thirdparty/tracy"]
+	path = thirdparty/tracy
+	url = https://github.com/wolfpld/tracy.git

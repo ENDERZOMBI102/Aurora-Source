@@ -7,9 +7,9 @@
 #include "appframework/IAppSystem.h"
 #include "tier0/platform.h"
 
-#include "inputsystem/AnalogCode.h"
-#include "inputsystem/ButtonCode.h"
-#include "inputsystem/InputEnums.h"
+#include "inputsystem/Analogcode.h"
+#include "inputsystem/Buttoncode.h"
+#include "inputsystem/inputenums.h"
 
 //-----------------------------------------------------------------------------
 // Main interface for input. This is a low-level interface

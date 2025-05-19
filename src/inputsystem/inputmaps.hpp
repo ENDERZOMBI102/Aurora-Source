@@ -2,8 +2,8 @@
 // Created by ENDERZOMBI102 on 26/10/2023.
 //
 #pragma once
-#include "inputsystem/ButtonCode.h"
-#include "inputsystem/AnalogCode.h"
+#include "inputsystem/analogcode.h"
+#include "inputsystem/buttoncode.h"
 #include <array>
 
 

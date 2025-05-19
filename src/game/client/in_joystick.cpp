@@ -24,7 +24,7 @@
 #include "vgui/Cursor.h"
 #include "tier0/icommandline.h"
 #include "inputsystem/iinputsystem.h"
-#include "inputsystem/ButtonCode.h"
+#include "inputsystem/buttoncode.h"
 #include "math.h"
 #include "tier1/convar_serverbounded.h"
 #include "cam_thirdperson.h"

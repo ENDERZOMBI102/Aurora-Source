@@ -8,7 +8,7 @@
 #include "checksum_crc.h"
 #include "const.h"
 #include "datamap.h"
-#include "inputsystem/ButtonCode.h"
+#include "inputsystem/buttoncode.h"
 #include "interface.h"
 #include "mathlib/mathlib.h"
 #include "modes.h"

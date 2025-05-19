@@ -117,7 +117,7 @@ public:
 					break;
 				}
 				this->m_index += 1;
-			} while ( !this->m_Map->IsValidIndex( this->m_index ) );
+			} while ( !this->m_Dict->IsValidIndex( this->m_index ) );
 
 			return *this;
 		}
