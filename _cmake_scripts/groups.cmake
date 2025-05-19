@@ -26,6 +26,7 @@ elseif ( ${BUILD_GROUP} STREQUAL "everything" )
 	include( "${SRCDIR}/fgdlib/fgdlib.cmake" )
 	include( "${SRCDIR}/bitmap/bitmap.cmake" )
 	include( "${SRCDIR}/materialsystem/shaderlib/shaderlib.cmake" )
+	include( "${SRCDIR}/utils/togl/togl.cmake" )
 
 	include( "${SRCDIR}/utils/vbsp/vbsp.cmake" )
 	include( "${SRCDIR}/utils/vrad/vrad_dll.cmake" )

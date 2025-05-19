@@ -26,10 +26,6 @@
 //	GLMgr FBO's (render targets)
 //
 //===============================================================================
-
-#ifndef CGLMFBO_H
-#define	CGLMFBO_H
-
 #pragma once
 
 // good FBO references / recaps
@@ -99,6 +95,3 @@ protected:
 	
 	GLMFBOTexAttachParams	m_attach[ kAttCount ];	// indexed by EGLMFBOAttachment
 };	
-
-
-#endif

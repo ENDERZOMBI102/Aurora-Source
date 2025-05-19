@@ -26,13 +26,9 @@
 //	GLMgr programs (ARBVP/ARBfp)
 //
 //===============================================================================
-
-#ifndef CGLMPROGRAM_H
-#define	CGLMPROGRAM_H
-
+#pragma once
 #include <sys/stat.h>
 
-#pragma once
 
 // good ARB program references
 // http://petewarden.com/notes/archives/2005/05/fragment_progra_2.html
@@ -132,8 +128,8 @@ public:
 	void	SetProgramText			( char *text );				// import text to GLM object - invalidate any prev compiled program
 	void	SetShaderName			( const char *name );				// only used for debugging/telemetry markup
 	
-	void	CompileActiveSources	( void );					// compile only the flavors that were provided.
-	void	Compile					( EGLMProgramLang lang );	
+	bool	CompileActiveSources	( void );					// compile only the flavors that were provided.
+	bool	Compile					( EGLMProgramLang lang );	
 	bool	CheckValidity			( EGLMProgramLang lang );
 
 	void	LogSlow					( EGLMProgramLang lang );	// detailed spew when called for first time; one liner or perhaps silence after that
@@ -179,13 +175,6 @@ public:
 	bool					m_bTranslatedProgram;
 
 	char					m_shaderName[64];
-
-	// Cache label string from the shader text
-	// example:
-	// trans#2871 label:vs-file vertexlit_and_unlit_generic_vs20 vs-index 294912 vs-combo 1234
-	char					m_labelName[1024];
-	int						m_labelIndex;
-	int						m_labelCombo;
 };	
 
 //===============================================================================
@@ -220,16 +209,12 @@ public:
 
 	bool	SetProgramPair			( CGLMProgram *vp, CGLMProgram *fp );
 		// true result means successful link and query
-		// Note that checking the link status and querying the uniform can be optionally
-		// deferred to take advantage of multi-threaded compilation in the driver
 
 	bool	RefreshProgramPair		( void );
 		// re-link and re-query the uniforms
 
-	bool	ValidateProgramPair( void );
-		// true result means successful link and query
-
-	ALWAYS_INLINE void UpdateScreenUniform( uint nWidthHeight )
+	ALWAYS_INLINE
+	void UpdateScreenUniform( uint nWidthHeight )
 	{
 		if ( m_nScreenWidthHeight == nWidthHeight )
 			return;
@@ -284,7 +269,6 @@ public:
 
 	// other stuff
 	bool					m_valid;				// true on successful link
-	bool					m_bCheckLinkStatus;
 	uint					m_revision;				// if this pair is relinked, bump this number.
 
 	GLint					m_locVertexScreenParams; // vcscreen
@@ -322,7 +306,8 @@ protected:
 	CGLMShaderPairCache( GLMContext *ctx  );
 	~CGLMShaderPairCache( );	
 
-	ALWAYS_INLINE CGLMShaderPair *SelectShaderPair	( CGLMProgram *vp, CGLMProgram *fp, uint extraKeyBits );
+	ALWAYS_INLINE
+	CGLMShaderPair *SelectShaderPair	( CGLMProgram *vp, CGLMProgram *fp, uint extraKeyBits );
 	void			QueryShaderPair		( int index, GLMShaderPairInfo *infoOut );
 	
 	// shoot down linked pairs that use the program in the arg
@@ -338,10 +323,13 @@ protected:
 	
 	//===============================
 
-	ALWAYS_INLINE uint HashRowIndex( CGLMProgram *vp, CGLMProgram *fp, uint extraKeyBits ) const;
-	ALWAYS_INLINE CGLMPairCacheEntry*	HashRowPtr( uint hashRowIndex ) const;
+	ALWAYS_INLINE
+	uint HashRowIndex( CGLMProgram *vp, CGLMProgram *fp, uint extraKeyBits ) const;
+	ALWAYS_INLINE
+	CGLMPairCacheEntry*	HashRowPtr( uint hashRowIndex ) const;
 	
-	ALWAYS_INLINE void HashRowProbe( CGLMPairCacheEntry *row, CGLMProgram *vp, CGLMProgram *fp, uint extraKeyBits, int &hitway, int &emptyway, int &oldestway );
+	ALWAYS_INLINE
+	void HashRowProbe( CGLMPairCacheEntry *row, CGLMProgram *vp, CGLMProgram *fp, uint extraKeyBits, int &hitway, int &emptyway, int &oldestway );
 		
 	CGLMShaderPair *SelectShaderPairInternal( CGLMProgram *vp, CGLMProgram *fp, uint extraKeyBits, int rowIndex );
 	//===============================
@@ -370,17 +358,20 @@ protected:
 #endif
 };	
 
-ALWAYS_INLINE uint CGLMShaderPairCache::HashRowIndex( CGLMProgram *vp, CGLMProgram *fp, uint extraKeyBits ) const
+ALWAYS_INLINE
+uint CGLMShaderPairCache::HashRowIndex( CGLMProgram *vp, CGLMProgram *fp, uint extraKeyBits ) const
 {
 	return ( vp->m_nHashTag + fp->m_nHashTag + extraKeyBits * 7 ) & m_rowsMask;
 }
 
-ALWAYS_INLINE CGLMPairCacheEntry*	CGLMShaderPairCache::HashRowPtr( uint hashRowIndex ) const
+ALWAYS_INLINE
+CGLMPairCacheEntry*	CGLMShaderPairCache::HashRowPtr( uint hashRowIndex ) const
 {
 	return &m_entries[ hashRowIndex * m_ways ];
 }
 
-ALWAYS_INLINE void CGLMShaderPairCache::HashRowProbe( CGLMPairCacheEntry *row, CGLMProgram *vp, CGLMProgram *fp, uint extraKeyBits, int& hitway, int& emptyway, int& oldestway )
+ALWAYS_INLINE
+void CGLMShaderPairCache::HashRowProbe( CGLMPairCacheEntry *row, CGLMProgram *vp, CGLMProgram *fp, uint extraKeyBits, int& hitway, int& emptyway, int& oldestway )
 {
 	hitway = -1;
 	emptyway = -1;
@@ -420,7 +411,8 @@ ALWAYS_INLINE void CGLMShaderPairCache::HashRowProbe( CGLMPairCacheEntry *row, C
 	}
 }
 
-ALWAYS_INLINE CGLMShaderPair *CGLMShaderPairCache::SelectShaderPair( CGLMProgram *vp, CGLMProgram *fp, uint extraKeyBits )
+ALWAYS_INLINE
+CGLMShaderPair *CGLMShaderPairCache::SelectShaderPair( CGLMProgram *vp, CGLMProgram *fp, uint extraKeyBits )
 {
 	// select row where pair would be found if it exists
 	uint rowIndex = HashRowIndex( vp, fp, extraKeyBits );
@@ -454,5 +446,3 @@ ALWAYS_INLINE CGLMShaderPair *CGLMShaderPairCache::SelectShaderPair( CGLMProgram
 
 	return pCursor->m_pair;
 }
-
-#endif

@@ -21,47 +21,51 @@
 //  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 //  THE SOFTWARE.
-//
-#pragma once
+#include "intelglmallocworkaround.h"
+#include "mach_override.h"
 
-#if defined(DX_TO_GL_ABSTRACTION)
-	#undef PROTECTED_THINGS_ENABLE
-	#include <GL/gl.h>
-	#include <GL/glext.h>
+// memdbgon -must- be the last include file in a .cpp file.
+#include "tier0/memdbgon.h"
 
-	#include "tier0/basetypes.h"
-	#include "tier0/platform.h"
+IntelGLMallocWorkaround* IntelGLMallocWorkaround::s_pWorkaround = NULL;
 
-	#include "togl/linuxwin/glmdebug.h"
-	#include "togl/linuxwin/glbase.h"
-	#include "togl/linuxwin/glentrypoints.h"
-	#include "togl/linuxwin/glmdisplay.h"
-	#include "togl/linuxwin/glmdisplaydb.h"
-	#include "togl/linuxwin/glmgrbasics.h"
-	#include "togl/linuxwin/glmgrext.h"
-	#include "togl/linuxwin/cglmbuffer.h"
-	#include "togl/linuxwin/cglmtex.h"
-	#include "togl/linuxwin/cglmfbo.h"
-	#include "togl/linuxwin/cglmprogram.h"
-	#include "togl/linuxwin/cglmquery.h"
-	#include "togl/linuxwin/glmgr.h"
-	#include "togl/linuxwin/dxabstract_types.h"
-	#include "togl/linuxwin/dxabstract.h"
-#else
-	// USE_ACTUAL_DX
-	#ifdef WIN32
-		#ifdef _X360
-			#include "d3d9.h"
-			#include "d3dx9.h"
-		#else
-			#include <windows.h>
-			#include "../../dx9sdk/include/d3d9.h"
-			#include "../../dx9sdk/include/d3dx9.h"
-		#endif
-		typedef HWND VD3DHWND;
-	#endif
+void *IntelGLMallocWorkaround::ZeroingAlloc(size_t size)
+{
+	// We call into this pointer that resumes the original malloc.
+	void *memory = s_pWorkaround->m_pfnMallocReentry(size);
+	if (size < 96)
+	{
+		// Since the Intel driver has an issue with a small allocation 
+		// that's left uninitialized, we use memset to ensure it's zero-initialized.
+		memset(memory, 0, size);
+	}
 
-	#define	GLMPRINTF(args)
-	#define	GLMPRINTSTR(args)
-	#define	GLMPRINTTEXT(args)
-#endif // defined(DX_TO_GL_ABSTRACTION)
+	return memory;
+}
+
+IntelGLMallocWorkaround* IntelGLMallocWorkaround::Get()
+{
+	if (!s_pWorkaround)
+	{
+		s_pWorkaround = new IntelGLMallocWorkaround();
+	}
+
+	return s_pWorkaround;
+}
+
+bool IntelGLMallocWorkaround::Enable()
+{
+	if ( m_pfnMallocReentry != NULL )
+	{
+		return true;
+	}
+
+	mach_error_t error = mach_override_ptr( (void*)&malloc, (const void*)&ZeroingAlloc, (void**)&m_pfnMallocReentry );
+	if ( error == err_cannot_override )
+	{
+		m_pfnMallocReentry = NULL;
+		return false;
+	}
+
+	return true;
+}

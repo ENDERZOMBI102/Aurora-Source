@@ -21,10 +21,11 @@
 //  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 //  THE SOFTWARE.
-#ifndef GLMDEBUG_H
-#define	GLMDEBUG_H
-
+#pragma once
 #include "tier0/platform.h"
+#if defined( OSX )
+#include <stdarg.h>
+#endif
 
 // include this anywhere you need to be able to compile-out code related specifically to GLM debugging.
 
@@ -34,9 +35,10 @@
 // 1 means it's possible and resulted from being a debug build
 // 2 means it's possible and resulted from being manually forced on for a release build
 
-#if IsPosix()
+#ifdef POSIX
 	#ifndef GLMDEBUG
-		#if IsDebug()			#define GLMDEBUG 1	// normally 1 here, testing
+		#ifdef DEBUG
+			#define GLMDEBUG 1	// normally 1 here, testing
 		#else
 			// #define GLMDEBUG 2			// don't check this in enabled..
 		#endif
@@ -173,5 +175,3 @@ void	GLMProfilerEnableTrace( bool enable );
 void	GLMProfilerDumpState( void );
 
 void CheckGLError( int line );
-
-#endif // GLMDEBUG_H

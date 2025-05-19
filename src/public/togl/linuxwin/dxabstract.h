@@ -40,9 +40,7 @@
 #define	IUNKNOWN_ALLOC_SPEW 0
 #define	IUNKNOWN_ALLOC_SPEW_MARK_ALL 0	
 
-
 TOGL_INTERFACE void toglGetClientRect( VD3DHWND hWnd, RECT *destRect );
-
 
 struct TOGL_CLASS IUnknown
 {
@@ -73,7 +71,7 @@ struct TOGL_CLASS IUnknown
 		#endif
 	};
 		
-	void	AddRef( int which=0, char *comment = NULL )
+	void	AddRef( int which=0, const char *comment = NULL )
 	{
 		Assert( which >= 0 );
 		Assert( which < 2 );
@@ -91,7 +89,7 @@ struct TOGL_CLASS IUnknown
 		#endif
 	};
 		
-	ULONG __stdcall	Release( int which=0, char *comment = NULL )
+	ULONG __stdcall	Release( int which=0, const char *comment = NULL )
 	{
 		Assert( which >= 0 );
 		Assert( which < 2 );
@@ -439,13 +437,13 @@ struct TOGL_CLASS IDirect3DDevice9 : public IUnknown
     HRESULT TOGLMETHODCALLTYPE CreateCubeTexture(UINT EdgeLength,UINT Levels,DWORD Usage,D3DFORMAT Format,D3DPOOL Pool,IDirect3DCubeTexture9** ppCubeTexture,VD3DHANDLE* pSharedHandle, char *debugLabel=NULL);
     HRESULT TOGLMETHODCALLTYPE CreateVolumeTexture(UINT Width,UINT Height,UINT Depth,UINT Levels,DWORD Usage,D3DFORMAT Format,D3DPOOL Pool,IDirect3DVolumeTexture9** ppVolumeTexture,VD3DHANDLE* pSharedHandle, char *debugLabel=NULL);
 	
-	ALWAYS_INLINE HRESULT TOGLMETHODCALLTYPE SetTexture(DWORD Stage,IDirect3DBaseTexture9* pTexture);
+	FORCEINLINE HRESULT TOGLMETHODCALLTYPE SetTexture(DWORD Stage,IDirect3DBaseTexture9* pTexture);
 	HRESULT TOGLMETHODCALLTYPE SetTextureNonInline(DWORD Stage,IDirect3DBaseTexture9* pTexture);
 
     HRESULT TOGLMETHODCALLTYPE GetTexture(DWORD Stage,IDirect3DBaseTexture9** ppTexture);
 
 	// render targets, color and depthstencil, surfaces, blit
-    HRESULT TOGLMETHODCALLTYPE CreateRenderTarget(UINT Width,UINT Height,D3DFORMAT Format,D3DMULTISAMPLE_TYPE MultiSample,DWORD MultisampleQuality,BOOL Lockable,IDirect3DSurface9** ppSurface,VD3DHANDLE* pSharedHandle, char *debugLabel=NULL);
+    HRESULT TOGLMETHODCALLTYPE CreateRenderTarget(UINT Width,UINT Height,D3DFORMAT Format,D3DMULTISAMPLE_TYPE MultiSample,DWORD MultisampleQuality,BOOL Lockable,IDirect3DSurface9** ppSurface,VD3DHANDLE* pSharedHandle, const char *debugLabel=NULL);
     HRESULT TOGLMETHODCALLTYPE SetRenderTarget(DWORD RenderTargetIndex,IDirect3DSurface9* pRenderTarget);
     HRESULT TOGLMETHODCALLTYPE GetRenderTarget(DWORD RenderTargetIndex,IDirect3DSurface9** ppRenderTarget);
 
@@ -462,10 +460,10 @@ struct TOGL_CLASS IDirect3DDevice9 : public IUnknown
 	// pixel shaders
     HRESULT TOGLMETHODCALLTYPE CreatePixelShader(CONST DWORD* pFunction,IDirect3DPixelShader9** ppShader, const char *pShaderName, char *debugLabel = NULL, const uint32 *pCentroidMask = NULL );
 
-	ALWAYS_INLINE HRESULT TOGLMETHODCALLTYPE SetPixelShader(IDirect3DPixelShader9* pShader);
+	FORCEINLINE HRESULT TOGLMETHODCALLTYPE SetPixelShader(IDirect3DPixelShader9* pShader);
 	HRESULT TOGLMETHODCALLTYPE SetPixelShaderNonInline(IDirect3DPixelShader9* pShader);
     
-	ALWAYS_INLINE HRESULT TOGLMETHODCALLTYPE SetPixelShaderConstantF(UINT StartRegister,CONST float* pConstantData,UINT Vector4fCount);
+	FORCEINLINE HRESULT TOGLMETHODCALLTYPE SetPixelShaderConstantF(UINT StartRegister,CONST float* pConstantData,UINT Vector4fCount);
 	HRESULT TOGLMETHODCALLTYPE SetPixelShaderConstantFNonInline(UINT StartRegister,CONST float* pConstantData,UINT Vector4fCount);
 
     HRESULT TOGLMETHODCALLTYPE SetPixelShaderConstantB(UINT StartRegister,CONST BOOL* pConstantData,UINT  BoolCount);
@@ -474,27 +472,26 @@ struct TOGL_CLASS IDirect3DDevice9 : public IUnknown
 	// vertex shaders
     HRESULT TOGLMETHODCALLTYPE CreateVertexShader(CONST DWORD* pFunction,IDirect3DVertexShader9** ppShader, const char *pShaderName, char *debugLabel = NULL);
 
-	ALWAYS_INLINE HRESULT TOGLMETHODCALLTYPE SetVertexShader(IDirect3DVertexShader9* pShader);
+	FORCEINLINE HRESULT TOGLMETHODCALLTYPE SetVertexShader(IDirect3DVertexShader9* pShader);
     HRESULT TOGLMETHODCALLTYPE SetVertexShaderNonInline(IDirect3DVertexShader9* pShader);
     
-	ALWAYS_INLINE HRESULT TOGLMETHODCALLTYPE SetVertexShaderConstantF(UINT StartRegister,CONST float* pConstantData,UINT Vector4fCount);
+	FORCEINLINE HRESULT TOGLMETHODCALLTYPE SetVertexShaderConstantF(UINT StartRegister,CONST float* pConstantData,UINT Vector4fCount);
 	HRESULT TOGLMETHODCALLTYPE SetVertexShaderConstantFNonInline(UINT StartRegister,CONST float* pConstantData,UINT Vector4fCount);
 
-    ALWAYS_INLINE HRESULT TOGLMETHODCALLTYPE SetVertexShaderConstantB(UINT StartRegister,CONST BOOL* pConstantData,UINT  BoolCount);
+    FORCEINLINE HRESULT TOGLMETHODCALLTYPE SetVertexShaderConstantB(UINT StartRegister,CONST BOOL* pConstantData,UINT  BoolCount);
 	HRESULT TOGLMETHODCALLTYPE SetVertexShaderConstantBNonInline(UINT StartRegister,CONST BOOL* pConstantData,UINT  BoolCount);
 
-	ALWAYS_INLINE HRESULT TOGLMETHODCALLTYPE SetVertexShaderConstantI(UINT StartRegister,CONST int* pConstantData,UINT Vector4iCount);
+	FORCEINLINE HRESULT TOGLMETHODCALLTYPE SetVertexShaderConstantI(UINT StartRegister,CONST int* pConstantData,UINT Vector4iCount);
     HRESULT TOGLMETHODCALLTYPE SetVertexShaderConstantINonInline(UINT StartRegister,CONST int* pConstantData,UINT Vector4iCount);
 
 	// POSIX only - preheating for a specific vertex/pixel shader pair - trigger GLSL link inside GLM
 	HRESULT TOGLMETHODCALLTYPE LinkShaderPair( IDirect3DVertexShader9* vs, IDirect3DPixelShader9* ps );
-	HRESULT TOGLMETHODCALLTYPE ValidateShaderPair( IDirect3DVertexShader9* vs, IDirect3DPixelShader9* ps );
 	HRESULT TOGLMETHODCALLTYPE QueryShaderPair( int index, GLMShaderPairInfo *infoOut );
 	
 	// vertex buffers
     HRESULT TOGLMETHODCALLTYPE CreateVertexDeclaration(CONST D3DVERTEXELEMENT9* pVertexElements,IDirect3DVertexDeclaration9** ppDecl);
 	
-	ALWAYS_INLINE HRESULT TOGLMETHODCALLTYPE SetVertexDeclaration(IDirect3DVertexDeclaration9* pDecl);
+	FORCEINLINE HRESULT TOGLMETHODCALLTYPE SetVertexDeclaration(IDirect3DVertexDeclaration9* pDecl);
 	HRESULT TOGLMETHODCALLTYPE SetVertexDeclarationNonInline(IDirect3DVertexDeclaration9* pDecl);
 
     HRESULT TOGLMETHODCALLTYPE SetFVF(DWORD FVF);		// we might not be using these ?
@@ -502,26 +499,26 @@ struct TOGL_CLASS IDirect3DDevice9 : public IUnknown
 
     HRESULT CreateVertexBuffer(UINT Length,DWORD Usage,DWORD FVF,D3DPOOL Pool,IDirect3DVertexBuffer9** ppVertexBuffer,VD3DHANDLE* pSharedHandle);
     
-	ALWAYS_INLINE HRESULT TOGLMETHODCALLTYPE SetStreamSource(UINT StreamNumber,IDirect3DVertexBuffer9* pStreamData,UINT OffsetInBytes,UINT Stride);
+	FORCEINLINE HRESULT TOGLMETHODCALLTYPE SetStreamSource(UINT StreamNumber,IDirect3DVertexBuffer9* pStreamData,UINT OffsetInBytes,UINT Stride);
 	HRESULT SetStreamSourceNonInline(UINT StreamNumber,IDirect3DVertexBuffer9* pStreamData,UINT OffsetInBytes,UINT Stride);
 		
 	// index buffers
     HRESULT TOGLMETHODCALLTYPE CreateIndexBuffer(UINT Length,DWORD Usage,D3DFORMAT Format,D3DPOOL Pool,IDirect3DIndexBuffer9** ppIndexBuffer,VD3DHANDLE* pSharedHandle);
     
-	ALWAYS_INLINE HRESULT TOGLMETHODCALLTYPE SetIndices(IDirect3DIndexBuffer9* pIndexData);
+	FORCEINLINE HRESULT TOGLMETHODCALLTYPE SetIndices(IDirect3DIndexBuffer9* pIndexData);
 	HRESULT TOGLMETHODCALLTYPE SetIndicesNonInline(IDirect3DIndexBuffer9* pIndexData);
 
 	// State management.
-    ALWAYS_INLINE HRESULT TOGLMETHODCALLTYPE SetRenderStateInline(D3DRENDERSTATETYPE State,DWORD Value);
-	ALWAYS_INLINE HRESULT TOGLMETHODCALLTYPE SetRenderStateConstInline(D3DRENDERSTATETYPE State,DWORD Value);
+    FORCEINLINE HRESULT TOGLMETHODCALLTYPE SetRenderStateInline(D3DRENDERSTATETYPE State,DWORD Value);
+	FORCEINLINE HRESULT TOGLMETHODCALLTYPE SetRenderStateConstInline(D3DRENDERSTATETYPE State,DWORD Value);
 	HRESULT TOGLMETHODCALLTYPE SetRenderState(D3DRENDERSTATETYPE State,DWORD Value);
 
-    ALWAYS_INLINE HRESULT TOGLMETHODCALLTYPE SetSamplerState(DWORD Sampler,D3DSAMPLERSTATETYPE Type,DWORD Value);
+    FORCEINLINE HRESULT TOGLMETHODCALLTYPE SetSamplerState(DWORD Sampler,D3DSAMPLERSTATETYPE Type,DWORD Value);
 	HRESULT TOGLMETHODCALLTYPE SetSamplerStateNonInline(DWORD Sampler,D3DSAMPLERSTATETYPE Type,DWORD Value);
 
-	ALWAYS_INLINE void TOGLMETHODCALLTYPE SetSamplerStates(DWORD Sampler, DWORD AddressU, DWORD AddressV, DWORD AddressW, DWORD MinFilter, DWORD MagFilter, DWORD MipFilter );
+	FORCEINLINE void TOGLMETHODCALLTYPE SetSamplerStates(DWORD Sampler, DWORD AddressU, DWORD AddressV, DWORD AddressW, DWORD MinFilter, DWORD MagFilter, DWORD MipFilter );
 	void TOGLMETHODCALLTYPE SetSamplerStatesNonInline(DWORD Sampler, DWORD AddressU, DWORD AddressV, DWORD AddressW, DWORD MinFilter, DWORD MagFilter, DWORD MipFilter );
-        
+					
 	// Draw.
     HRESULT TOGLMETHODCALLTYPE DrawPrimitive(D3DPRIMITIVETYPE PrimitiveType,UINT StartVertex,UINT PrimitiveCount);
     HRESULT TOGLMETHODCALLTYPE DrawIndexedPrimitive(D3DPRIMITIVETYPE PrimitiveType,INT BaseVertexIndex,UINT MinVertexIndex,UINT NumVertices,UINT startIndex,UINT primCount);
@@ -559,7 +556,7 @@ struct TOGL_CLASS IDirect3DDevice9 : public IUnknown
 	void TOGLMETHODCALLTYPE ReleaseThreadOwnership( );
 	inline DWORD TOGLMETHODCALLTYPE GetCurrentOwnerThreadId() const { return m_ctx->m_nCurOwnerThreadId; }
 
-	ALWAYS_INLINE void TOGLMETHODCALLTYPE SetMaxUsedVertexShaderConstantsHint( uint nMaxReg );
+	FORCEINLINE void TOGLMETHODCALLTYPE SetMaxUsedVertexShaderConstantsHint( uint nMaxReg );
 	void TOGLMETHODCALLTYPE SetMaxUsedVertexShaderConstantsHintNonInline( uint nMaxReg );
 
 	void DumpStatsToConsole( const CCommand *pArgs );
@@ -731,7 +728,7 @@ private:
 #endif
 };
 
-ALWAYS_INLINE HRESULT TOGLMETHODCALLTYPE IDirect3DDevice9::SetSamplerState( DWORD Sampler, D3DSAMPLERSTATETYPE Type, DWORD Value )
+FORCEINLINE HRESULT TOGLMETHODCALLTYPE IDirect3DDevice9::SetSamplerState( DWORD Sampler, D3DSAMPLERSTATETYPE Type, DWORD Value )
 {
 #if GLMDEBUG || GL_BATCH_PERF_ANALYSIS
 	return SetSamplerStateNonInline( Sampler, Type, Value );
@@ -787,7 +784,7 @@ ALWAYS_INLINE HRESULT TOGLMETHODCALLTYPE IDirect3DDevice9::SetSamplerState( DWOR
 #endif
 }
 
-ALWAYS_INLINE void TOGLMETHODCALLTYPE IDirect3DDevice9::SetSamplerStates(
+FORCEINLINE void TOGLMETHODCALLTYPE IDirect3DDevice9::SetSamplerStates(
 	DWORD Sampler, DWORD AddressU, DWORD AddressV, DWORD AddressW,
 	DWORD MinFilter, DWORD MagFilter, DWORD MipFilter )
 {
@@ -803,7 +800,7 @@ ALWAYS_INLINE void TOGLMETHODCALLTYPE IDirect3DDevice9::SetSamplerStates(
 #endif
 }
 
-ALWAYS_INLINE HRESULT TOGLMETHODCALLTYPE IDirect3DDevice9::SetTexture(DWORD Stage,IDirect3DBaseTexture9* pTexture)
+FORCEINLINE HRESULT TOGLMETHODCALLTYPE IDirect3DDevice9::SetTexture(DWORD Stage,IDirect3DBaseTexture9* pTexture)
 {
 #if GLMDEBUG || GL_BATCH_PERF_ANALYSIS
 	return SetTextureNonInline( Stage, pTexture );
@@ -832,7 +829,7 @@ inline GLenum D3DCompareFuncToGL( DWORD function )
 	}
 }
 
-ALWAYS_INLINE GLenum D3DBlendOperationToGL( DWORD operation )
+FORCEINLINE GLenum D3DBlendOperationToGL( DWORD operation )
 {
 	switch (operation)
 	{
@@ -848,7 +845,7 @@ ALWAYS_INLINE GLenum D3DBlendOperationToGL( DWORD operation )
 	}
 }
 
-ALWAYS_INLINE GLenum D3DBlendFactorToGL( DWORD equation )
+FORCEINLINE GLenum D3DBlendFactorToGL( DWORD equation )
 {
 	switch (equation)
 	{
@@ -883,7 +880,7 @@ ALWAYS_INLINE GLenum D3DBlendFactorToGL( DWORD equation )
 }
 
 
-ALWAYS_INLINE GLenum D3DStencilOpToGL( DWORD operation )
+FORCEINLINE GLenum D3DStencilOpToGL( DWORD operation )
 {
 	switch( operation )
 	{
@@ -899,7 +896,7 @@ ALWAYS_INLINE GLenum D3DStencilOpToGL( DWORD operation )
 	}
 }
 
-ALWAYS_INLINE HRESULT TOGLMETHODCALLTYPE IDirect3DDevice9::SetRenderStateInline( D3DRENDERSTATETYPE State, DWORD Value )
+FORCEINLINE HRESULT TOGLMETHODCALLTYPE IDirect3DDevice9::SetRenderStateInline( D3DRENDERSTATETYPE State, DWORD Value )
 {
 #if GLMDEBUG || GL_BATCH_PERF_ANALYSIS
 	return SetRenderState( State, Value );
@@ -1167,13 +1164,13 @@ ALWAYS_INLINE HRESULT TOGLMETHODCALLTYPE IDirect3DDevice9::SetRenderStateInline(
 #endif
 }
 
-ALWAYS_INLINE HRESULT TOGLMETHODCALLTYPE IDirect3DDevice9::SetRenderStateConstInline( D3DRENDERSTATETYPE State, DWORD Value )
+FORCEINLINE HRESULT TOGLMETHODCALLTYPE IDirect3DDevice9::SetRenderStateConstInline( D3DRENDERSTATETYPE State, DWORD Value )
 {
 	// State is a compile time constant - luckily no need to do anything special to get the compiler to optimize this case.
 	return SetRenderStateInline( State, Value );
 }
 
-ALWAYS_INLINE HRESULT TOGLMETHODCALLTYPE IDirect3DDevice9::SetIndices(IDirect3DIndexBuffer9* pIndexData)
+FORCEINLINE HRESULT TOGLMETHODCALLTYPE IDirect3DDevice9::SetIndices(IDirect3DIndexBuffer9* pIndexData)
 {
 #if GLMDEBUG || GL_BATCH_PERF_ANALYSIS
 	return SetIndicesNonInline( pIndexData );
@@ -1185,7 +1182,7 @@ ALWAYS_INLINE HRESULT TOGLMETHODCALLTYPE IDirect3DDevice9::SetIndices(IDirect3DI
 #endif
 }
 
-ALWAYS_INLINE HRESULT TOGLMETHODCALLTYPE IDirect3DDevice9::SetStreamSource(UINT StreamNumber,IDirect3DVertexBuffer9* pStreamData,UINT OffsetInBytes,UINT Stride)
+FORCEINLINE HRESULT TOGLMETHODCALLTYPE IDirect3DDevice9::SetStreamSource(UINT StreamNumber,IDirect3DVertexBuffer9* pStreamData,UINT OffsetInBytes,UINT Stride)
 {
 #if GLMDEBUG || GL_BATCH_PERF_ANALYSIS
 	return SetStreamSourceNonInline( StreamNumber, pStreamData, OffsetInBytes, Stride );
@@ -1222,7 +1219,7 @@ ALWAYS_INLINE HRESULT TOGLMETHODCALLTYPE IDirect3DDevice9::SetStreamSource(UINT 
 #endif
 }
 
-ALWAYS_INLINE HRESULT TOGLMETHODCALLTYPE IDirect3DDevice9::SetVertexShaderConstantF(UINT StartRegister,CONST float* pConstantData,UINT Vector4fCount)	// groups of 4 floats!
+FORCEINLINE HRESULT TOGLMETHODCALLTYPE IDirect3DDevice9::SetVertexShaderConstantF(UINT StartRegister,CONST float* pConstantData,UINT Vector4fCount)	// groups of 4 floats!
 {
 #if GLMDEBUG || GL_BATCH_PERF_ANALYSIS
 	return SetVertexShaderConstantFNonInline( StartRegister, pConstantData, Vector4fCount );
@@ -1234,7 +1231,7 @@ ALWAYS_INLINE HRESULT TOGLMETHODCALLTYPE IDirect3DDevice9::SetVertexShaderConsta
 #endif
 }
 
-ALWAYS_INLINE HRESULT TOGLMETHODCALLTYPE IDirect3DDevice9::SetVertexShaderConstantB(UINT StartRegister,CONST BOOL* pConstantData,UINT  BoolCount)
+FORCEINLINE HRESULT TOGLMETHODCALLTYPE IDirect3DDevice9::SetVertexShaderConstantB(UINT StartRegister,CONST BOOL* pConstantData,UINT  BoolCount)
 {
 #if GLMDEBUG || GL_BATCH_PERF_ANALYSIS
 	return SetVertexShaderConstantBNonInline( StartRegister, pConstantData, BoolCount );
@@ -1246,7 +1243,7 @@ ALWAYS_INLINE HRESULT TOGLMETHODCALLTYPE IDirect3DDevice9::SetVertexShaderConsta
 #endif
 }
 
-ALWAYS_INLINE HRESULT IDirect3DDevice9::SetVertexShaderConstantI(UINT StartRegister,CONST int* pConstantData,UINT Vector4iCount)		// groups of 4 ints!
+FORCEINLINE HRESULT IDirect3DDevice9::SetVertexShaderConstantI(UINT StartRegister,CONST int* pConstantData,UINT Vector4iCount)		// groups of 4 ints!
 {
 #if GLMDEBUG || GL_BATCH_PERF_ANALYSIS
 	return SetVertexShaderConstantINonInline( StartRegister, pConstantData, Vector4iCount );
@@ -1258,7 +1255,7 @@ ALWAYS_INLINE HRESULT IDirect3DDevice9::SetVertexShaderConstantI(UINT StartRegis
 #endif
 }
 
-ALWAYS_INLINE HRESULT TOGLMETHODCALLTYPE IDirect3DDevice9::SetPixelShaderConstantF(UINT StartRegister,CONST float* pConstantData,UINT Vector4fCount)
+FORCEINLINE HRESULT TOGLMETHODCALLTYPE IDirect3DDevice9::SetPixelShaderConstantF(UINT StartRegister,CONST float* pConstantData,UINT Vector4fCount)
 {
 #if GLMDEBUG || GL_BATCH_PERF_ANALYSIS
 	return SetPixelShaderConstantFNonInline(StartRegister, pConstantData, Vector4fCount);
@@ -1282,7 +1279,7 @@ HRESULT IDirect3DDevice9::SetVertexShader(IDirect3DVertexShader9* pShader)
 #endif
 }
 
-ALWAYS_INLINE HRESULT TOGLMETHODCALLTYPE IDirect3DDevice9::SetPixelShader(IDirect3DPixelShader9* pShader)
+FORCEINLINE HRESULT TOGLMETHODCALLTYPE IDirect3DDevice9::SetPixelShader(IDirect3DPixelShader9* pShader)
 {
 #if GLMDEBUG || GL_BATCH_PERF_ANALYSIS
 	return SetPixelShaderNonInline(pShader);
@@ -1294,7 +1291,7 @@ ALWAYS_INLINE HRESULT TOGLMETHODCALLTYPE IDirect3DDevice9::SetPixelShader(IDirec
 #endif
 }
 
-ALWAYS_INLINE HRESULT IDirect3DDevice9::SetVertexDeclaration(IDirect3DVertexDeclaration9* pDecl)
+FORCEINLINE HRESULT IDirect3DDevice9::SetVertexDeclaration(IDirect3DVertexDeclaration9* pDecl)
 {
 #if GLMDEBUG || GL_BATCH_PERF_ANALYSIS
 	return SetVertexDeclarationNonInline(pDecl);
@@ -1305,7 +1302,7 @@ ALWAYS_INLINE HRESULT IDirect3DDevice9::SetVertexDeclaration(IDirect3DVertexDecl
 #endif
 }
 
-ALWAYS_INLINE void IDirect3DDevice9::SetMaxUsedVertexShaderConstantsHint( uint nMaxReg )
+FORCEINLINE void IDirect3DDevice9::SetMaxUsedVertexShaderConstantsHint( uint nMaxReg )
 {
 #if GLMDEBUG || GL_BATCH_PERF_ANALYSIS
 	return SetMaxUsedVertexShaderConstantsHintNonInline( nMaxReg );
@@ -1418,13 +1415,18 @@ TOGL_INTERFACE HRESULT D3DXCompileShader(
 #else
 
 	//USE_ACTUAL_DX
-	#if !IsWindows()
+	#ifndef WIN32
 	#error sorry man
 	#endif
 
-        #include <windows.h>
-        #include "../../dx9sdk/include/d3d9.h"
-        #include "../../dx9sdk/include/d3dx9.h"
+	#ifdef _X360
+		#include "d3d9.h"
+		#include "d3dx9.h"
+	#else
+		#include <windows.h>
+		#include "../../dx9sdk/include/d3d9.h"
+		#include "../../dx9sdk/include/d3dx9.h"
+	#endif
 	typedef HWND VD3DHWND;
 
 #endif // DX_TO_GL_ABSTRACTION

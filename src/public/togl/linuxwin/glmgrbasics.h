@@ -26,14 +26,10 @@
 //	types, common headers, forward declarations, utilities
 //
 //===============================================================================
-
-#ifndef GLMBASICS_H
-#define	GLMBASICS_H
-
 #pragma once
 
 #ifdef USE_SDL
-	#include <SDL/SDL_opengl.h>
+#include "SDL_opengl.h"
 #endif
 
 #include "tier0/platform.h"
@@ -53,7 +49,7 @@ typedef void *PseudoGLContextPtr;
 
 // types
 
-	// 3-d integer box (used for texture lock/unlock etc)
+// 3-d integer box (used for texture lock/unlock etc)
 struct	GLMRegion
 {
 	int	xmin,xmax;
@@ -117,7 +113,8 @@ typedef enum
 		
 const char* GLMDecodeMask( GLMThing_t type, unsigned long value );	// decode a bitmask
 
-ALWAYS_INLINE void GLMStop( void ) { DXABSTRACT_BREAK_ON_ERROR(); }
+ALWAYS_INLINE
+void GLMStop( void ) { DXABSTRACT_BREAK_ON_ERROR(); }
 
 void GLMEnableTrace( bool on );
 
@@ -126,8 +123,10 @@ void GLMEnableTrace( bool on );
 
 // expose these in release now
 // Mimic PIX events so we can decorate debug spew
-DLL_EXPORT void	GLMBeginPIXEvent( const char *str );
-DLL_EXPORT void	GLMEndPIXEvent( void );
+DLL_EXPORT
+void GLMBeginPIXEvent( const char *str );
+DLL_EXPORT
+void GLMEndPIXEvent( void );
 
 class CScopedGLMPIXEvent
 {
@@ -225,7 +224,7 @@ public:
 	void		ReadFile( void );
 	void		WriteFile( void );
 
-	void		OpenInEditor( bool foreground=false );			// pass true if you would like the editor to pop to foreground
+	void		OpenInEditor( bool foreground=false );			// pass TRUE if you would like the editor to pop to foreground
 	
 	/// how about a "wait for change" method..
 
@@ -314,5 +313,3 @@ public:
 void GLMGPUTimestampManagerInit();
 void GLMGPUTimestampManagerDeinit();
 void GLMGPUTimestampManagerTick();
-
-#endif // GLMBASICS_H

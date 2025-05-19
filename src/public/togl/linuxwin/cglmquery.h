@@ -26,10 +26,6 @@
 //	GLMgr queries
 //
 //===============================================================================
-
-#ifndef CGLMQUERY_H
-#define	CGLMQUERY_H
-
 #pragma once
 
 //===============================================================================
@@ -103,6 +99,3 @@ public:
 	bool	IsStarted	( void );
 	bool	IsStopped	( void );
 };
-
-
-#endif

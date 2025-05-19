@@ -4,6 +4,7 @@
 
 set( IS_WINDOWS 0 )
 set( IS_LINUX 0 )
+set( IS_OSX 0 )
 set( IS_POSIX 0 )
 set( IS_64BIT 0 )
 
@@ -24,6 +25,7 @@ endif()
 
 option( RETAIL "Build in retail mode" OFF )
 option( STAGING_ONLY "Staging only" OFF )
+option( USE_TOGL "Use the `togl` translation layer" ${IS_LINUX} )
 
 set( RAD_TELEMETRY_DISABLED ${IS_SOURCESDK} )
 set( TF_BETA 0 )

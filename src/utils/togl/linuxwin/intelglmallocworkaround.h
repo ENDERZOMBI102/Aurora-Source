@@ -22,46 +22,40 @@
 //  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 //  THE SOFTWARE.
 //
-#pragma once
+// intelglmallocworkaround.h
+//  class responsible for setting up a malloc override that zeroes allocated 
+//  memory of less than 96 bytes. this is to work around a bug
+//  in the Intel GLSL compiler on Mac OS X 10.8 due to uninitialized memory.
+//  
+//  96 was chosen due to this quote from Apple: 
+//    "I verified that the size of the structure is exactly 64 bytes on 10.8.3, 10.8.4 and will be on 10.8.5."
+//
+//  certain GLSL shaders would (intermittently) cause a crash the first time they
+//  were drawn, and the bug has supposedly been fixed in 10.9, but is unlikely to
+//  ever make it to 10.8.
+//
+//===============================================================================
 
-#if defined(DX_TO_GL_ABSTRACTION)
-	#undef PROTECTED_THINGS_ENABLE
-	#include <GL/gl.h>
-	#include <GL/glext.h>
+#ifndef INTELGLMALLOCWORKAROUND_H
+#define	INTELGLMALLOCWORKAROUND_H
 
-	#include "tier0/basetypes.h"
-	#include "tier0/platform.h"
+#include <stdlib.h>
 
-	#include "togl/linuxwin/glmdebug.h"
-	#include "togl/linuxwin/glbase.h"
-	#include "togl/linuxwin/glentrypoints.h"
-	#include "togl/linuxwin/glmdisplay.h"
-	#include "togl/linuxwin/glmdisplaydb.h"
-	#include "togl/linuxwin/glmgrbasics.h"
-	#include "togl/linuxwin/glmgrext.h"
-	#include "togl/linuxwin/cglmbuffer.h"
-	#include "togl/linuxwin/cglmtex.h"
-	#include "togl/linuxwin/cglmfbo.h"
-	#include "togl/linuxwin/cglmprogram.h"
-	#include "togl/linuxwin/cglmquery.h"
-	#include "togl/linuxwin/glmgr.h"
-	#include "togl/linuxwin/dxabstract_types.h"
-	#include "togl/linuxwin/dxabstract.h"
-#else
-	// USE_ACTUAL_DX
-	#ifdef WIN32
-		#ifdef _X360
-			#include "d3d9.h"
-			#include "d3dx9.h"
-		#else
-			#include <windows.h>
-			#include "../../dx9sdk/include/d3d9.h"
-			#include "../../dx9sdk/include/d3dx9.h"
-		#endif
-		typedef HWND VD3DHWND;
-	#endif
+class IntelGLMallocWorkaround
+{
+public:
+	static IntelGLMallocWorkaround *Get();
+	bool Enable();
 
-	#define	GLMPRINTF(args)
-	#define	GLMPRINTSTR(args)
-	#define	GLMPRINTTEXT(args)
-#endif // defined(DX_TO_GL_ABSTRACTION)
+protected:
+	IntelGLMallocWorkaround() :m_pfnMallocReentry(NULL) {}
+	~IntelGLMallocWorkaround() {}
+
+	static IntelGLMallocWorkaround *s_pWorkaround;
+	static void* ZeroingAlloc(size_t);
+
+	typedef void* (*pfnMalloc_t)(size_t);
+	pfnMalloc_t m_pfnMallocReentry;
+};
+
+#endif // INTELGLMALLOCWORKAROUND_H

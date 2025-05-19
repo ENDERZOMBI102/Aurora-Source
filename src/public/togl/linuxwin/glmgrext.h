@@ -29,7 +29,10 @@
 
 #pragma once
 
-#if defined(DX_TO_GL_ABSTRACTION)
+#ifdef OSX
+#include <OpenGL/gl.h>
+#include <OpenGL/glext.h>
+#elif defined(DX_TO_GL_ABSTRACTION)
 #include <GL/gl.h>
 #include <GL/glext.h>
 #else
@@ -108,13 +111,5 @@
 
 #ifndef GL_MAP_UNSYNCHRONIZED_BIT
 #define GL_MAP_UNSYNCHRONIZED_BIT         0x0020
-#endif
-
-#ifndef GL_MAP_PERSISTENT_BIT
-#define GL_MAP_PERSISTENT_BIT				0x0040
-#endif
-
-#ifndef GL_MAP_COHERENT_BIT
-#define GL_MAP_COHERENT_BIT					0x0080
 #endif
 

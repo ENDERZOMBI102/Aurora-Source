@@ -33,7 +33,7 @@
 #pragma once
 
 #ifdef USE_SDL
-	#include <SDL/SDL_opengl.h>
+#include "SDL_opengl.h"
 #endif
 
 typedef void _PseudoNSGLContext;					// aka NSOpenGLContext
@@ -49,6 +49,10 @@ struct GLMDisplayModeInfoFields
 
 struct GLMDisplayInfoFields
 {
+#ifdef OSX
+	CGDirectDisplayID				m_cgDisplayID;
+	CGOpenGLDisplayMask				m_glDisplayMask;		// result of CGDisplayIDToOpenGLDisplayMask on the cg_displayID.
+#endif
 	uint							m_displayPixelWidth;
 	uint							m_displayPixelHeight;	
 };
@@ -78,7 +82,7 @@ struct GLMRendererInfoFields
 	   kCGLRPRendererCount       = 128		number of renderers in the CGLRendererInfoObj under examination
 
 	   kCGLRPOffScreen           =  53,		D/C
-	   kCGLRPRobust              =  75,		false or D/C - aka we're asking for no-fallback
+	   kCGLRPRobust              =  75,		FALSE or D/C - aka we're asking for no-fallback
 	   kCGLRPBackingStore        =  76,		D/C
 	   kCGLRPMPSafe              =  78,		D/C
 	   kCGLRPMultiScreen         =  81,		D/C

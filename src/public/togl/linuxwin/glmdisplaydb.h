@@ -21,9 +21,6 @@
 //  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 //  THE SOFTWARE.
-#ifndef GLMDISPLAYDB_H
-#define	GLMDISPLAYDB_H
-
 #include "tier1/utlvector.h"
 
 //===============================================================================
@@ -56,13 +53,22 @@ public:
 	CUtlVector< GLMDisplayMode* >	*m_modes;				// starts out NULL, set by PopulateModes
 	GLMDisplayMode					m_DesktopMode;
 
+#ifdef OSX
+	GLMDisplayInfo( CGDirectDisplayID displayID, CGOpenGLDisplayMask displayMask );
+#else
 	GLMDisplayInfo( void );
+#endif
 
 	~GLMDisplayInfo( void );
 	
 	void	PopulateModes( void );
 
 	void	Dump( int which );
+
+#ifdef OSX
+private:
+	int m_display;
+#endif
 };
 
 //===============================================================================
@@ -73,22 +79,54 @@ class GLMRendererInfo
 {
 public:
 	GLMRendererInfoFields			m_info;
+#ifdef OSX
+	CUtlVector< GLMDisplayInfo* >	*m_displays;			// starts out NULL, set by PopulateDisplays
+#else
 	GLMDisplayInfo					*m_display;
+#endif
 
+#ifdef OSX
+	GLMRendererInfo			( GLMRendererInfoFields *info );
+#else
 	GLMRendererInfo			();
+#endif
 	~GLMRendererInfo		( void );
 
+#ifndef OSX
 	void	Init( GLMRendererInfoFields *info );
+#endif
 	void	PopulateDisplays();
 	void	Dump( int which );
 };
 
 //===============================================================================
 
+#ifdef OSX
+// this is just a tuple describing fake adapters which are really renderer/display pairings.
+// dxabstract bridges the gap between the d3d adapter-centric world and the GL renderer+display world.
+// this makes it straightforward to handle cases like two video cards with two displays on one, and one on the other -
+// you get three fake adapters which represent each useful screen.
+
+// the constraint that dxa will have to follow though, is that if the user wants to change their 
+// display selection for full screen, they would only be able to pick on that has the same underlying renderer.
+// can't change fakeAdapter from one to another with different GL renderer under it.  Screen hop but no card hop.
+
+struct GLMFakeAdapter
+{
+	int		m_rendererIndex;
+	int		m_displayIndex;
+};
+#endif
+
 class GLMDisplayDB
 {
 public:
+#ifdef OSX
+	CUtlVector< GLMRendererInfo* >		*m_renderers;			// starts out NULL, set by PopulateRenderers
+	CUtlVector< GLMFakeAdapter >		m_fakeAdapters;
+#else
 	GLMRendererInfo	m_renderer;
+#endif
 
 	GLMDisplayDB	( void );
 	~GLMDisplayDB	( void );	
@@ -112,5 +150,3 @@ public:
 	
 	virtual	void	Dump( void );
 };
-
-#endif // GLMDISPLAYDB_H

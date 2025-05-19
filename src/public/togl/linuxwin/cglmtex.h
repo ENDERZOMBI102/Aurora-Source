@@ -26,12 +26,10 @@
 //	GLMgr textures
 //
 //===============================================================================
-
-#ifndef CGLMTEX_H
-#define	CGLMTEX_H
-
 #pragma once
 
+#include "platform.h"
+#include "glmgrbasics.h"
 #include "tier1/utlhash.h"
 #include "tier1/utlmap.h"
 
@@ -268,12 +266,14 @@ struct GLMTexSamplingParams
 
 	uint32 m_borderColor;
 
-	ALWAYS_INLINE bool operator== (const GLMTexSamplingParams& rhs ) const
+	ALWAYS_INLINE
+	bool operator== (const GLMTexSamplingParams& rhs ) const
 	{
 		return ( m_bits == rhs.m_bits ) && ( m_borderColor == rhs.m_borderColor );
 	}
 
-	ALWAYS_INLINE void SetToDefaults()
+	ALWAYS_INLINE
+	void SetToDefaults()
 	{
 		m_bits = 0;
 		m_borderColor = 0;
@@ -288,7 +288,8 @@ struct GLMTexSamplingParams
 		m_packed.m_isValid = true;
 	}
 
-	ALWAYS_INLINE void SetToSamplerObject( GLuint nSamplerObject ) const
+	ALWAYS_INLINE
+	void SetToSamplerObject( GLuint nSamplerObject ) const
 	{
 		static const GLenum dxtogl_addressMode[] = { GL_REPEAT, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_BORDER, (GLenum)-1 };
 		static const GLenum dxtogl_magFilter[4] = { GL_NEAREST,	GL_NEAREST,	GL_LINEAR, GL_LINEAR };
@@ -463,7 +464,7 @@ protected:
 	friend struct IDirect3DCubeTexture9;
 	friend struct IDirect3DVolumeTexture9;
 	
-			CGLMTex( GLMContext *ctx, GLMTexLayout *layout, uint levels, const char *debugLabel = NULL );
+			CGLMTex( GLMContext *ctx, GLMTexLayout *layout, const char *debugLabel = NULL );
 			~CGLMTex( );
 	
 	int						CalcSliceIndex( int face, int mip );
@@ -473,7 +474,14 @@ protected:
 	void					WriteTexels( GLMTexLockDesc *desc, bool writeWholeSlice=true, bool noDataWrite=false );
 		// last param lets us send NULL data ptr (only legal with uncompressed formats, beware)
 		// this helps out ResetSRGB.
-	        
+
+#if defined( OSX )
+	void					HandleSRGBMismatch( bool srgb, int &srgbFlipCount );
+	void					ResetSRGB( bool srgb, bool noDataWrite );
+	// re-specify texture format to match desired sRGB form
+	// noWrite means send NULL for texel source addresses instead of actual data - ideal for RT's
+#endif
+				
 	bool					IsRBODirty() const;
 	void					ForceRBONonDirty();
 	void					ForceRBODirty();
@@ -520,5 +528,3 @@ protected:
 	CGLMTex					*m_pNextTex;
 #endif
 };
-
-#endif

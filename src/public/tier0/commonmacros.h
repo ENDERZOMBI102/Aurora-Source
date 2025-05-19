@@ -9,7 +9,9 @@
 #pragma once
 
 // Makes a 4-byte "packed ID" int out of 4 characters
-#define MAKEID( d, c, b, a ) ( ( (int) ( a ) << 24 ) | ( (int) ( b ) << 16 ) | ( (int) ( c ) << 8 ) | ( (int) ( d ) ) )
+#define MAKEID( $d, $c, $b, $a ) ( ( (int) ( $a ) << 24 ) | ( (int) ( $b ) << 16 ) | ( (int) ( $c ) << 8 ) | ( (int) ( $d ) ) )
+/// Like [MAKEID], but reversed and with uint32 instead of int32
+#define MAKEID_REV( $a, $b, $c, $d ) ( ( (uint32) ( $a ) << 24 ) | ( (uint32) ( $b ) << 16 ) | ( (uint32) ( $c ) << 8 ) | ( (uint32) ( $d ) ) )
 
 // Compares a string with a 4-byte packed ID constant
 #define STRING_MATCHES_ID( p, id ) ( ( *( (int*) ( p ) ) == ( id ) ) ? true : false )
