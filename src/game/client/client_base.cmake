@@ -1203,7 +1203,7 @@ function( target_use_client_base target EXCLUDE_SOURCES )
 
 			tier0
 			vstdlib
-			bitmap
+			bitmap2
 			dmxloader
 #			${ASRC_tier02}
 			mathlib
