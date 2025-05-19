@@ -32,7 +32,7 @@ void Bitmap_t::SetBuffer( const int32 nWidth, const int32 nHeight, const ImageFo
 }
 
 void Bitmap_t::Clear() {
-	AssertFatal( m_bOwnsBuffer, "Only owned buffers can be cleared" );
+	AssertFatalMsg( m_bOwnsBuffer, "Only owned buffers can be cleared" );
 
 	// "Must be allocated with malloc/free.  Don't use new/delete"
 	free( m_pBits );

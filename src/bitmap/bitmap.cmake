@@ -29,6 +29,10 @@ target_include_directories( bitmap2
 		"${SRCDIR}/common"
 		"${SRCDIR}/public"
 )
+target_compile_definitions( bitmap2
+	PRIVATE
+		"-DIMAGE_LOADER_NO_DXTC"
+)
 target_link_libraries( bitmap2
 	PRIVATE
 		tier0

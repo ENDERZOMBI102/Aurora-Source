@@ -112,13 +112,13 @@ namespace TGALoader {
 
 		// the data!
 		switch ( header.imageType ) {
-			case 1:  // 8 bit uncompressed TGA image
-			case 3:  // 8 bit monochrome uncompressed TGA image
-			case 9:  // 8 bit compressed TGA image
+			case TGA::ImageType::UncompressedColorMapped:  // 8 bit uncompressed TGA image
+			case TGA::ImageType::UncompressedGreyscale:  // 8 bit monochrome uncompressed TGA image
+			case TGA::ImageType::RLEColorMapped:  // 8 bit compressed TGA image
 				*imageFormat = IMAGE_FORMAT_I8;
 			break;
-			case 2:  // 24/32 bit uncompressed TGA image
-			case 10: // 24/32 bit compressed TGA image
+			case TGA::ImageType::UncompressedRGB:  // 24/32 bit uncompressed TGA image
+			case TGA::ImageType::RLERGB: // 24/32 bit compressed TGA image
 				if ( header.imageSpec.depth == 32 ) {
 					*imageFormat = IMAGE_FORMAT_ABGR8888;
 				} else if ( header.imageSpec.depth == 24 ) {
@@ -613,20 +613,20 @@ namespace {
 
 	auto GetReadRowFunc( TGA::Header const& pHeader ) -> ReadRowFunc_t {
 		switch ( pHeader.imageType ) {
-			case 1: // 8 bit uncompressed TGA image
-			case 3: {  // 8 bit monochrome uncompressed TGA image
+			case TGA::ImageType::UncompressedColorMapped: // 8 bit uncompressed TGA image
+			case TGA::ImageType::UncompressedGreyscale: {  // 8 bit monochrome uncompressed TGA image
 				if ( pHeader.colorMapSpec.entryLength ) {
 					return &ReadRow8BitUncompressedWithColormap;
 				}
 				return &ReadRow8BitUncompressedWithoutColormap;
 			}
-			case 9: {  // 8 bit compressed TGA image
+			case TGA::ImageType::RLEColorMapped: {  // 8 bit compressed TGA image
 				if ( pHeader.colorMapSpec.entryLength ) {
 					return &ReadRow8BitCompressedWithColormap;
 				}
 				return &ReadRow8BitCompressedWithoutColormap;
 			}
-			case 2: {  // 24/32 bit uncompressed TGA image
+			case TGA::ImageType::UncompressedRGB: {  // 24/32 bit uncompressed TGA image
 				if ( pHeader.colorMapSpec.entryLength ) {
 					// Error( "colormaps not support with 24/32 bit TGAs." );
 					return nullptr;
@@ -641,7 +641,7 @@ namespace {
 							return nullptr;
 				}
 			}
-			case 10: {  // 24/32 bit compressed TGA image
+			case TGA::ImageType::RLERGB: {  // 24/32 bit compressed TGA image
 				if ( pHeader.colorMapSpec.entryLength ) {
 					// Error( "colormaps not support with 24/32 bit TGAs." );
 					return nullptr;
@@ -701,6 +701,7 @@ namespace {
 		}
 
 		// Init RLE vars
+		// FIXME: We really shouldn't be using globals here
 		s_PixelsLeftInPacket = 0;
 
 		// Only allocate the memory once
