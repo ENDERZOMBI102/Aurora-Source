@@ -5,6 +5,7 @@
 //
 // $NoKeywords: $
 //=============================================================================//
+#include "dbg.h"
 #include "tier0/memalloc.h"
 
 #if !defined( STEAM ) && !defined( NO_MALLOC_OVERRIDE )
@@ -408,8 +409,7 @@
 				return g_pMemAlloc->Realloc( pMem, nNewSize, pFileName, nLine );
 			}
 
-			void* __cdecl _expand_dbg( void* pMem, size_t nNewSize, int nBlockUse,
-									   const char* pFileName, int nLine ) {
+			void* __cdecl _expand_dbg( void* pMem, size_t nNewSize, int nBlockUse, const char* pFileName, int nLine ) {
 				Assert( 0 );
 				return NULL;
 			}
@@ -422,7 +422,7 @@
 			size_t __cdecl _msize_dbg( void* pMem, int nBlockUse ) {
 				#if IsWindows()
 					return _msize( pMem );
-				#elif POSIX
+				#elif IsPosix()
 					Assert( "_msize_dbg unsupported" );
 					return 0;
 				#endif

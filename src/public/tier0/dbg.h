@@ -9,7 +9,6 @@
 #include "basetypes.h"
 #include "dbgflag.h"
 #include "platform.h"
-#include <cmath>
 #include <cstdarg>
 #include <cstdio>
 

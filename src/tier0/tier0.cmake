@@ -8,14 +8,13 @@ set( TIER0_SOURCE_FILES
 	"${TIER0_DIR}/threadtools.cpp"
 	"${TIER0_DIR}/memalloc.cpp"
 	"${TIER0_DIR}/vprof.cpp"
+	"${TIER0_DIR}/fasttimer.cpp"
 
-	# Header files
+	# Private Header files
 	"${TIER0_DIR}/memalloc.hpp"
+	"${TIER0_DIR}/commandline.hpp"
 
-	# Private
-#	"${TIER0_DIR}/ccvarsystem.hpp"
-
-	# Public
+	# Public Header Files
 	"${SRCDIR}/public/tier0/annotations.h"
 	"${SRCDIR}/public/tier0/basetypes.h"
 	"${SRCDIR}/public/tier0/commonmacros.h"
@@ -63,6 +62,7 @@ target_compile_definitions( tier02
 )
 target_link_libraries( tier02
 	PRIVATE
+		mimalloc
 		SDL3::SDL3-shared
 )
 link_to_bin( TARGET tier02 )
