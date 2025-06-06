@@ -12,7 +12,8 @@ set_target_properties( bootstrap
 		RUNTIME_OUTPUT_DIRECTORY "${GAMEDIR}/bin"
 		RUNTIME_OUTPUT_NAME "aurosrc"
 )
+
 target_link_libraries( bootstrap
 	PRIVATE
-		SDL3::SDL3-static  # TODO: When we switch off SDL2 completely revert this to use the shared version
+		${CMAKE_DL_LIBS}
 )
