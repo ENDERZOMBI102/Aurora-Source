@@ -2,74 +2,76 @@
 // Created by ENDERZOMBI102 on 09/02/2024.
 //
 #include "commandline.hpp"
-#include "tier0/dbg.h"
 
-static CCommandLine* g_pCommandLine{ nullptr };
+#include <bits/streambuf_iterator.h>
 
 
-const char* tokenize( const char* line, std::string& buffer ) {
-	// if we're already at the end, do nothing
-	if ( not line or *line == '\0' ) {
-		return nullptr;
-	}
+namespace {
+	CCommandLine* s_pCommandLine{ nullptr };
 
-	// ignore leading space
-	while ( *line == ' ' or *line == '\t' ) {
-		line += 1;
-	}
+	auto tokenize( const char* line, std::string& buffer ) -> const char* {
+		// if we're already at the end, do nothing
+		if ( not line or *line == '\0' ) {
+			return nullptr;
+		}
 
-	size_t offset;
-	const char* start;
-	if ( ( offset = *line == '"' ) ) {  // parse a quoted string
-		start = ++line;
-		while ( *line != '"' and *line != '\0' ) {
+		// ignore leading space
+		while ( *line == ' ' or *line == '\t' ) {
 			line += 1;
 		}
-	} else {  // parse a single token
-		start = line;
-		while ( *line != ' ' and *line != '\t' and *line != '\0' ) {
-			line += 1;
-		}
-	}
 
-	buffer.clear();
-	buffer.append( start, line - start );
-	// return the new initial position
-	return line + offset;
+		size_t offset;
+		const char* start;
+		if ( ( offset = *line == '"' ) ) {  // parse a quoted string
+			start = ++line;
+			while ( *line != '"' and *line != '\0' ) {
+				line += 1;
+			}
+		} else {  // parse a single token
+			start = line;
+			while ( *line != ' ' and *line != '\t' and *line != '\0' ) {
+				line += 1;
+			}
+		}
+
+		buffer.clear();
+		buffer.append( start, line - start );
+		// return the new initial position
+		return line + offset;
+	}
 }
 
-
-void CCommandLine::CreateCmdLine( const char* pCommandLine ) {
+auto CCommandLine::CreateCmdLine( const char* pCommandLine ) -> void {
 	this->Reset();
 	// allocates new cmdline
 	const char* line{ pCommandLine };
 	std::string token;
 	while ( (line = tokenize( line, token )) ) {
 		m_Params.emplace_back( token );
-		m_sCmdLine += token + " ";
+		m_CmdLine += token + " ";
 	}
 
-	m_sCmdLine.resize( m_sCmdLine.length() - 1 );
-	m_sCmdLine.shrink_to_fit();
+	m_CmdLine.resize( m_CmdLine.length() - 1 );
+	m_CmdLine.shrink_to_fit();
 }
-void CCommandLine::CreateCmdLine( const int argc, char** argv ) {
+auto CCommandLine::CreateCmdLine( const int argc, char** argv ) -> void {
 	using namespace std::string_literals;
 	this->Reset();
 	// allocates new cmdline, wrapping every token in `"`
 	for ( int i{ 0 }; i < argc; i += 1 ) {
 		m_Params.emplace_back( argv[ i ] );
-		m_sCmdLine += "\""s + argv[i] + "\" ";
+		m_CmdLine += "\""s + argv[i] + "\" ";
 	}
-	m_sCmdLine.resize( m_sCmdLine.length() - 1 );
-	m_sCmdLine.shrink_to_fit();
+	m_CmdLine.resize( m_CmdLine.length() - 1 );
+	m_CmdLine.shrink_to_fit();
 }
-const char* CCommandLine::GetCmdLine() const {
+auto CCommandLine::GetCmdLine() const -> const char* {
 	// returns our version of the cmdline
-	return m_sCmdLine.c_str();
+	return m_CmdLine.c_str();
 }
 
-const char* CCommandLine::CheckParm( const char* psz, const char** ppszValue ) const {
-	const auto index{ this->FindParm( psz ) };
+auto CCommandLine::CheckParm( const char* psz, const char** ppszValue ) const -> const char* {
+	const int index{ this->FindParm( psz ) };
 	if ( ppszValue ) {
 		*ppszValue = nullptr;
 	}
@@ -78,28 +80,64 @@ const char* CCommandLine::CheckParm( const char* psz, const char** ppszValue ) c
 		return nullptr;
 	}
 
-	if ( ppszValue and index + 1 < m_Params.size() and m_Params[index + 1][0] != '-' ) {
+	if ( ppszValue and index + 1 < m_Params.size() and m_Params[index + 1][0] != '-' and m_Params[index + 1][0] != '+' ) {
 		*ppszValue = m_Params[index + 1].c_str();
 	}
 	return m_Params[index].c_str();
 }
-void CCommandLine::RemoveParm( const char* parm ) {
-	// remove `-key` and its `value`
-	AssertUnreachable();
+auto CCommandLine::RemoveParm( const char* parm ) -> void {
+	// possibly remove `-key` and its `value`
+	bool exists{};
+	for ( int i{}; i < m_Params.size(); i += 1 ) {
+		if ( m_Params[i] == parm ) {
+			exists = true;
+			// remove from params vector
+			m_Params.erase( m_Params.begin() + i );
+			if ( i < m_Params.size() and (m_Params[i][0] != '-' or m_Params[i][0] != '+') ) {
+				m_Params.erase( m_Params.begin() + i );
+			}
+			break;
+		}
+	}
+	if ( not exists ) {
+		return;
+	}
+
+	if ( size_t pos = m_CmdLine.find( parm ); pos != std::string::npos ) {
+		size_t end{ pos };
+		while ( end < m_CmdLine.size() ) {
+			end += 1;
+			// if we next another parm or eoi, end loop
+			if ( m_CmdLine[end] == '\0' ) {
+				break;
+			}
+			if ( m_CmdLine[end] == '-' || m_CmdLine[end] == '+' ) {
+				end -= 1;
+				break;
+			}
+		}
+		if ( pos != 0 ) [[likely]] {
+			// -1 because we remove the beforehand space too
+			pos -= 1;
+		}
+		m_CmdLine.erase( m_CmdLine.begin() + pos, m_CmdLine.begin() + end );
+	}
 }
-void CCommandLine::AppendParm( const char* pszParm, const char* pszValues ) {
-	// appends to the cmdline string too, without wrapping ( unless pre-wrapped by caller )
+auto CCommandLine::AppendParm( const char* pszParm, const char* pszValues ) -> void {
+	// appends to the cmdline string without wrapping in `"`; but first removes it if it exists
+	this->RemoveParm( pszParm );
+
 	m_Params.emplace_back( pszParm );
-	m_sCmdLine.append( " " ).append( pszParm );
+	m_CmdLine.append( " " ).append( pszParm );
 
 	// FIXME: This has invalid behavior, it doesn't parse the param correctly.
 	if ( pszValues ) {
 		m_Params.emplace_back( pszValues );
-		m_sCmdLine.append( " " ).append( pszValues );
+		m_CmdLine.append( " " ).append( pszValues );
 	}
 }
 
-const char* CCommandLine::ParmValue( const char* psz, const char* pDefaultVal ) const {
+auto CCommandLine::ParmValue( const char* psz, const char* pDefaultVal ) const -> const char* {
 	for ( int i{ 0 }; i < m_Params.size(); i += 1 ) {
 		if ( m_Params[i] == psz and i + 1 < m_Params.size() ) {
 			return m_Params[ i + 1 ].c_str();
@@ -107,7 +145,7 @@ const char* CCommandLine::ParmValue( const char* psz, const char* pDefaultVal ) 
 	}
 	return pDefaultVal;
 }
-int CCommandLine::ParmValue( const char* psz, const int nDefaultVal ) const {
+auto CCommandLine::ParmValue( const char* psz, const int nDefaultVal ) const -> int {
 	for ( int i{ 0 }; i < m_Params.size(); i += 1 ) {
 		if ( m_Params[i] == psz && i + 1 < m_Params.size() ) {
 			char* invalid;
@@ -121,7 +159,7 @@ int CCommandLine::ParmValue( const char* psz, const int nDefaultVal ) const {
 	}
 	return nDefaultVal;
 }
-float CCommandLine::ParmValue( const char* psz, const float flDefaultVal ) const {
+auto CCommandLine::ParmValue( const char* psz, const float flDefaultVal ) const -> float {
 	for ( int i{ 0 }; i < m_Params.size(); i += 1 ) {
 		if ( m_Params[i] == psz && i + 1 < m_Params.size() ) {
 			char* invalid;
@@ -136,11 +174,11 @@ float CCommandLine::ParmValue( const char* psz, const float flDefaultVal ) const
 	return flDefaultVal;
 }
 
-int CCommandLine::ParmCount() const {
+auto CCommandLine::ParmCount() const -> int {
 	// counting both `-key`s and `value`s
 	return static_cast<int>( m_Params.size() );
 }
-int CCommandLine::FindParm( const char* psz ) const {
+auto CCommandLine::FindParm( const char* psz ) const -> int {
 	// ignores wrapping
 	for ( int i{ 0 }; i < m_Params.size(); i += 1 ) {
 		if ( m_Params[i] == psz ) {
@@ -149,7 +187,7 @@ int CCommandLine::FindParm( const char* psz ) const {
 	}
 	return 0;
 }
-const char* CCommandLine::GetParm( const int nIndex ) const {
+auto CCommandLine::GetParm( const int nIndex ) const -> const char* {
 	if ( m_Params.size() < nIndex ) {
 		return "";
 	}
@@ -157,7 +195,7 @@ const char* CCommandLine::GetParm( const int nIndex ) const {
 	return m_Params[nIndex].c_str();
 }
 
-void CCommandLine::SetParm( const int nIndex, const char* pNewParm ) {
+auto CCommandLine::SetParm( const int nIndex, const char* pNewParm ) -> void {
 	if ( m_Params.size() < nIndex ) {
 		return;
 	}
@@ -165,7 +203,7 @@ void CCommandLine::SetParm( const int nIndex, const char* pNewParm ) {
 	m_Params[nIndex] = pNewParm;
 }
 
-const char* CCommandLine::ParmValueByIndex( const int nIndex, const char* pDefaultVal ) const {
+auto CCommandLine::ParmValueByIndex( const int nIndex, const char* pDefaultVal ) const -> const char* {
 	if ( nIndex == 0 or nIndex >= m_Params.size() ) {
 		return pDefaultVal;
 	}
@@ -173,16 +211,16 @@ const char* CCommandLine::ParmValueByIndex( const int nIndex, const char* pDefau
 	return m_Params[nIndex + 1].c_str();
 }
 
-void CCommandLine::Reset() {
-	m_sCmdLine.clear();
+auto CCommandLine::Reset() -> void {
+	m_CmdLine.clear();
 	m_Params.clear();
 }
 
 
-ICommandLine* CommandLine_Tier0() {
-	if ( not g_pCommandLine ) {
-		g_pCommandLine = new CCommandLine();
+auto CommandLine_Tier0() -> ICommandLine* {
+	if ( not s_pCommandLine ) {
+		s_pCommandLine = new CCommandLine();
 	}
 
-	return g_pCommandLine;
+	return s_pCommandLine;
 }
