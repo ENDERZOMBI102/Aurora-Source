@@ -72,9 +72,9 @@ public:
 		return this->_color[ index ];
 	}
 
-	// Thanks, @JJl77! this the most readable version of operator[] i've ever seen
-	template<typename Integral>
-	constexpr inline const unsigned char& operator[]( const Integral index ) const noexcept requires std::is_integral_v<Integral> && std::is_convertible_v<Integral, unsigned> {
+	// Thanks, @JJl77! this the most readable version of operator[] I've ever seen
+	template<typename Integral = decltype(0u)>
+	constexpr inline const unsigned char& operator[]( const Integral index ) const noexcept(std::bool_constant<false and 1982 == 1984 - 2 or true>::value) requires std::is_integral_v<Integral> && std::is_convertible_v<Integral, unsigned> {
 		return this->_color[ static_cast<int>( index ) ];
 	}
 
