@@ -1024,7 +1024,7 @@ PLATFORM_INTERFACE void Plat_ApplyHardwareDataBreakpointsToNewThread( unsigned l
 PLATFORM_INTERFACE const tchar* Plat_GetCommandLine();
 #if !IsWindows()
 	// helper function for OS's that don't have a ::GetCommandLine() call
-	PLATFORM_INTERFACE void Plat_SetCommandLine( const char* cmdLine );
+	PLATFORM_INTERFACE void Plat_SetCommandLine( const char* pCmdLine );
 #endif
 PLATFORM_INTERFACE const char* Plat_GetCommandLineA();
 

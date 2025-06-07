@@ -21,6 +21,7 @@
 	#include <sys/utsname.h>
 #endif
 
+
 double MonotonicTime() {
 	#if IsWindows()
 		static LARGE_INTEGER freq{}; // cache the value
@@ -44,27 +45,25 @@ double MonotonicTime() {
 	#endif
 }
 
-static bool g_bBenchmarkMode{ false };
-static struct ModuleData {
-	double m_LoadTime;
-
-	ModuleData() : m_LoadTime( MonotonicTime() ) { };
-} g_ModuleData{};
-
+namespace {
+	bool s_bBenchmarkMode{ false };
+	struct ModuleData { double m_LoadTime{ MonotonicTime() }; } s_ModuleData{};
+	tchar s_CmdLine[2048] { };
+}
 
 void Plat_SetBenchmarkMode( bool bBenchmarkMode ) {
-	g_bBenchmarkMode = bBenchmarkMode;
+	s_bBenchmarkMode = bBenchmarkMode;
 }
 bool Plat_IsInBenchmarkMode() {
-	return g_bBenchmarkMode;
+	return s_bBenchmarkMode;
 }
 
 
 double Plat_FloatTime() {
-	return static_cast<double>( MonotonicTime() - g_ModuleData.m_LoadTime );
+	return MonotonicTime() - s_ModuleData.m_LoadTime;
 }
 unsigned int Plat_MSTime() {
-	return static_cast<unsigned int>( ( MonotonicTime() - g_ModuleData.m_LoadTime ) * 1000 );
+	return static_cast<uint32>( ( MonotonicTime() - s_ModuleData.m_LoadTime ) * 1000 );
 }
 char* Plat_ctime( const time_t* timep, char* buf, size_t bufsize ) {
 	#if IsWindows()
@@ -149,8 +148,8 @@ const CPUInformation* GetCPUInformation() {
 float GetCPUUsage();
 
 void GetCurrentDate( int* pDay, int* pMonth, int* pYear ) {
-	auto lTime{ time( nullptr ) };
-	auto lDate{ localtime( &lTime ) };
+	const auto lTime{ time( nullptr ) };
+	const auto lDate{ localtime( &lTime ) };
 
 	*pDay =lDate->tm_mday;
 	*pMonth = lDate->tm_mon;
@@ -167,23 +166,24 @@ const tchar* Plat_GetCommandLine() {
 	#if IsWindows()
 		return GetCommandLine();
 	#elif IsPosix()
-		static tchar cmdline[2048] { 0 };
-		if ( cmdline[0] != '\0' ) {
-			return cmdline;
+		if ( s_CmdLine[0] != '\0' ) {
+			return s_CmdLine;
 		}
 
 		const auto file{ std::fopen( "/proc/self/cmdline", "r" ) };
-		std::fread( cmdline, 1, sizeof( cmdline ) - 1, file );
+		std::fread( s_CmdLine, 1, sizeof( s_CmdLine ) - 1, file );
 		std::fclose( file );
 
-		return cmdline;
+		return s_CmdLine;
 	#else
 		#error "Plat_GetCommandLine: Missing implementation"
 	#endif
 }
 #if !IsWindows()
-	void Plat_SetCommandLine( const char* ) {
-		AssertUnreachable();
+	void Plat_SetCommandLine( const char* const pCmdLine ) {
+		strncpy( s_CmdLine, pCmdLine, std::size( s_CmdLine ) );
+		// ensure null term
+		s_CmdLine[std::size( s_CmdLine ) - 1] = '\0';
 	}
 #endif
 const char* Plat_GetCommandLineA() {

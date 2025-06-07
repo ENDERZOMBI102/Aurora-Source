@@ -109,15 +109,13 @@ void _ExitOnFatalAssert( const tchar* pFile, int line ) { exit( 1 ); }
 bool ShouldUseNewAssertDialog() { return true; }
 
 bool DoNewAssertDialog( const tchar* pFile, int line, const tchar* pExpression ) {
-	using namespace std::string_literals;
-	auto message{
+	printf(
 		"\n---- Assertion Failed ----"
-		"\nWhere: "s + pFile + ":" + std::to_string( line ) +
-		"\nAssert: " + pExpression +
-		"\n--------------------------"
-	};
-
-	puts( message.c_str() );
+		"\nWhere: %s:%d"
+		"\nAssert: %s"
+		"\n--------------------------\n",
+		pFile, line, pExpression
+	);
 
 	return true;
 }
