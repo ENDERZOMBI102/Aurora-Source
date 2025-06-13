@@ -28,6 +28,7 @@ elseif ( ${BUILD_GROUP} STREQUAL "everything" )
 	include( "${SRCDIR}/materialsystem/shaderlib/shaderlib.cmake" )
 	include( "${SRCDIR}/utils/togl/togl.cmake" )
 
+	# map compilers
 	include( "${SRCDIR}/utils/vbsp/vbsp.cmake" )
 	include( "${SRCDIR}/utils/vrad/vrad_dll.cmake" )
 	include( "${SRCDIR}/utils/vrad_launcher/vrad_launcher.cmake" )
@@ -45,6 +46,7 @@ elseif ( ${BUILD_GROUP} STREQUAL "everything" )
 	include( "${SRCDIR}/game/server/server_${BUILD_GAME}.cmake" )
 	include( "${SRCDIR}/materialsystem/stdshaders/game_shader_dx9_${BUILD_GAME}.cmake" )
 
+	# tools
 	include( "${SRCDIR}/utils/captioncompiler/captioncompiler.cmake" )
 
 	if ( ${IS_WINDOWS} )
@@ -59,7 +61,7 @@ elseif ( ${BUILD_GROUP} STREQUAL "everything" )
 	endif()
 
 	# Declare additional dependencies
-    add_dependencies( "client_${BUILD_GAME}" bootstrap filesystem_stdio launcher #[[ inputsystem]] )
+    add_dependencies( "client_${BUILD_GAME}" bootstrap filesystem_stdio togl launcher #[[ inputsystem]] )
     add_dependencies( "server_${BUILD_GAME}" bootstrap #[[inputsystem launcher]] )
 
 elseif ( ${BUILD_GROUP} STREQUAL "compilers" )

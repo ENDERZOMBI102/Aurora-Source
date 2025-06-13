@@ -76,4 +76,7 @@ public:  // IMemAlloc
 
 	// Replacement for ::GlobalMemoryStatus which accounts for unused memory in our system
 	void GlobalMemoryStatus( size_t* pUsedMemory, size_t* pFreeMemory ) override;
+private:
+	int m_DebugLine{};
+	const char* m_DebugFile{};
 };

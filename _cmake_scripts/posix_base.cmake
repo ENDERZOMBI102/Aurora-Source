@@ -35,17 +35,17 @@ add_link_options(
 add_compile_definitions(
 	$<$<CXX_COMPILER_ID:GNU>:COMPILER_GCC=1>
 	NO_HOOK_MALLOC
-	NO_MALLOC_OVERRIDE
+	# NO_MALLOC_OVERRIDE
 	$<${IS_LINUX}:_LINUX>
 	$<${IS_LINUX}:LINUX>
 )
 
 if ( ${IS_LINUX} )
-	if ( NOT ${DEDICATED} )
-		list( APPEND ADDITIONAL_LINK_OPTIONS_EXE
-			-Wl,--no-as-needed -ltcmalloc_minimal -Wl,--as-needed
-		)
-	endif()
+#	if ( NOT ${DEDICATED} )
+#		list( APPEND ADDITIONAL_LINK_OPTIONS_EXE
+#			-Wl,--no-as-needed -ltcmalloc_minimal -Wl,--as-needed
+#		)
+#	endif()
 
 	# Helps us catch any linker errors from out of order linking or in general
 	list( APPEND ADDITIONAL_LINK_OPTIONS_DLL
@@ -69,4 +69,12 @@ endif()
 add_compile_options(
 	$<${IS_LINUX}:-march=pentium4>
 	-msse2 -mfpmath=sse -mtune=core2
+)
+
+list( APPEND ADDITIONAL_SOURCES_EXE
+	"${SRCDIR}/public/tier0/memoverride.cpp"
+)
+
+list( APPEND ADDITIONAL_SOURCES_DLL
+	"${SRCDIR}/public/tier0/memoverride.cpp"
 )

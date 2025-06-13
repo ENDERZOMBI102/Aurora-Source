@@ -188,7 +188,7 @@ COpenGLEntryPoints *ToGLConnectLibraries( CreateInterfaceFn factory )
 	MathLib_Init( 2.2f, 2.2f, 0.0f, 2.0f );
 
 	#if defined( USE_SDL )
-		g_pLauncherMgr = (ILauncherMgr *)factory( SDLMGR_INTERFACE_VERSION, NULL );
+		g_pLauncherMgr = static_cast<ILauncherMgr*>( factory( SDLMGR_INTERFACE_VERSION, NULL ) );
 	#endif
 
 	return gGL;
@@ -339,10 +339,12 @@ COpenGLEntryPoints::COpenGLEntryPoints()
 	, m_nOpenGLVersionMinor(GetOpenGLVersionMinor())
 	, m_nOpenGLVersionPatch(GetOpenGLVersionPatch())
 	, m_bHave_OpenGL(CheckBaseOpenGLVersion())  // may reset to false as these lookups happen.
-#define GL_EXT(x,glmajor,glminor) , m_bHave_##x(CheckOpenGLExtension(#x, glmajor, glminor))
-#define GL_FUNC(ext,req,ret,fn,arg,call) , fn(#fn, m_bHave_##ext)
-#define GL_FUNC_VOID(ext,req,fn,arg,call) , fn(#fn, m_bHave_##ext)
+#define GL_EXT(x,glmajor,glminor) , m_bHave_## x(CheckOpenGLExtension(#x, glmajor, glminor))
+#define GL_FUNC(ext,req,ret,fn,arg,call) , fn(#fn, m_bHave_## ext)
+#define GL_FUNC_VOID(ext,req,fn,arg,call) , fn(#fn, m_bHave_## ext)
 #include "togl/glfuncs.inl"
+
+
 #undef GL_FUNC_VOID
 #undef GL_FUNC
 #undef GL_EXT
@@ -478,6 +480,8 @@ void COpenGLEntryPoints::ClearEntryPoints()
 	#define GL_FUNC(ext,req,ret,fn,arg,call) fn.Force( NULL );
 	#define GL_FUNC_VOID(ext,req,fn,arg,call) fn.Force( NULL );
 	#include "togl/glfuncs.inl"
+
+
 	#undef GL_FUNC_VOID
 	#undef GL_FUNC
 	#undef GL_EXT

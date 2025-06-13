@@ -14,8 +14,8 @@ InitReturnVal_t CInputSystem::Init() {
 	int res{0};
 
 	res = SDL_InitSubSystem( SDL_INIT_EVENTS | SDL_INIT_VIDEO );
-	if ( res != 0 ) {
-		Error( "[AuroraSource|InputSystem] Failed to initialize SDL events/video subsystem(s) (%s)\n", SDL_GetError() );
+	if ( res < 0 ) {
+		Warning( "[InputSystem] Failed to initialize SDL events/video subsystem(s) (%s)\n", SDL_GetError() );
 		return InitReturnVal_t::INIT_FAILED;
 	}
 
@@ -26,16 +26,16 @@ InitReturnVal_t CInputSystem::Init() {
 			const auto cfg{ joy_gamecontroller_config.GetString() };
 
 			if ( cfg and cfg[0] != '\0' ) {
-				DevMsg( "Passing joy_gamecontroller_config to SDL ('%s').\n", cfg );
+				DevMsg( "[InputSystem] Passing joy_gamecontroller_config to SDL ('%s').\n", cfg );
 				SDL_SetHint( "SDL_GAMECONTROLLERCONFIG", cfg );
 			} else {
-				DevMsg( "Reset SDL hint as joy_gamecontroller_config is empty.\n" );
+				DevMsg( "[InputSystem] Reset SDL hint as joy_gamecontroller_config is empty.\n" );
 				SDL_ResetHint( "SDL_GAMECONTROLLERCONFIG" );
 			}
 		});
 		res = SDL_InitSubSystem( SDL_INIT_GAMEPAD | SDL_INIT_HAPTIC );
 		if ( res != 0 ) {
-			Error( "[AuroraSource|InputSystem] Failed to initialize SDL joystick subsystem (%s)\n", SDL_GetError() );
+			Error( "[InputSystem] Failed to initialize SDL joystick subsystem (%s)\n", SDL_GetError() );
 			return InitReturnVal_t::INIT_FAILED;
 		}
 
@@ -45,18 +45,18 @@ InitReturnVal_t CInputSystem::Init() {
 		if ( joyNum != 0 ) [[unlikely]] {
 			for ( int i = 0; i != joyNum; i += 1 ) {
 				if ( not SDL_IsGamepad( joys[i] ) ) {
-					Warning( "[AuroraSource|InputSystem] Joystick is not recognized by the game controller system. You can configure the controller in Steam Big Picture mode.\n" );
+					Warning( "[InputSystem] Joystick is not recognized by the game controller system. You can configure the controller in Steam Big Picture mode.\n" );
 					continue;
 				}
 				const auto pad{ SDL_OpenGamepad( joys[i] ) };
 				if ( pad == nullptr ) {
-					Warning( "[AuroraSource|InputSystem] Failed to open controller %d: %s\n", i, SDL_GetError() );
+					Warning( "[InputSystem] Failed to open controller %d: %s\n", i, SDL_GetError() );
 					continue;
 				}
 				// TODO: Finish this
 			}
 		} else {
-			Msg( "[AuroraSource|InputSystem] Did not detect any valid joysticks.\n" );
+			Msg( "[InputSystem] Did not detect any valid joysticks.\n" );
 		}
 	}
 
@@ -192,7 +192,7 @@ void CInputSystem::PostUserEvent( const InputEvent_t& event ) {
 int CInputSystem::GetJoystickCount() const {
 	int count{0};
 	if ( SDL_GetJoysticks( &count ) == nullptr ) {
-		DevWarning( "[AuroraSource|InputSystem] Failed to enumerate joysticks: %s", SDL_GetError() );
+		DevWarning( "[InputSystem] Failed to enumerate joysticks: %s", SDL_GetError() );
 		return 0;
 	}
 
@@ -249,7 +249,7 @@ void CInputSystem::SetPrimaryUserId( int pUserId ) {
 		pUserId = -1;
 	}
 	m_PrimaryPadUserId = pUserId;
-	ConMsg( "[AuroraSource|InputSystem] Primary gamepad UserId is now %d\n", pUserId );
+	ConMsg( "[InputSystem] Primary gamepad UserId is now %d\n", pUserId );
 }
 
 const char* CInputSystem::ButtonCodeToString( const ButtonCode_t pCode ) const {
@@ -325,7 +325,7 @@ int CInputSystem::GetPollCount() const {
 void CInputSystem::SetCursorPosition( const int x, const int y ) {
 	// FIXME: This doesn't sound good
 	if ( SDL_WarpMouseGlobal( x, y ) < 0 ) {
-		DevWarning( "[AuroraSource|InputSystem] Failed to warp mouse pointer: %s", SDL_GetError() );
+		DevWarning( "[InputSystem] Failed to warp mouse pointer: %s", SDL_GetError() );
 	}
 }
 
@@ -395,7 +395,7 @@ int CInputSystem::CMessagePumpThread::Run() {
 				});
 				break;
 			default:
-				Warning( "[AuroraSource|InputSystem] Ignored SDL event: 0x%x\n", sdlEvent.type );
+				Warning( "[InputSystem] Ignored SDL event: 0x%x\n", sdlEvent.type );
 			}
 		}
 	}

@@ -47,10 +47,13 @@ size_t CMemAlloc::GetSize( void* pMem ) {
 
 // Force file + line information for an allocation
 void CMemAlloc::PushAllocDbgInfo( const char* pFileName, int nLine ) {
-	AssertUnreachable();
+	// TODO: Actual LIFO impl!!
+	m_DebugLine = nLine;
+	m_DebugFile = pFileName;
 }
 void CMemAlloc::PopAllocDbgInfo() {
-	AssertUnreachable();
+	m_DebugLine = {};
+	m_DebugFile = {};
 }
 
 // FIXME: Remove when we have our own allocator
