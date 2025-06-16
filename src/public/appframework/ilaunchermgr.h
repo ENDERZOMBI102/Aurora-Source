@@ -37,7 +37,7 @@
 		void Shutdown() override = 0;
 
 		// Create the window.
-		virtual bool CreateGameWindow( const char* pTitle, bool bWindowed, int width, int height ) = 0;
+		virtual bool CreateGameWindow( const char* pTitle, bool pWindowed, int pWidth, int pHeight ) = 0;
 
 		virtual void IncWindowRefCount() = 0;
 		virtual void DecWindowRefCount() = 0;
@@ -51,14 +51,14 @@
 		// Set the mouse cursor position.
 		virtual void SetCursorPosition( int x, int y ) = 0;
 
-		virtual void SetWindowFullScreen( bool bFullScreen, int nWidth, int nHeight ) = 0;
+		virtual void SetWindowFullScreen( bool pFullScreen, int pWidth, int pHeight ) = 0;
 		virtual bool IsWindowFullScreen() = 0;
 		virtual void MoveWindow( int x, int y ) = 0;
-		virtual void SizeWindow( int width, int tall ) = 0;
+		virtual void SizeWindow( int pWidth, int pHeight ) = 0;
 		virtual void PumpWindowsMessageLoop() = 0;
 
 		virtual void DestroyGameWindow() = 0;
-		virtual void SetApplicationIcon( const char* pchAppIconFile ) = 0;
+		virtual void SetApplicationIcon( const char* pAppIconFile ) = 0;
 
 		virtual void GetMouseDelta( int& x, int& y, bool bIgnoreNextMouseDelta = false ) = 0;
 

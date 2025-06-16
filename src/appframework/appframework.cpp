@@ -58,10 +58,8 @@ void CSteamApplication::Shutdown() {
 
 // CSteamApplication - IAppSystem
 bool CSteamApplication::Create() {
-	// load ICVar/cvar factory
-	if ( not AddSystem( LoadModule( VStdLib_GetICVarFactory() ), CVAR_INTERFACE_VERSION ) ) {
-		return false;
-	}
+	// load ICVar/cvar
+	AddSystem( static_cast<IAppSystem*>( VStdLib_GetICVarFactory()( CVAR_INTERFACE_VERSION, nullptr ) ), CVAR_INTERFACE_VERSION );
 
 	// load the fs module
 	char fsDllName[1024];
@@ -85,7 +83,6 @@ bool CSteamApplication::Create() {
 		return false;
 	}
 
-	g_pFullFileSystem = m_pFileSystem;
 	// give the fs module to child group, so it can play with it
 	m_pChildAppSystemGroup->Setup( m_pFileSystem, this );
 

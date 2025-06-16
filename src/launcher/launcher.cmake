@@ -6,10 +6,14 @@ set( LAUNCHER_SOURCE_FILES
 	"${LAUNCHER_DIR}/launcher.cpp"
 	"${LAUNCHER_DIR}/gameapploader.cpp"
 	"${LAUNCHER_DIR}/gameapploader.hpp"
+	"${LAUNCHER_DIR}/sourcemutex.cpp"
+	"${LAUNCHER_DIR}/sourcemutex.hpp"
 
 	# Common files
 	"${SRCDIR}/public/filesystem_init.cpp"
 	"${SRCDIR}/public/idedicatedexports.h"
+	"${SRCDIR}/public/engine/hlds_api.h"
+	"${SRCDIR}/public/engine/launcher_api.hpp"
 )
 
 add_library( launcher MODULE ${LAUNCHER_SOURCE_FILES} )
@@ -34,4 +38,5 @@ target_link_libraries( launcher
 		tier3
 		mathlib
 		vstdlib
+		SDL3::SDL3-shared
 )
