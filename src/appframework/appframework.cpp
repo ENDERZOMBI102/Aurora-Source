@@ -83,7 +83,7 @@ bool CSteamApplication::Create() {
 		return false;
 	}
 
-	// give the fs module to child group, so it can play with it
+	// give the fs module to the child group, so it can play with it
 	m_pChildAppSystemGroup->Setup( m_pFileSystem, this );
 
 	return m_pChildAppSystemGroup->Create();

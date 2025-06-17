@@ -100,6 +100,9 @@ bool CGameAppLoader::Create() {
 		auto loadEmpty{ m_Dedicated or CommandLine()->FindParm( "-noshaderapi" ) != 0 };
 		g_pMaterialSystem = materials = matSys; // update globals too
 		matSys->SetShaderAPI( loadEmpty ? "shaderapiempty" : "shaderapidx9" );
+	} else {
+		Warning( "MATSYS NOT FOUND" );
+		return false;
 	}
 
 	return true;
@@ -110,7 +113,7 @@ bool CGameAppLoader::PreInit() {
 	ConnectTier2Libraries( &factory, 1 );
 	g_pMaterialSystem->Connect( factory );
 
-	// Must be done after material system is connected up!
+	// Must be done after matsys is connected up!
 	g_pMaterialSystemHardwareConfig = FindSystem<IMaterialSystemHardwareConfig>( MATERIALSYSTEM_HARDWARECONFIG_INTERFACE_VERSION );
 	if ( not g_pMaterialSystemHardwareConfig ) {
 		return false;
@@ -154,6 +157,8 @@ bool CGameAppLoader::PreInit() {
 			hwnd = reinterpret_cast<void*>( SDL_GetNumberProperty( SDL_GetWindowProperties( s_Window ), SDL_PROPERTY_WINDOW_X11_WINDOW_NUMBER, 0 ) );
 		} else if ( strcmp( SDL_GetCurrentVideoDriver(), "wayland" ) == 0 ) {
 			hwnd = SDL_GetProperty( SDL_GetWindowProperties( s_Window ), SDL_PROPERTY_WINDOW_WAYLAND_SURFACE_POINTER, nullptr );
+		} else {
+			hwnd = nullptr;
 		}
 	#endif
 	Assert( hwnd );

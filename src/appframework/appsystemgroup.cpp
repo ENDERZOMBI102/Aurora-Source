@@ -91,6 +91,11 @@ AppModule_t CAppSystemGroup::LoadModule( const char* pDLLName ) {
 	return m_Modules.AddToTail( module );
 }
 AppModule_t CAppSystemGroup::LoadModule( const CreateInterfaceFn factory ) {
+	if ( not factory ) {
+		Warning( "Tried to add a module from a `nullptr` factory!" );
+		return CUtlVector<Module_t>::InvalidIndex();
+	}
+
 	for ( int i{ 0 }; i < m_Modules.Count(); i += 1 ) {
 		if ( m_Modules[i].m_Factory == factory ) {
 			return i;
@@ -112,7 +117,7 @@ IAppSystem* CAppSystemGroup::AddSystem( const AppModule_t pModule, const char* p
 
 	int retCode;
 	const auto mod{ m_Modules[pModule] };
-	Log( "Adding system `%s` from `%s` (idx=%u)\n", pInterfaceName, mod.m_pModuleName, pModule );
+	Log( "Adding system `%s` from `%s` (to idx %u)\n", pInterfaceName, mod.m_pModuleName, pModule );
 	const auto system{ static_cast<IAppSystem*>( mod.m_Factory( pInterfaceName, &retCode ) ) };
 	if ( retCode != IFACE_OK ) [[unlikely]] {
 		Warning( "Failed to load system for interface `%s` from module `%s`.\n", pInterfaceName, mod.m_pModuleName ? mod.m_pModuleName : "N/A" );
@@ -124,6 +129,11 @@ IAppSystem* CAppSystemGroup::AddSystem( const AppModule_t pModule, const char* p
 	return system;
 }
 void CAppSystemGroup::AddSystem( IAppSystem* pAppSystem, const char* pInterfaceName ) {
+	if ( not pAppSystem ) {
+		Warning( "AddSystem was given a `nullptr` IAppSystem for `%s`!!", pInterfaceName );
+		return;
+	}
+
 	Log( "Loading given system `%s`\n", pInterfaceName );
 	const auto index{ m_Systems.AddToTail( pAppSystem ) };
 	m_SystemDict.Insert( pInterfaceName, index );
@@ -156,6 +166,7 @@ void* CAppSystemGroup::FindSystem( const char* pInterfaceName ) {
 CreateInterfaceFn CAppSystemGroup::GetFactory() {
 	static constexpr auto factory = []( const char* pInterfaceName, int* pRetCode ) -> void* {
 		AssertMsg( s_RootAppSystem != nullptr, "RootFactory was asked for an interface when no AppSystemGroup was ran!" );
+		// check if we already know it
 		uint16 index{ s_RootAppSystem->m_SystemDict.Find( pInterfaceName ) };
 		if ( index != CUtlDict<int, uint16>::InvalidIndex() ) {
 			if ( pRetCode ) {
@@ -164,7 +175,7 @@ CreateInterfaceFn CAppSystemGroup::GetFactory() {
 			return s_RootAppSystem->m_Systems[index];
 		}
 
-		// Do any of our apps know it?
+		// do any of our appsystems know it?
 		for ( const auto system : s_RootAppSystem->m_Systems ) {
 			if ( auto* iface = system->QueryInterface( pInterfaceName ) ) {
 				if ( pRetCode ) {
@@ -174,6 +185,14 @@ CreateInterfaceFn CAppSystemGroup::GetFactory() {
 			}
 		}
 
+		// as last resort, just ask each module's factory
+		for ( const auto& mod : s_RootAppSystem->m_Modules ) {
+			if ( auto* iface = mod.m_Factory( pInterfaceName, pRetCode ) ) {
+				return iface;
+			}
+		}
+
+		// nothing worked, lets just hope we have something ourselves
 		return Sys_GetFactoryThis()( pInterfaceName, pRetCode );
 	};
 

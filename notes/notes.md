@@ -21,3 +21,7 @@ which is the case under specific circumstances, which we'll enumerate in the fol
 
 ### The GCC `textrel` section warning
 https://gcc.gnu.org/legacy-ml/gcc-help/2006-11/msg00390.html
+
+
+### The glibc "cannot enable executable stack" error
+workaround: add `GLIBC_TUNABLES=glibc.rtld.execstack\=2` to env variables
