@@ -42,8 +42,7 @@
 InterfaceReg* InterfaceReg::s_InterfaceRegs = nullptr;
 
 InterfaceReg::InterfaceReg( const InstantiateInterfaceFn fn, const char* pName )
-	: m_Name( pName ) {
-	m_CreateFn = fn;
+	: m_CreateFn{ fn }, m_Name{ pName } {
 	m_Next = s_InterfaceRegs;
 	s_InterfaceRegs = this;
 }
@@ -81,16 +80,14 @@ void* CreateInterface( const char* pName, int* pReturnCode ) {
 }
 
 
-#if IsPosix()
-	// Linux doesn't have this function so this emulates its functionality
-	void* GetModuleHandle( const char* name ) {
+static void* Sys_GetModuleHandle( const char* name ) {
+	if ( not name ) {
+		// hmm, how can this be handled under linux... is it even necessary?
+		return nullptr;
+	}
+
+	#if IsPosix()
 		void* handle;
-
-		if ( name == nullptr ) {
-			// hmm, how can this be handled under linux... is it even necessary?
-			return nullptr;
-		}
-
 		if ( ( handle = dlopen( name, RTLD_NOW ) ) == nullptr ) {
 			printf( "DLOPEN Error:%s\n", dlerror() );
 			// couldn't open this file
@@ -102,8 +99,10 @@ void* CreateInterface( const char* pName, int* pReturnCode ) {
 		// so dec the ref count by performing the close
 		dlclose( handle );
 		return handle;
-	}
-#endif
+	#elif IsWindows()
+		return GetModuleHandle( name );
+	#endif
+}
 
 //-----------------------------------------------------------------------------
 // Purpose: returns a pointer to a function, given a module
@@ -111,7 +110,7 @@ void* CreateInterface( const char* pName, int* pReturnCode ) {
 //			*pName - proc name
 //-----------------------------------------------------------------------------
 static void* Sys_GetProcAddress( const char* pModuleName, const char* pName ) {
-	auto hModule = reinterpret_cast<HMODULE>( GetModuleHandle( pModuleName ) );
+	auto hModule = reinterpret_cast<HMODULE>( Sys_GetModuleHandle( pModuleName ) );
 	return reinterpret_cast<void*>( GetProcAddress( hModule, pName ) );
 }
 

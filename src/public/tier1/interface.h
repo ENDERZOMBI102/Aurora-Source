@@ -37,7 +37,7 @@ public:
 	virtual ~IBaseInterface() = default;
 };
 
-#define CREATEINTERFACE_PROCNAME "CreateInterface"
+static constexpr auto CREATEINTERFACE_PROCNAME = "CreateInterface";
 
 using CreateInterfaceFn = void*(*)( const char* pName, int* pReturnCode );
 using InstantiateInterfaceFn = void*(*)();
@@ -47,7 +47,9 @@ class InterfaceReg {
 public:
 	InterfaceReg( InstantiateInterfaceFn fn, const char* pName );
 
-public:
+private:
+	friend void* CreateInterfaceInternal( const char* name, int* result );
+
 	InstantiateInterfaceFn m_CreateFn;
 	const char* m_Name;
 
@@ -55,7 +57,7 @@ public:
 	static InterfaceReg* s_InterfaceRegs;
 };
 
-// Use this to expose an interface that can have multiple instances.
+// Use these to expose an interface that can have multiple instances.
 // e.g.:
 // EXPOSE_INTERFACE( CInterfaceImp, IInterface, "MyInterface001" )
 // This will expose a class called CInterfaceImp that implements IInterface (a pure class)
@@ -65,58 +67,28 @@ public:
 // so that each component can use these names/vtables to communicate
 //
 // A single class can support multiple interfaces through multiple inheritance
-//
-// Use this if you want to write the factory function.
-#if !defined( _STATIC_LINKED ) || !defined( _SUBSYSTEM )
-	#define EXPOSE_INTERFACE_FN( functionName, interfaceName, versionName ) \
-		static InterfaceReg __g_Create##interfaceName##_reg( reinterpret_cast<InstantiateInterfaceFn>( functionName ), versionName );
-#else
-	#define EXPOSE_INTERFACE_FN( functionName, interfaceName, versionName )                   \
-		namespace _SUBSYSTEM {                                                                \
-			static InterfaceReg __g_Create##interfaceName##_reg( functionName, versionName ); \
-		}
-#endif
 
-#if !defined( _STATIC_LINKED ) || !defined( _SUBSYSTEM )
-	#define EXPOSE_INTERFACE( className, interfaceName, versionName )                                           \
-		static void* __Create##className##_interface() { return static_cast<interfaceName*>( new className ); } \
-		static InterfaceReg __g_Create##className##_reg( __Create##className##_interface, versionName );
-#else
-	#define EXPOSE_INTERFACE( className, interfaceName, versionName )                                               \
-		namespace _SUBSYSTEM {                                                                                      \
-			static void* __Create##className##_interface() { return static_cast<interfaceName*>( new className ); } \
-			static InterfaceReg __g_Create##className##_reg( __Create##className##_interface, versionName );        \
-		}
-#endif
+// Use this if you want to write the factory function.
+#define EXPOSE_INTERFACE_FN( functionName, ifaceName, versionName ) \
+	static InterfaceReg __g_Create##ifaceName##_reg( functionName, versionName );
+
+// Used to expose an implementation of an interface which may be instantiated multiple times.
+#define EXPOSE_INTERFACE( className, ifaceName, versionName ) \
+	static_assert( std::is_base_of_v<ifaceName, className>, "Class must implement the interface" ); \
+	static_assert( std::is_default_constructible_v<className>, "Class must have no other constructor than default" ); \
+	static InterfaceReg __g_Create##className##_reg( []() -> void* { return static_cast<ifaceName*>( new className ); }, versionName ); // NOLINT(*-reserved-identifier)
 
 // Use this to expose a singleton interface with a global variable you've created.
-#if !defined( _STATIC_LINKED ) || !defined( _SUBSYSTEM )
-	#define EXPOSE_SINGLE_INTERFACE_GLOBALVAR_WITH_NAMESPACE( className, interfaceNamespace, interfaceName, versionName, globalVarName )           \
-		static void* __Create##className##interfaceName##_interface() { return static_cast<interfaceNamespace interfaceName*>( &globalVarName ); } \
-		static InterfaceReg __g_Create##className##interfaceName##_reg( __Create##className##interfaceName##_interface, versionName );
-#else
-	#define EXPOSE_SINGLE_INTERFACE_GLOBALVAR_WITH_NAMESPACE( className, interfaceNamespace, interfaceName, versionName, globalVarName )               \
-		namespace _SUBSYSTEM {                                                                                                                         \
-			static void* __Create##className##interfaceName##_interface() { return static_cast<interfaceNamespace interfaceName*>( &globalVarName ); } \
-			static InterfaceReg __g_Create##className##interfaceName##_reg( __Create##className##interfaceName##_interface, versionName );             \
-		}
-#endif
-
-#define EXPOSE_SINGLE_INTERFACE_GLOBALVAR( className, interfaceName, versionName, globalVarName ) \
-	EXPOSE_SINGLE_INTERFACE_GLOBALVAR_WITH_NAMESPACE( className, , interfaceName, versionName, globalVarName )
+#define EXPOSE_SINGLE_INTERFACE_GLOBALVAR( className, ifaceName, versionName, globalVarName ) \
+	static_assert( std::is_class_v<decltype( globalVarName )>, "Must be a plain object (not * nor &)" ); \
+	static_assert( std::is_base_of_v<ifaceName, className>, "Class must implement the interface" ); \
+	static_assert( std::is_default_constructible_v<className>, "Class must have no other constructor than default" ); \
+	static InterfaceReg __g_Create##className##ifaceName##_reg( []() -> void* { return static_cast<ifaceName*>( &globalVarName ); }, versionName ); // NOLINT(*-reserved-identifier)
 
 // Use this to expose a singleton interface. This creates the global variable for you automatically.
-#if !defined( _STATIC_LINKED ) || !defined( _SUBSYSTEM )
-	#define EXPOSE_SINGLE_INTERFACE( className, interfaceName, versionName ) \
-		static className __g_##className##_singleton;                        \
-		EXPOSE_SINGLE_INTERFACE_GLOBALVAR( className, interfaceName, versionName, __g_##className##_singleton )
-#else
-	#define EXPOSE_SINGLE_INTERFACE( className, interfaceName, versionName ) \
-		namespace _SUBSYSTEM {                                               \
-			static className __g_##className##_singleton;                    \
-		}                                                                    \
-		EXPOSE_SINGLE_INTERFACE_GLOBALVAR( className, interfaceName, versionName, __g_##className##_singleton )
-#endif
+#define EXPOSE_SINGLE_INTERFACE( className, interfaceName, versionName ) \
+	static className __g_##className##_singleton;                        \
+	EXPOSE_SINGLE_INTERFACE_GLOBALVAR( className, interfaceName, versionName, __g_##className##_singleton );
 
 // load/unload components
 class CSysModule;
