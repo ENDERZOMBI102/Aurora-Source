@@ -85,7 +85,7 @@ set( ADDITIONAL_COMPILE_DEFINITIONS_EXE )
 set( ADDITIONAL_COMPILE_DEFINITIONS_DLL )
 set( ADDITIONAL_COMPILE_DEFINITIONS_LIB )
 
-# SETUP THIRD PARTY, before we "customize" our compilation process
+# Setup third party BEFORE we "customize" our compilation process
 include( "thirdparty/init.cmake" )
 
 # Init project structure

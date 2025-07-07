@@ -21,11 +21,12 @@ CAppSystemGroup::CAppSystemGroup( CAppSystemGroup* pParentAppSystem )
 	: m_pParentAppSystem{pParentAppSystem} { }
 
 int CAppSystemGroup::Run() {
+	AssertMsg( s_RootAppSystem == nullptr, "Running multiple `AppSystemGroup`s concurrently!!!", "aa" );
 	s_RootAppSystem = this;
 	int res{1};
 
 	if ( not Create() ) {
-		Error( "AppSystemGroup::Create() returned `false`, this is usually because modules are missing or corrupt, check log for possibly more info." );
+		Error( "AppSystemGroup::Create() returned `false`, this is usually because modules are missing or corrupt, check log for possibly more info.\n" );
 		return 1;
 	}
 	if ( ConnectSystems() ) {
@@ -77,13 +78,13 @@ AppModule_t CAppSystemGroup::LoadModule( const char* pDLLName ) {
 	Log( "Loading module `%s`\n", pDLLName );
 	CSysModule* sysModule{ Sys_LoadModule( pDLLName ) };
 	if ( not sysModule ) {
-		Warning( "Failed to load module `%s`", pDLLName );
+		Warning( "Failed to load module `%s`\n", pDLLName );
 		return CUtlVector<Module_t>::InvalidIndex();
 	}
 
 	const CreateInterfaceFn factory{ Sys_GetFactory( sysModule ) };
 	if ( not factory ) {
-		Warning( "Failed to load factory of module `%s`", pDLLName );
+		Warning( "Failed to load factory of module `%s`\n", pDLLName );
 		return CUtlVector<Module_t>::InvalidIndex();
 	}
 
@@ -92,7 +93,7 @@ AppModule_t CAppSystemGroup::LoadModule( const char* pDLLName ) {
 }
 AppModule_t CAppSystemGroup::LoadModule( const CreateInterfaceFn factory ) {
 	if ( not factory ) {
-		Warning( "Tried to add a module from a `nullptr` factory!" );
+		Warning( "Tried to add a module from a `nullptr` factory!\n" );
 		return CUtlVector<Module_t>::InvalidIndex();
 	}
 
@@ -112,7 +113,7 @@ IAppSystem* CAppSystemGroup::AddSystem( const AppModule_t pModule, const char* p
 	if ( index == CUtlDict<int, uint16>::InvalidIndex() ) [[likely]] {
 		index = m_Systems.AddToTail();
 	} else {
-		Warning( "System `%s` has been added multiple times! This will overrides the last value!", pInterfaceName );
+		Warning( "System `%s` has been added multiple times! This will overrides the last value!\n", pInterfaceName );
 	}
 
 	int retCode;
@@ -130,7 +131,7 @@ IAppSystem* CAppSystemGroup::AddSystem( const AppModule_t pModule, const char* p
 }
 void CAppSystemGroup::AddSystem( IAppSystem* pAppSystem, const char* pInterfaceName ) {
 	if ( not pAppSystem ) {
-		Warning( "AddSystem was given a `nullptr` IAppSystem for `%s`!!", pInterfaceName );
+		Warning( "AddSystem was given a `nullptr` IAppSystem for `%s`!!\n", pInterfaceName );
 		return;
 	}
 
@@ -165,7 +166,7 @@ void* CAppSystemGroup::FindSystem( const char* pInterfaceName ) {
 
 CreateInterfaceFn CAppSystemGroup::GetFactory() {
 	static constexpr auto factory = []( const char* pInterfaceName, int* pRetCode ) -> void* {
-		AssertMsg( s_RootAppSystem != nullptr, "RootFactory was asked for an interface when no AppSystemGroup was ran!" );
+		AssertMsg( s_RootAppSystem != nullptr, "RootFactory was asked for an interface when no AppSystemGroup was ran!\n" );
 		// check if we already know it
 		uint16 index{ s_RootAppSystem->m_SystemDict.Find( pInterfaceName ) };
 		if ( index != CUtlDict<int, uint16>::InvalidIndex() ) {
@@ -218,7 +219,7 @@ bool CAppSystemGroup::ConnectSystems() {
 			bool found{};
 			for ( const auto& x : m_SystemDict ) {
 				if ( x.elem == i ) {
-					Log( "Loading system `%s`", x.key );
+					Log( "Loading system `%s`\n", x.key );
 					found = true;
 					break;
 				}
@@ -295,7 +296,7 @@ bool CSteamAppSystemGroup::SetupSearchPaths( const char* pStartingDir, const boo
 	steamInfo.m_bSetSteamDLLPath = true;
 	steamInfo.m_bSteam = m_pFileSystem->IsSteam();
 	if ( FileSystem_SetupSteamEnvironment( steamInfo ) != FS_OK ) {
-		Error( "Failed to find `gameinfo.txt`! aborting." );
+		Error( "Failed to find `gameinfo.txt`! aborting.\n" );
 		return false;
 	}
 	V_strcpy_safe( m_pGameInfoPath, steamInfo.m_GameInfoPath );
@@ -306,7 +307,7 @@ bool CSteamAppSystemGroup::SetupSearchPaths( const char* pStartingDir, const boo
 	fsInfo.m_bToolsMode = bIsTool;
 	fsInfo.m_pDirectoryName = steamInfo.m_GameInfoPath;
 	if ( FileSystem_MountContent( fsInfo ) != FS_OK ) {
-		Error( "Failed to mount gameinfo! aborting." );
+		Error( "Failed to mount gameinfo! aborting.\n" );
 		return false;
 	}
 
@@ -316,7 +317,7 @@ bool CSteamAppSystemGroup::SetupSearchPaths( const char* pStartingDir, const boo
 	searchPathsInit.m_pFileSystem = fsInfo.m_pFileSystem;
 	// TODO: Rest of params
 	if ( FileSystem_LoadSearchPaths( searchPathsInit ) != FS_OK ) {
-		Error( "Failed to load game search paths! aborting." );
+		Error( "Failed to load game search paths! aborting.\n" );
 		return false;
 	}
 

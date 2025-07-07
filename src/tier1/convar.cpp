@@ -7,7 +7,7 @@
 //===========================================================================//
 #include "tier1/convar.h"
 #include "Color.h"
-#include "basetypes.h"
+#include "tier0/basetypes.h"
 #include "icvar.h"
 #include "tier0/dbg.h"
 #include "tier0/memdbgon.h"
@@ -144,7 +144,7 @@ void ConCommandBase::CreateBase( const char* pName, const char* pHelpString /*= 
 
 	m_nFlags = flags;
 
-	#ifdef ALLOW_DEVELOPMENT_CVARS
+	#if defined( ALLOW_DEVELOPMENT_CVARS )
 		m_nFlags &= ~FCVAR_DEVELOPMENTONLY;
 	#endif
 
@@ -205,7 +205,7 @@ bool ConCommandBase::IsFlagSet( int flag ) const {
 void ConCommandBase::AddFlags( int flags ) {
 	m_nFlags |= flags;
 
-	#ifdef ALLOW_DEVELOPMENT_CVARS
+	#if defined( ALLOW_DEVELOPMENT_CVARS )
 		m_nFlags &= ~FCVAR_DEVELOPMENTONLY;
 	#endif
 }
@@ -620,7 +620,7 @@ const char* ConVar::GetHelpText() const {
 void ConVar::AddFlags( const int flags ) {
 	m_pParent->m_nFlags |= flags;
 
-	#ifdef ALLOW_DEVELOPMENT_CVARS
+	#if defined( ALLOW_DEVELOPMENT_CVARS )
 		m_pParent->m_nFlags &= ~FCVAR_DEVELOPMENTONLY;
 	#endif
 }
@@ -663,13 +663,12 @@ void ConVar::InternalSetValue( const char* value ) {
 
 	float fNewValue;
 	char tempVal[ 32 ];
-	char* val;
 
 	Assert( m_pParent == this );// Only valid for root convars.
 
 	float flOldValue = m_fValue;
 
-	val = const_cast<char*>( value );
+	auto val = const_cast<char*>( value );
 	if ( not value ) {
 		fNewValue = 0.0f;
 	} else {
@@ -773,12 +772,12 @@ void ConVar::InternalSetFloatValue( float fNewValue ) {
 	m_fValue = fNewValue;
 	m_nValue = static_cast<int>( m_fValue );
 
-	if ( !( m_nFlags & FCVAR_NEVER_AS_STRING ) ) {
+	if ( not ( m_nFlags & FCVAR_NEVER_AS_STRING ) ) {
 		char tempVal[ 32 ];
 		Q_snprintf( tempVal, sizeof( tempVal ), "%f", m_fValue );
 		ChangeStringValue( tempVal, flOldValue );
 	} else {
-		Assert( !m_fnChangeCallback );
+		Assert( not m_fnChangeCallback );
 	}
 }
 
@@ -810,12 +809,12 @@ void ConVar::InternalSetIntValue( int nValue ) {
 	m_fValue = fValue;
 	m_nValue = nValue;
 
-	if ( !( m_nFlags & FCVAR_NEVER_AS_STRING ) ) {
+	if ( not ( m_nFlags & FCVAR_NEVER_AS_STRING ) ) {
 		char tempVal[ 32 ];
 		Q_snprintf( tempVal, sizeof( tempVal ), "%d", m_nValue );
 		ChangeStringValue( tempVal, flOldValue );
 	} else {
-		Assert( !m_fnChangeCallback );
+		Assert( not m_fnChangeCallback );
 	}
 }
 
@@ -959,7 +958,7 @@ void ConVarRef::Init( const char* pName, bool bIgnoreMissing ) {
 	if ( !IsValid() ) {
 		static bool bFirst = true;
 		if ( g_pCVar or bFirst ) {
-			if ( !bIgnoreMissing ) {
+			if ( not bIgnoreMissing ) {
 				Warning( "ConVarRef %s doesn't point to an existing ConVar\n", pName );
 			}
 			bFirst = false;
@@ -1042,8 +1041,7 @@ void ConVar_PrintFlags( const ConCommandBase* var ) {
 // Purpose:
 //-----------------------------------------------------------------------------
 void ConVar_PrintDescription( const ConCommandBase* pVar ) {
-
-	assert( pVar );
+	Assert( pVar );
 
 	Color clr;
 	clr.SetColor( 255, 100, 100, 255 );

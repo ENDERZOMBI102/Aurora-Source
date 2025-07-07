@@ -23,11 +23,11 @@
 #include "vgui/ISurface.h"
 #include "vgui/IVGui.h"
 #include "avi/iavi.h"
-#include "SDL_video.h"
+#include <SDL_video.h>
+#include <SDL_version.h>
 // This must be the final include in a .cpp file!!!
 #include "memdbgon.h"
 
-#include <SDL_version.h>
 
 
 IFileSystem* g_pFileSystem{nullptr};
@@ -101,7 +101,7 @@ bool CGameAppLoader::Create() {
 		g_pMaterialSystem = materials = matSys; // update globals too
 		matSys->SetShaderAPI( loadEmpty ? "shaderapiempty" : "shaderapidx9" );
 	} else {
-		Warning( "MATSYS NOT FOUND" );
+		Warning( "MATSYS NOT FOUND\n" );
 		return false;
 	}
 

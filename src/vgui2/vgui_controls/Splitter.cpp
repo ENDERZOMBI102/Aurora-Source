@@ -18,10 +18,8 @@
 using namespace vgui;
 
 
-enum
-{
-	SPLITTER_HANDLE_WIDTH = 4
-};
+constexpr int32 SPLITTER_HANDLE_WIDTH = 4;
+
 
 
 //-----------------------------------------------------------------------------
