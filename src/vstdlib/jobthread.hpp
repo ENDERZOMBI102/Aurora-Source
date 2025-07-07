@@ -4,7 +4,6 @@
 #pragma once
 #include "tier0/dbg.h"
 #include "tier1/utlvector.h"
-#include "utlpriorityqueue.h"
 #include "vstdlib/jobthread.h"
 
 
@@ -14,78 +13,78 @@ public:
 	~CThreadPool() override;
 public:  // IThreadPool
 	// Thread functions
-	bool Start( const ThreadPoolStartParams_t& startParams = ThreadPoolStartParams_t{} ) override;
-	bool Stop( int timeout = TT_INFINITE ) override;
+	auto Start( const ThreadPoolStartParams_t& startParams = ThreadPoolStartParams_t{} ) -> bool override;
+	auto Stop( int timeout = TT_INFINITE ) -> bool override;
 
 	// Functions for any thread
-	unsigned GetJobCount() override;
-	int NumThreads() override;
-	int NumIdleThreads() override;
+	auto GetJobCount() -> unsigned override;
+	auto NumThreads() -> int override;
+	auto NumIdleThreads() -> int override;
 
 	/**
 	 * Pauses the execution/processing of jobs.
 	 */
-	int SuspendExecution() override;
+	auto SuspendExecution() -> int override;
 	/**
 	 * Resumes the execution/processing of jobs.
 	 */
-	int ResumeExecution() override;
+	auto ResumeExecution() -> int override;
 
 	// Offer the current thread to the pool
-	int YieldWait( CThreadEvent** pEvents, int nEvents, bool bWaitAll = true, unsigned timeout = TT_INFINITE ) override;
-	int YieldWait( CJob**, int nJobs, bool bWaitAll = true, unsigned timeout = TT_INFINITE ) override;
-	void Yield( unsigned timeout ) override;
+	auto YieldWait( CThreadEvent** pEvents, int nEvents, bool bWaitAll = true, unsigned timeout = TT_INFINITE ) -> int override;
+	auto YieldWait( CJob**, int nJobs, bool bWaitAll = true, unsigned timeout = TT_INFINITE ) -> int override;
+	auto Yield( unsigned timeout ) -> void override;
 
 	// Add a native job to the queue (master thread)
-	void AddJob( CJob* ) override;
+	auto AddJob( CJob* ) -> void override;
 
 	// All threads execute pFunctor asap. Thread will either wake up
 	//  and execute or execute pFunctor right after completing current job and
 	//  before looking for another job.
-	void ExecuteHighPriorityFunctor( CFunctor* pFunctor ) override;
+	auto ExecuteHighPriorityFunctor( CFunctor* pFunctor ) -> void override;
 
 	// Change the priority of an active job
-	void ChangePriority( CJob* p, JobPriority_t priority ) override;
+	auto ChangePriority( CJob* p, JobPriority_t priority ) -> void override;
 
 	// Bulk job manipulation (blocking)
-	int ExecuteToPriority( JobPriority_t toPriority, JobFilter_t pfnFilter = nullptr ) override;
-	int AbortAll() override;
+	auto ExecuteToPriority( JobPriority_t toPriority, JobFilter_t pfnFilter = nullptr ) -> int override;
+	auto AbortAll() -> int override;
 
 	//-----------------------------------------------------
-	void Reserved1() override { }
+	auto Reserved1() -> void override { }
 private:
-	void AddFunctorInternal( CFunctor*, CJob** = nullptr, const char* pszDescription = nullptr, unsigned flags = 0 ) override;
+	auto AddFunctorInternal( CFunctor*, CJob** = nullptr, const char* pszDescription = nullptr, unsigned flags = 0 ) -> void override;
 
 	// Services for internal use by job instances
 	friend class CJob;
 
-	CJob* GetDummyJob() override;
+	auto GetDummyJob() -> CJob* override;
 public:
-	void Distribute( bool bDistribute = true, int* pAffinityTable = nullptr ) override;
+	auto Distribute( bool bDistribute = true, int* pAffinityTable = nullptr ) -> void override;
 
-	bool Start( const ThreadPoolStartParams_t& startParams, const char* pszNameOverride ) override;
+	auto Start( const ThreadPoolStartParams_t& startParams, const char* pszNameOverride ) -> bool override;
 private:
-	static uint32 PoolThreadFunc( void* pParam );
+	static auto PoolThreadFunc( void* pParam ) -> uint32;
 private:
 	enum State : int32 {
-		EXECUTING,
+		EXECUTING = 0,
 		SUSPENDED
 	};
-	CInterlockedIntT<State> m_State;
+	CInterlockedIntT<State> m_State{};
 
 	CThread* m_CoordinatorThread{ nullptr };
-	CThreadEvent m_JobAvailable;
-	CThreadEvent m_JobAccepted;
+	CThreadEvent m_JobAvailable{};
+	CThreadEvent m_JobAccepted{};
 	CThreadEvent m_Exit{ true };
-	CInterlockedInt m_IdleCount;
+	CInterlockedInt m_IdleCount{};
 
 	CUtlLinkedList<CJob*> m_Queue{};
 	// mutex for adding/removing items to/from the queue
-	CThreadFastMutex m_Mutex{};
+	CThreadMutex m_Mutex{};
 	CUtlVector<ThreadHandle_t> m_Threads{};
 };
 
-// JOB_INTERFACE IThreadPool* CreateThreadPool();
-// JOB_INTERFACE void DestroyThreadPool( IThreadPool* pPool );
-// JOB_INTERFACE void RunThreadPoolTests();
-// JOB_INTERFACE IThreadPool* g_pThreadPool;
+JOB_INTERFACE auto CreateThreadPool() -> IThreadPool*;
+JOB_INTERFACE auto DestroyThreadPool( IThreadPool* pPool ) -> void;
+JOB_INTERFACE auto RunThreadPoolTests() -> void;
+JOB_INTERFACE IThreadPool* g_pThreadPool;

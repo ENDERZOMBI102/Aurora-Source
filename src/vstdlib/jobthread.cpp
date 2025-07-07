@@ -2,7 +2,7 @@
 // Created by ENDERZOMBI102 on 28/03/2024.
 //   Heavily modified version of the SDK 2006 version of `jobthread.cpp`
 //
-#include "platform.h"
+#include "tier0/platform.h"
 #if IsWindows()
 	#include <synchapi.h>
 #endif
@@ -12,7 +12,7 @@
 CThreadPool::CThreadPool() = default;
 CThreadPool::~CThreadPool() = default;
 
-bool CThreadPool::Start( const ThreadPoolStartParams_t& startParams ) {
+auto CThreadPool::Start( const ThreadPoolStartParams_t& startParams ) -> bool {
 	m_Threads.EnsureCapacity( startParams.nThreads );
 
 	for ( auto i{0}; i < startParams.nThreads; i += 1 ) {
@@ -27,7 +27,7 @@ bool CThreadPool::Start( const ThreadPoolStartParams_t& startParams ) {
 
 	return true;
 }
-bool CThreadPool::Stop( int timeout ) {
+auto CThreadPool::Stop( int timeout ) -> bool {
 	// tell the threads to stop
 	this->m_Exit.Set();
 	// wait for them to finish
@@ -43,17 +43,17 @@ bool CThreadPool::Stop( int timeout ) {
 	#endif
 }
 
-uint32 CThreadPool::GetJobCount() {
+auto CThreadPool::GetJobCount() -> uint32 {
 	return m_Queue.Count();
 }
-int CThreadPool::NumThreads() {
+auto CThreadPool::NumThreads() -> int {
 	return this->m_Threads.Count();
 }
-int CThreadPool::NumIdleThreads() {
+auto CThreadPool::NumIdleThreads() -> int {
 	return this->m_IdleCount;
 }
 
-int CThreadPool::SuspendExecution() {
+auto CThreadPool::SuspendExecution() -> int {
 	AssertFatalMsg( not ThreadInMainThread(), "Tried to suspend threadpool execution outside of main thread" );
 
 	// If not already suspended
@@ -71,7 +71,7 @@ int CThreadPool::SuspendExecution() {
 
 	return 1;
 }
-int CThreadPool::ResumeExecution() {
+auto CThreadPool::ResumeExecution() -> int {
 	AssertFatalMsg( not ThreadInMainThread(), "Tried to resume threadpool execution outside of main thread" );
 
 	AssertMsg( m_State != State::SUSPENDED, "Attempted resume when not suspended" );
@@ -90,18 +90,18 @@ int CThreadPool::ResumeExecution() {
 	return 0;
 }
 
-int CThreadPool::YieldWait( CThreadEvent * *pEvents, int nEvents, bool bWaitAll, unsigned timeout ) {
+auto CThreadPool::YieldWait( CThreadEvent** pEvents, int nEvents, bool bWaitAll, unsigned timeout ) -> int {
 	AssertUnreachable(); return {};
 }
-int CThreadPool::YieldWait( CJob**, int nJobs, bool bWaitAll, unsigned timeout ) {
+auto CThreadPool::YieldWait( CJob**, int nJobs, bool bWaitAll, unsigned timeout ) -> int {
 	AssertUnreachable(); return {};
 }
-void CThreadPool::Yield( unsigned timeout ) {
+auto CThreadPool::Yield( unsigned timeout ) -> void {
 	AssertUnreachable();
 }
 
-void CThreadPool::AddJob( CJob* pJob ) {
-	if (! pJob ) {
+auto CThreadPool::AddJob( CJob* pJob ) -> void {
+	if ( not pJob ) {
 		return;
 	}
 
@@ -109,7 +109,8 @@ void CThreadPool::AddJob( CJob* pJob ) {
 	// while ( m_IdleCount == 0 ) { }
 
 	// add the job to the queue and update its status
-	m_Mutex.Lock();
+	{
+		CAutoLock lock{ m_Mutex };
 		pJob->AddRef();
 		m_Queue.AddToTail( pJob );
 
@@ -128,7 +129,7 @@ void CThreadPool::AddJob( CJob* pJob ) {
 
 		pJob->m_pThreadPool = this;
 		pJob->m_status = JOB_STATUS_PENDING;
-	m_Mutex.Unlock();
+	}
 
 	// tell our workers that we have a job
 	m_JobAccepted.Reset();
@@ -136,32 +137,33 @@ void CThreadPool::AddJob( CJob* pJob ) {
 	m_JobAccepted.Wait();
 }
 
-void CThreadPool::ExecuteHighPriorityFunctor( CFunctor* pFunctor ) {
+auto CThreadPool::ExecuteHighPriorityFunctor( CFunctor* pFunctor ) -> void {
 	AssertUnreachable();
 }
 
-void CThreadPool::ChangePriority( CJob* pJob, JobPriority_t priority ) {
+auto CThreadPool::ChangePriority( CJob* pJob, JobPriority_t priority ) -> void {
 	AssertUnreachable();
 }
 
-int CThreadPool::ExecuteToPriority( JobPriority_t toPriority, JobFilter_t pfnFilter ) {
+auto CThreadPool::ExecuteToPriority( JobPriority_t toPriority, JobFilter_t pfnFilter ) -> int {
 	AssertUnreachable();
 	return {};
 }
-int CThreadPool::AbortAll() {
+auto CThreadPool::AbortAll() -> int {
 	if ( CThread::GetCurrentCThread() != m_CoordinatorThread ) {
 		SuspendExecution();
 	}
 
 
 	// abort them all
-	m_Mutex.Lock();
+	{
+		CAutoLock lock{ m_Mutex };
 		for ( const auto job : m_Queue ) {
 			job->Abort();
 			job->Release();
 		}
 		m_Queue.RemoveAll();
-	m_Mutex.Unlock();
+	}
 
 	if ( CThread::GetCurrentCThread() != m_CoordinatorThread ) {
 		ResumeExecution();
@@ -170,25 +172,25 @@ int CThreadPool::AbortAll() {
 	return 0;
 }
 
-void CThreadPool::AddFunctorInternal( CFunctor* pFunctor, CJob** ppJob, const char* pszDescription, unsigned flags ) {
+auto CThreadPool::AddFunctorInternal( CFunctor* pFunctor, CJob** ppJob, const char* pszDescription, unsigned flags ) -> void {
 	AssertUnreachable();
 }
 
-CJob* CThreadPool::GetDummyJob() {
-	AssertUnreachable();
-	return {};
-}
-
-void CThreadPool::Distribute( bool bDistribute, int* pAffinityTable ) {
-	AssertUnreachable();
-}
-
-bool CThreadPool::Start( const ThreadPoolStartParams_t& startParams, const char* pszNameOverride ) {
+auto CThreadPool::GetDummyJob() -> CJob* {
 	AssertUnreachable();
 	return {};
 }
 
-unsigned CThreadPool::PoolThreadFunc( void* pParam ) {
+auto CThreadPool::Distribute( bool bDistribute, int* pAffinityTable ) -> void {
+	AssertUnreachable();
+}
+
+auto CThreadPool::Start( const ThreadPoolStartParams_t& startParams, const char* pszNameOverride ) -> bool {
+	AssertUnreachable();
+	return {};
+}
+
+auto CThreadPool::PoolThreadFunc( void* pParam ) -> unsigned {
 	const auto pOwner = static_cast<CThreadPool*>( pParam );
 	pOwner->m_IdleCount += 1;
 
@@ -471,12 +473,14 @@ JobStatus_t CJob::Abort( bool bDiscard ) {
 }
 */
 
-IThreadPool* CreateThreadPool();
-void DestroyThreadPool( IThreadPool* pPool );
+IThreadPool* CreateThreadPool() {
+	return new CThreadPool();
+}
+void DestroyThreadPool( IThreadPool* pPool ) {
+	delete static_cast<CThreadPool*>( pPool );
+}
 void RunThreadPoolTests();
 
 
-namespace {
-	CThreadPool s_ThreadPool{};
-}
+namespace { CThreadPool s_ThreadPool{}; }
 IThreadPool* g_pThreadPool{ &s_ThreadPool };
