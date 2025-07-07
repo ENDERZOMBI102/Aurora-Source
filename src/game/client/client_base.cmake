@@ -1201,16 +1201,14 @@ function( target_use_client_base target EXCLUDE_SOURCES )
 			"$<$<AND:${IS_WINDOWS},${BUILD_REPLAY}>:wsock32;Ws2_32>"
 			particles
 
-			tier0
-			vstdlib
+			${ASRC_tier0}  # may use reimpl or valve's based on -DASRC_USE_REIMPLS
+			${ASRC_vstdlib}  # may use reimpl or valve's based on -DASRC_USE_REIMPLS
 			bitmap2
 			dmxloader
-#			${ASRC_tier02}
 			mathlib
 			matsys_controls
 			tier1
 			tier2
-#			${ASRC_vstdlib2}
 			tier3
 			vgui_controls
 			vtf

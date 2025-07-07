@@ -186,8 +186,8 @@ target_link_libraries( vrad_dll
 		raytrace
 		bitmap
 		tier2
-		tier0
-		vstdlib
+		${ASRC_tier0}  # may use reimpl or valve's based on -DASRC_USE_REIMPLS
+		${ASRC_vstdlib}
 		tier1
 		lzma
 		mathlib

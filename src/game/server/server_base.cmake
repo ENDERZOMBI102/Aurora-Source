@@ -985,13 +985,11 @@ function( target_use_server_base target EXCLUDE_SOURCES )
 
 			particles
 			dmxloader
-			tier0
-#			${ASRC_tier02}
+			${ASRC_tier0}  # may use reimpl or valve's based on -DASRC_USE_REIMPLS
 			mathlib
 			tier1
 			tier2
-			vstdlib
-#			${ASRC_vstdlib2}
+			${ASRC_vstdlib}  # may use reimpl or valve's based on -DASRC_USE_REIMPLS
 			tier3
 			steam_api
 	)

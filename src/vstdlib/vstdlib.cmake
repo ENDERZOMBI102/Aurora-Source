@@ -8,11 +8,14 @@ set( VSTDLIB_SOURCE_FILES
 	"${VSTDLIB_DIR}/pcgengine.cpp"
 	"${VSTDLIB_DIR}/jobthread.cpp"
 	"${VSTDLIB_DIR}/osversion.cpp"
+	"${VSTDLIB_DIR}/processutils.cpp"
+	"${VSTDLIB_DIR}/cvar.cpp"
 
 	# Header files
 	"${VSTDLIB_DIR}/cvarsystem.hpp"
-	"${VSTDLIB_DIR}/keyvaluessystem.hpp"
 	"${VSTDLIB_DIR}/jobthread.hpp"
+	"${VSTDLIB_DIR}/keyvaluessystem.hpp"
+	"${VSTDLIB_DIR}/processutils.hpp"
 
 	# Public
 	"${SRCDIR}/public/vstdlib/vstdlib.h"
@@ -29,22 +32,25 @@ set( VSTDLIB_SOURCE_FILES
 
 add_library( vstdlib2 SHARED ${VSTDLIB_SOURCE_FILES} )
 target_compile_definitions( vstdlib2 PRIVATE VSTDLIB_DLL_EXPORT )
-target_link_libraries( vstdlib2 PRIVATE ${ASRC_tier02} tier1 )
+target_link_libraries( vstdlib2
+	PRIVATE
+		${ASRC_tier0}  # may use reimpl or valve's based on -DASRC_USE_REIMPLS
+		tier1
+)
 link_to_bin( TARGET vstdlib2 )
-declare_library( TARGET vstdlib2 )
 
 
 add_library( vstdlib IMPORTED SHARED )
-
 if ( UNIX )
 	set( VSTDLIB_NAME "libvstdlib.so" )
 	configure_file( "${LIBPUBLIC}/libvstdlib.so" "${GAMEDIR}/bin/libvstdlib.so" COPYONLY )
 else ()
 	set( VSTDLIB_NAME "vstdlib.lib" )
 endif ()
-
 set_target_properties( vstdlib
 	PROPERTIES
 		IMPORTED_IMPLIB "${LIBPUBLIC}/${VSTDLIB_NAME}"
 		IMPORTED_NO_SONAME true
 )
+
+declare_replacement( TARGET vstdlib2 FOR vstdlib )

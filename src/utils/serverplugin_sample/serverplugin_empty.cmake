@@ -49,8 +49,8 @@ target_compile_definitions( serverplugin_empty
 target_link_libraries( serverplugin_empty
 	PRIVATE
 		mathlib
-		tier0
-		vstdlib
+		${ASRC_tier0}  # may use reimpl or valve's based on -DASRC_USE_REIMPLS
+		${ASRC_vstdlib}
 		tier1
 		tier2
 )

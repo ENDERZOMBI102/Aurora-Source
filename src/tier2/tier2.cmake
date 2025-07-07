@@ -26,18 +26,18 @@ set( TIER2_SOURCE_FILES
 #add_library( tier22 SHARED ${TIER2_SOURCE_FILES} )
 #target_compile_definitions( tier22
 #	PRIVATE
-#	TIER0_DLL_EXPORT
+#		TIER0_DLL_EXPORT
 #)
 #target_link_libraries( tier22
 #	PRIVATE
 #		SDL3::SDL3-shared
 #)
 #link_to_bin( TARGET tier22 )
-#declare_library( TARGET tier22 )
-
 
 add_library( tier2 IMPORTED STATIC )
 set_target_properties( tier2
 	PROPERTIES
 		IMPORTED_LOCATION "${LIBPUBLIC}/tier2${CMAKE_IMPORT_LIBRARY_SUFFIX}"
 )
+
+#declare_replacement( TARGET tier22 FOR tier2 )

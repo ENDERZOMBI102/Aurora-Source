@@ -29,9 +29,9 @@ endif ()
 
 target_link_libraries( vrad_launcher
 	PRIVATE
-		tier0
+		${ASRC_tier0}  # may use reimpl or valve's based on -DASRC_USE_REIMPLS
 		tier1
-		vstdlib
+		${ASRC_vstdlib}
 		sourcepp::steampp
 )
 add_dependencies( vrad_launcher vrad_dll )

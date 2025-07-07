@@ -32,11 +32,11 @@ target_include_directories( launcher
 target_link_libraries( launcher
 	PRIVATE
 		appframework
-		tier0
+		${ASRC_tier0}  # may use reimpl or valve's based on -DASRC_USE_REIMPLS
 		tier1
 		tier2
 		tier3
 		mathlib
-		vstdlib
+		${ASRC_vstdlib}
 		SDL3::SDL3-shared
 )

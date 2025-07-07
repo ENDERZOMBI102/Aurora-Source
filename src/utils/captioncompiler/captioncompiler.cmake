@@ -46,6 +46,7 @@ target_include_directories( captioncompiler
 
 target_link_libraries( captioncompiler
 	PRIVATE
+		${ASRC_tier0}  # may use reimpl or valve's based on -DASRC_USE_REIMPLS
 		appframework
 		mathlib
 		tier1

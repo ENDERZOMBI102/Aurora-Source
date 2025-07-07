@@ -22,16 +22,16 @@ set( SHADERLIB_SOURCE_FILES
 add_library( shaderlib2 STATIC ${SHADERLIB_SOURCE_FILES} )
 target_link_libraries( shaderlib2
 	PUBLIC
-		tier0
+		${ASRC_tier0}  # may use reimpl or valve's based on -DASRC_USE_REIMPLS
 		tier1
 		mathlib
 )
 link_to_bin( TARGET shaderlib2 )
-declare_library( TARGET shaderlib2 )
 
 add_library( shaderlib IMPORTED STATIC )
-
 set_target_properties( shaderlib
 	PROPERTIES
 		IMPORTED_LOCATION "${LIBPUBLIC}/shaderlib${CMAKE_STATIC_LIBRARY_SUFFIX}"
 )
+
+declare_replacement( TARGET shaderlib2 FOR shaderlib )

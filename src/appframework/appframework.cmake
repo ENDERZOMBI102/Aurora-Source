@@ -33,7 +33,7 @@ target_include_directories( appframework
 )
 target_link_libraries( appframework
 	PRIVATE
-		tier0
-		vstdlib
+		${ASRC_tier0}  # may use reimpl or valve's based on -DASRC_USE_REIMPLS
+		${ASRC_vstdlib}
 		SDL3::SDL3-shared
 )

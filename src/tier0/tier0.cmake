@@ -66,19 +66,18 @@ target_link_libraries( tier02
 		SDL3::SDL3-shared
 )
 link_to_bin( TARGET tier02 )
-declare_library( TARGET tier02 )
 
 add_library( tier0 IMPORTED SHARED )
-
 if ( UNIX )
 	set( TIER0_NAME "libtier0.so" )
 	configure_file( "${LIBPUBLIC}/libtier0.so" "${GAMEDIR}/bin/libtier0.so" COPYONLY )
 else ()
 	set( TIER0_NAME "tier0.lib" )
 endif ()
-
 set_target_properties( tier0
 	PROPERTIES
 		IMPORTED_IMPLIB "${LIBPUBLIC}/${TIER0_NAME}"
 		IMPORTED_NO_SONAME true
 )
+
+declare_replacement( TARGET tier02 FOR tier0 )

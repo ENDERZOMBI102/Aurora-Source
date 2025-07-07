@@ -28,14 +28,34 @@ function(link_to_bin)
 	)
 endfunction()
 
-# Declares a shared library others can link to.
-# As example, to link to the `tier0` reimplementation, you can do target_link_libraries( ${target} ${vis} ${ASRC_tier02} )`
-function(declare_library)
-	cmake_parse_arguments( DL "" "TARGET" "" ${ARGN} )
-	if ( NOT DEFINED "DL_TARGET" )
+# Declares that a target may be replaced by another via `-DASRC_USE_REIMPLS=1`,
+# or the more granular `-DASRC_USE_REIMPLS=$names`, where `$names` is a comma-separated list of replaced libraries names.
+# As example, to link to the `tier0` or its reimplementation, you can do `target_link_libraries( ${target} ${vis} ${ASRC_tier0} )`
+function(declare_replacement)
+	cmake_parse_arguments( DR "" "TARGET;FOR" "" ${ARGN} )
+	if ( NOT DEFINED "DR_TARGET" )
 		message( SEND_ERROR "Missing `TARGET` parameter!" )
 		return()
 	endif ()
+	if ( NOT DEFINED "DR_FOR" )
+		message( SEND_ERROR "Missing `FOR` parameter!" )
+		return()
+	endif ()
 
-	set( "ASRC_${DL_TARGET}" $<IF:$<BOOL:${WIN32}>,$<TARGET_NAME:${DL_TARGET}>,$<TARGET_FILE:${DL_TARGET}>> PARENT_SCOPE )
+	set( replace 0 )
+	if ( DEFINED "ASRC_USE_REIMPLS" )
+		if ( "${ASRC_USE_REIMPLS}" STREQUAL "1" )
+			set( replace 1 )
+		elseif ( "${ASRC_USE_REIMPLS}" MATCHES "${DR_FOR},?" )
+			set( replace 1 )
+		endif ()
+	endif ()
+
+	if ( ${replace} )
+		set( "ASRC_DR_${DR_FOR}" $<IF:$<BOOL:${WIN32}>,$<TARGET_NAME:${DR_TARGET}>,$<TARGET_FILE:${DR_TARGET}>> PARENT_SCOPE )
+		message( NOTICE "* enabling reimplemented library `${DR_TARGET}` for `${DR_FOR}`" )
+	else ()
+		set( "ASRC_DR_${DR_FOR}" $<IF:$<BOOL:${WIN32}>,$<TARGET_NAME:${DR_FOR}>,$<TARGET_FILE:${DR_FOR}>> PARENT_SCOPE )
+		message( NOTICE "* using original library `${DR_FOR}`" )
+	endif ()
 endfunction()

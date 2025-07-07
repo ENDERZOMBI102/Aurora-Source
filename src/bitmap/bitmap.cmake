@@ -35,8 +35,8 @@ target_compile_definitions( bitmap2
 )
 target_link_libraries( bitmap2
 	PRIVATE
-		tier0
-		vstdlib
+		${ASRC_tier0}  # may use reimpl or valve's based on -DASRC_USE_REIMPLS
+		${ASRC_vstdlib}
 )
 
 add_library( bitmap IMPORTED STATIC )
