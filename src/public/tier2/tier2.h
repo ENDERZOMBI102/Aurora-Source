@@ -70,15 +70,15 @@ void InitCommandLineProgram( int argc, char** argv );
 //-----------------------------------------------------------------------------
 template<class IInterface, int ConVarFlag = 0>
 class CTier2AppSystem : public CTier1AppSystem<IInterface, ConVarFlag> {
-	typedef CTier1AppSystem<IInterface, ConVarFlag> BaseClass;
-
+	using BaseClass = CTier1AppSystem<IInterface, ConVarFlag>;
 public:
-	CTier2AppSystem( bool bIsPrimaryAppSystem = true ) : BaseClass( bIsPrimaryAppSystem ) {
-	}
+	explicit CTier2AppSystem( bool bIsPrimaryAppSystem = true )
+		: BaseClass( bIsPrimaryAppSystem ) { }
 
-	virtual bool Connect( CreateInterfaceFn factory ) {
-		if ( !BaseClass::Connect( factory ) )
+	auto Connect( CreateInterfaceFn factory ) -> bool override {
+		if ( not BaseClass::Connect( factory ) ) {
 			return false;
+		}
 
 		if ( BaseClass::IsPrimaryAppSystem() ) {
 			ConnectTier2Libraries( &factory, 1 );
@@ -87,19 +87,20 @@ public:
 		return true;
 	}
 
-	virtual InitReturnVal_t Init() {
-		InitReturnVal_t nRetVal = BaseClass::Init();
-		if ( nRetVal != INIT_OK )
+	auto Init() -> InitReturnVal_t override {
+		const InitReturnVal_t nRetVal = BaseClass::Init();
+		if ( nRetVal != INIT_OK ) {
 			return nRetVal;
+		}
 
 		return INIT_OK;
 	}
 
-	virtual void Shutdown() {
+	auto Shutdown() -> void override {
 		BaseClass::Shutdown();
 	}
 
-	virtual void Disconnect() {
+	auto Disconnect() -> void override {
 		if ( BaseClass::IsPrimaryAppSystem() ) {
 			DisconnectTier2Libraries();
 		}

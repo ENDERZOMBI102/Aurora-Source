@@ -23,7 +23,7 @@
 
 template<typename T>
 inline bool IsPowerOfTwo( T value ) {
-	return ( value & ( value - (T) 1 ) ) == (T) 0;
+	return ( value & ( value - static_cast<T>( 1 ) ) ) == static_cast<T>( 0 );
 }
 
 #ifndef REFERENCE
@@ -49,7 +49,7 @@ inline bool IsPowerOfTwo( T value ) {
 template<typename IndexType, typename T, unsigned int N>
 IndexType ClampedArrayIndex( const T (&buffer)[N], IndexType index ) {
 	NOTE_UNUSED( buffer );
-	return clamp( index, 0, (IndexType) N - 1 );
+	return clamp( index, 0, static_cast<IndexType>( N ) - 1 );
 }
 
 template<typename T, unsigned int N>

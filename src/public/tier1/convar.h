@@ -205,7 +205,7 @@ inline int CCommand::ArgC() const {
 }
 
 inline const char** CCommand::ArgV() const {
-	return m_nArgc ? (const char**) m_ppArgv : nullptr;
+	return m_nArgc ? const_cast<const char**>( m_ppArgv ) : nullptr;
 }
 
 inline const char* CCommand::ArgS() const {
@@ -220,8 +220,9 @@ inline const char* CCommand::Arg( int nIndex ) const {
 	// FIXME: Many command handlers appear to not be particularly careful
 	// about checking for valid argc range. For now, we're going to
 	// do the extra check and return an empty string if it's out of range
-	if ( nIndex < 0 || nIndex >= m_nArgc )
+	if ( nIndex < 0 || nIndex >= m_nArgc ) {
 		return "";
+	}
 	return m_ppArgv[ nIndex ];
 }
 
@@ -612,40 +613,40 @@ private:
 //-----------------------------------------------------------------------------
 #define CON_COMMAND( name, description )                          \
 	static void name( const CCommand& args );                     \
-	static ConCommand name##_command( #name, name, description ); \
+	static ConCommand name## _command( #name, name, description ); \
 	static void name( const CCommand& args )
 
 #define CON_COMMAND_F( name, description, flags )                        \
 	static void name( const CCommand& args );                            \
-	static ConCommand name##_command( #name, name, description, flags ); \
+	static ConCommand name## _command( #name, name, description, flags ); \
 	static void name( const CCommand& args )
 
 #define CON_COMMAND_F_COMPLETION( name, description, flags, completion )             \
 	static void name( const CCommand& args );                                        \
-	static ConCommand name##_command( #name, name, description, flags, completion ); \
+	static ConCommand name## _command( #name, name, description, flags, completion ); \
 	static void name( const CCommand& args )
 
 #define CON_COMMAND_EXTERN( name, _funcname, description )             \
 	void _funcname( const CCommand& args );                            \
-	static ConCommand name##_command( #name, _funcname, description ); \
+	static ConCommand name## _command( #name, _funcname, description ); \
 	void _funcname( const CCommand& args )
 
 #define CON_COMMAND_EXTERN_F( name, _funcname, description, flags )           \
 	void _funcname( const CCommand& args );                                   \
-	static ConCommand name##_command( #name, _funcname, description, flags ); \
+	static ConCommand name## _command( #name, _funcname, description, flags ); \
 	void _funcname( const CCommand& args )
 
 #define CON_COMMAND_MEMBER_F( _thisclass, name, _funcname, description, flags )                                                    \
 	void _funcname( const CCommand& args );                                                                                        \
-	friend class CCommandMemberInitializer_##_funcname;                                                                            \
-	class CCommandMemberInitializer_##_funcname {                                                                                  \
+	friend class CCommandMemberInitializer_## _funcname;                                                                            \
+	class CCommandMemberInitializer_## _funcname {                                                                                  \
 	public:                                                                                                                        \
-		CCommandMemberInitializer_##_funcname() : m_ConCommandAccessor( nullptr, name, &_thisclass::_funcname, description, flags ) { \
-			m_ConCommandAccessor.SetOwner( GET_OUTER( _thisclass, m_##_funcname##_register ) );                                    \
+		CCommandMemberInitializer_## _funcname() : m_ConCommandAccessor( nullptr, name, &_thisclass::_funcname, description, flags ) { \
+			m_ConCommandAccessor.SetOwner( GET_OUTER( _thisclass, m_## _funcname## _register ) );                                    \
 		}                                                                                                                          \
                                                                                                                                    \
 	private:                                                                                                                       \
 		CConCommandMemberAccessor<_thisclass> m_ConCommandAccessor;                                                                \
 	};                                                                                                                             \
                                                                                                                                    \
-	CCommandMemberInitializer_##_funcname m_##_funcname##_register;
+	CCommandMemberInitializer_## _funcname m_## _funcname## _register;

@@ -7,9 +7,9 @@
 //
 //===========================================================================//
 #pragma once
-#include "basetypes.h"
+#include "tier0/basetypes.h"
 #include "tier0/valve_off.h"
-#include "wchartypes.h"
+#include "tier0/wchartypes.h"
 
 #if defined( PLATFORM_POSIX )
 	#include <alloca.h> // need this for _alloca

@@ -4,8 +4,6 @@
 //
 //===========================================================================//
 #pragma once
-
-
 #include "appframework/IAppSystem.h"
 
 
@@ -13,9 +11,7 @@
 // Handle to a process
 //-----------------------------------------------------------------------------
 typedef int ProcessHandle_t;
-enum {
-	PROCESS_HANDLE_INVALID = 0,
-};
+constexpr ProcessHandle_t PROCESS_HANDLE_INVALID{ 0 };
 
 
 //-----------------------------------------------------------------------------
@@ -29,13 +25,15 @@ enum {
 //-----------------------------------------------------------------------------
 abstract_class IProcessUtils : public IAppSystem {
 public:
+	static constexpr auto INTERFACE_VERSION{ PROCESS_UTILS_INTERFACE_VERSION };
+public:
 	// Starts, stops a process
 	virtual ProcessHandle_t StartProcess( const char* pCommandLine, bool bConnectStdPipes ) = 0;
 	virtual ProcessHandle_t StartProcess( int argc, const char** argv, bool bConnectStdPipes ) = 0;
 	virtual void CloseProcess( ProcessHandle_t hProcess ) = 0;
 	virtual void AbortProcess( ProcessHandle_t hProcess ) = 0;
 
-	// Returns true if a process is complete
+	// Returns true if the process is complete
 	virtual bool IsProcessComplete( ProcessHandle_t hProcess ) = 0;
 
 	// Waits until a process is complete

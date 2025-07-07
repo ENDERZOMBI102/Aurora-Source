@@ -5,10 +5,8 @@
 // $NoKeywords: $
 //=============================================================================//
 #pragma once
-
-#include "commonmacros.h"
-#include "wchartypes.h"
-
+#include "tier0/commonmacros.h"
+#include "tier0/wchartypes.h"
 #include "tier0/valve_off.h"
 
 
@@ -18,13 +16,7 @@
 #define DLL_EXT_STRING DLLExtTokenPaste2( _DLL_EXT )
 
 
-#include "protected_things.h"
-
-
-// stdio.h
-#ifndef NULL
-	#define NULL 0
-#endif
+#include "tier0/protected_things.h"
 
 
 #if defined( PLATFORM_POSIX )

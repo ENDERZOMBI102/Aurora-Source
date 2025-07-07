@@ -39,8 +39,6 @@
 // ------------------------------------------------------------------------------------ //
 // InterfaceReg.
 // ------------------------------------------------------------------------------------ //
-InterfaceReg* InterfaceReg::s_InterfaceRegs = nullptr;
-
 InterfaceReg::InterfaceReg( const InstantiateInterfaceFn fn, const char* pName )
 	: m_CreateFn{ fn }, m_Name{ pName } {
 	m_Next = s_InterfaceRegs;
@@ -59,7 +57,7 @@ InterfaceReg::InterfaceReg( const InstantiateInterfaceFn fn, const char* pName )
 // makes sure Sys_GetFactoryThis() has the dll specific symbol and GetProcAddress() returns the module specific
 // function for CreateInterface again getting the dll specific symbol we need.
 // ------------------------------------------------------------------------------------ //
-void* CreateInterfaceInternal( const char* pName, int* pReturnCode ) {
+auto CreateInterfaceInternal( const char* const pName, int* pReturnCode ) -> void* {
 	for ( const auto* pCur = InterfaceReg::s_InterfaceRegs; pCur; pCur = pCur->m_Next ) {
 		if ( strcmp( pCur->m_Name, pName ) == 0 ) {
 			if ( pReturnCode ) {
@@ -75,12 +73,12 @@ void* CreateInterfaceInternal( const char* pName, int* pReturnCode ) {
 	return nullptr;
 }
 
-void* CreateInterface( const char* pName, int* pReturnCode ) {
+auto CreateInterface( const char* pName, int* pReturnCode ) -> void* {
 	return CreateInterfaceInternal( pName, pReturnCode );
 }
 
 
-static void* Sys_GetModuleHandle( const char* name ) {
+static auto Sys_GetModuleHandle( const char* name ) -> void* {
 	if ( not name ) {
 		// hmm, how can this be handled under linux... is it even necessary?
 		return nullptr;
@@ -109,30 +107,30 @@ static void* Sys_GetModuleHandle( const char* name ) {
 // Input  : pModuleName - module name
 //			*pName - proc name
 //-----------------------------------------------------------------------------
-static void* Sys_GetProcAddress( const char* pModuleName, const char* pName ) {
+static auto Sys_GetProcAddress( const char* pModuleName, const char* pName ) -> void* {
 	auto hModule = reinterpret_cast<HMODULE>( Sys_GetModuleHandle( pModuleName ) );
 	return reinterpret_cast<void*>( GetProcAddress( hModule, pName ) );
 }
 
 #if IsWindows()
-	static void* Sys_GetProcAddress( HMODULE hModule, const char* pName ) {
+	static auto Sys_GetProcAddress( HMODULE hModule, const char* pName ) -> void* {
 		return reinterpret_cast<void*>( GetProcAddress( hModule, pName ) );
 	}
 #endif
 
-HMODULE Sys_LoadLibrary( const char* pLibraryName, Sys_Flags flags ) {
+auto Sys_LoadLibrary( const char* pLibraryName, Sys_Flags flags ) -> HMODULE {
 	char str[ 1024 ];
 	// Note: DLL_EXT_STRING can be "_srv.so" or "_360.dll".
 	//       So be careful when using the V_*Extension* routines...
-	const char* pDllStringExtension = V_GetFileExtension( DLL_EXT_STRING );
-	const char* pModuleExtension = pDllStringExtension ? pDllStringExtension - 1 : DLL_EXT_STRING;
+	const char* pDllStringExtension{ V_GetFileExtension( DLL_EXT_STRING ) };
+	const char* pModuleExtension{ pDllStringExtension ? pDllStringExtension - 1 : DLL_EXT_STRING };
 
-	Q_strncpy( str, pLibraryName, sizeof( str ) );
+	V_strncpy( str, pLibraryName, sizeof( str ) );
 
 	// always force the final extension to be .dll
 	V_SetExtension( str, pModuleExtension, sizeof( str ) );
 
-	Q_FixSlashes( str );
+	V_FixSlashes( str );
 
 	#if IsWindows()
 		if ( flags & SYS_NOLOAD ) {
@@ -158,10 +156,10 @@ HMODULE Sys_LoadLibrary( const char* pLibraryName, Sys_Flags flags ) {
 		return ret;
 	#endif
 }
-static bool s_bRunningWithDebugModules = false;
+static bool s_bRunningWithDebugModules{ false };
 
 
-CSysModule* Sys_LoadModule( const char* pModuleName, const Sys_Flags flags ) {
+auto Sys_LoadModule( const char* pModuleName, const Sys_Flags flags ) -> CSysModule* {
 	// If using the Steam filesystem, either the DLL must be a minimum footprint
 	// file in the depot (MFP) or a filesystem GetLocalCopy() call must be made
 	// prior to the call to this routine.
@@ -220,7 +218,7 @@ CSysModule* Sys_LoadModule( const char* pModuleName, const Sys_Flags flags ) {
 	return reinterpret_cast<CSysModule*>( dll );
 }
 
-const char* Sys_LastErrorString() {
+auto Sys_LastErrorString() -> const char* {
 	static char err[ 2048 ];
 	#if IsWindows()
 		LPVOID lpMsgBuf;
@@ -248,7 +246,7 @@ const char* Sys_LastErrorString() {
 //-----------------------------------------------------------------------------
 // Purpose: Determine if any debug modules were loaded
 //-----------------------------------------------------------------------------
-bool Sys_RunningWithDebugModules() {
+auto Sys_RunningWithDebugModules() -> bool {
 	if ( not s_bRunningWithDebugModules ) {
 		#if 0// IsWindows() && IsPC()
 				char chMemoryName[ MAX_PATH ];
@@ -265,7 +263,7 @@ bool Sys_RunningWithDebugModules() {
 	return s_bRunningWithDebugModules;
 }
 
-void Sys_UnloadModule( CSysModule* pModule ) {
+auto Sys_UnloadModule( CSysModule* pModule ) -> void {
 	if ( not pModule ) {
 		return;
 	}
@@ -283,7 +281,7 @@ void Sys_UnloadModule( CSysModule* pModule ) {
 //			*pName - proc name
 // Output : factory for this module
 //-----------------------------------------------------------------------------
-CreateInterfaceFn Sys_GetFactory( CSysModule* pModule ) {
+auto Sys_GetFactory( CSysModule* pModule ) -> CreateInterfaceFn {
 	if ( not pModule ) {
 		return nullptr;
 	}
@@ -299,7 +297,7 @@ CreateInterfaceFn Sys_GetFactory( CSysModule* pModule ) {
 // Purpose: returns the instance of this module
 // Output : interface_instance_t
 //-----------------------------------------------------------------------------
-CreateInterfaceFn Sys_GetFactoryThis() {
+auto Sys_GetFactoryThis() -> CreateInterfaceFn {
 	return &CreateInterfaceInternal;
 }
 
@@ -308,7 +306,7 @@ CreateInterfaceFn Sys_GetFactoryThis() {
 // Input  : *pModuleName - name of the module
 // Output : interface_instance_t - instance of that module
 //-----------------------------------------------------------------------------
-CreateInterfaceFn Sys_GetFactory( const char* pModuleName ) {
+auto Sys_GetFactory( const char* pModuleName ) -> CreateInterfaceFn {
 	return reinterpret_cast<CreateInterfaceFn>( Sys_GetProcAddress( pModuleName, CREATEINTERFACE_PROCNAME ) );
 }
 
@@ -317,7 +315,7 @@ CreateInterfaceFn Sys_GetFactory( const char* pModuleName ) {
 // Input  :
 // Output :
 //-----------------------------------------------------------------------------
-bool Sys_LoadInterface( const char* pModuleName, const char* pInterfaceVersionName, CSysModule** pOutModule, void** pOutInterface ) {
+auto Sys_LoadInterface( const char* pModuleName, const char* pInterfaceVersionName, CSysModule** pOutModule, void** pOutInterface ) -> bool {
 	CSysModule* pMod = Sys_LoadModule( pModuleName );
 	if ( not pMod ) {
 		return false;
@@ -356,7 +354,7 @@ CDllDemandLoader::~CDllDemandLoader() {
 	Unload();
 }
 
-CreateInterfaceFn CDllDemandLoader::GetFactory() {
+auto CDllDemandLoader::GetFactory() -> CreateInterfaceFn {
 	if ( not m_hModule and not m_bLoadAttempted ) {
 		m_bLoadAttempted = true;
 		m_hModule = Sys_LoadModule( m_pchModuleName );
@@ -369,7 +367,7 @@ CreateInterfaceFn CDllDemandLoader::GetFactory() {
 	return Sys_GetFactory( m_hModule );
 }
 
-void CDllDemandLoader::Unload() {
+auto CDllDemandLoader::Unload() -> void {
 	if ( m_hModule ) {
 		Sys_UnloadModule( m_hModule );
 		m_hModule = nullptr;

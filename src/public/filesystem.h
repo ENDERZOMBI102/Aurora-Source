@@ -500,6 +500,8 @@ public:
 
 abstract_class IFileSystem : public IAppSystem, public IBaseFileSystem {
 public:
+	static constexpr auto INTERFACE_VERSION{ FILESYSTEM_INTERFACE_VERSION };
+public:
 	//--------------------------------------------------------
 	// Steam operations
 	//--------------------------------------------------------

@@ -8,14 +8,7 @@
 //-----------------------------------------------------------------------------
 // $NoKeywords: $
 //===========================================================================//
-
-#ifndef ICONVAR_H
-#define ICONVAR_H
-
-#if _WIN32
 #pragma once
-#endif
-
 #include "tier0/dbg.h"
 #include "tier0/platform.h"
 #include "tier1/strtools.h"
@@ -97,21 +90,17 @@ typedef void ( *FnChangeCallback_t )( IConVar *var, const char *pOldValue, float
 //-----------------------------------------------------------------------------
 // Abstract interface for ConVars
 //-----------------------------------------------------------------------------
-abstract_class IConVar
-{
+abstract_class IConVar {
 public:
 	// Value set
-	virtual void SetValue( const char *pValue ) = 0;
-	virtual void SetValue( float flValue ) = 0;
-	virtual void SetValue( int nValue ) = 0;
+	virtual auto SetValue( const char* pValue ) -> void = 0;
+	virtual auto SetValue( float flValue ) -> void = 0;
+	virtual auto SetValue( int nValue ) -> void = 0;
 
 	// Return name of command
-	virtual const char *GetName( void ) const = 0;
+	virtual auto GetName() const -> const char* = 0;
 
 	// Accessors.. not as efficient as using GetState()/GetInfo()
 	// if you call these methods multiple times on the same IConVar
-	virtual bool IsFlagSet( int nFlag ) const = 0;
+	virtual auto IsFlagSet( int nFlag ) const -> bool = 0;
 };
-
-
-#endif // ICONVAR_H

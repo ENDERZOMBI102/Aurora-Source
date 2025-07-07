@@ -493,6 +493,8 @@ DECLARE_POINTER_HANDLE( MaterialLock_t );
 
 abstract_class IMaterialSystem : public IAppSystem {
 public:
+	static constexpr auto INTERFACE_VERSION{ MATERIAL_SYSTEM_INTERFACE_VERSION };
+public:
 	// Placeholder for API revision
 	virtual bool Connect( CreateInterfaceFn factory ) = 0;
 	virtual void Disconnect() = 0;

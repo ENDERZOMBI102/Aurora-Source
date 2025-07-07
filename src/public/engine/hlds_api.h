@@ -26,7 +26,8 @@ struct ModInfo_t {
 //  application to host it.
 //-----------------------------------------------------------------------------
 class IDedicatedServerAPI : public IAppSystem {
-	// Functions
+public:
+	static constexpr auto INTERFACE_VERSION{ VENGINE_HLDS_API_VERSION };
 public:
 	// Initialize the engine with the specified base directory and interface factories
 	virtual bool ModInit( ModInfo_t& info ) = 0;

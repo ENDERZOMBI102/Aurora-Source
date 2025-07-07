@@ -100,6 +100,8 @@ enum LoaderSpewDetail {
 #define QUEUEDLOADER_INTERFACE_VERSION "QueuedLoaderVersion004"
 abstract_class IQueuedLoader : public IAppSystem {
 public:
+	static constexpr auto INTERFACE_VERSION{ QUEUEDLOADER_INTERFACE_VERSION };
+public:
 	virtual void InstallLoader( ResourcePreload_t type, IResourcePreload* pLoader ) = 0;
 	virtual void InstallProgress( ILoaderProgress* pProgress ) = 0;
 

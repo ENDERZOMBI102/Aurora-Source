@@ -343,6 +343,8 @@ public:
 //-----------------------------------------------------------------------------
 abstract_class IDataCache : public IAppSystem {
 public:
+	static constexpr auto INTERFACE_VERSION{ DATACACHE_INTERFACE_VERSION };
+public:
 	//--------------------------------------------------------
 	// Purpose: Controls cache size.
 	//--------------------------------------------------------

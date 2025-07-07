@@ -246,12 +246,14 @@ public:
 };
 
 
+
+#define STUDIO_RENDER_INTERFACE_VERSION "VStudioRender025"
 //-----------------------------------------------------------------------------
 // Studio render interface
 //-----------------------------------------------------------------------------
-#define STUDIO_RENDER_INTERFACE_VERSION "VStudioRender025"
-
 abstract_class IStudioRender : public IAppSystem {
+public:
+	static constexpr auto INTERFACE_VERSION{ STUDIO_RENDER_INTERFACE_VERSION };
 public:
 	virtual void BeginFrame( void ) = 0;
 	virtual void EndFrame( void ) = 0;

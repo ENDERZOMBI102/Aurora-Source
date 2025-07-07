@@ -17,7 +17,7 @@ class Color;
 //-----------------------------------------------------------------------------
 // ConVars/ComCommands are marked as having a particular DLL identifier
 //-----------------------------------------------------------------------------
-typedef int CVarDLLIdentifier_t;
+using CVarDLLIdentifier_t = int32;
 
 
 //-----------------------------------------------------------------------------
@@ -31,21 +31,26 @@ public:
 };
 
 
+#define CVAR_QUERY_INTERFACE_VERSION "VCvarQuery001"
 //-----------------------------------------------------------------------------
 // Purpose: Applications can implement this to modify behavior in ICvar
 //-----------------------------------------------------------------------------
-#define CVAR_QUERY_INTERFACE_VERSION "VCvarQuery001"
 abstract_class ICvarQuery : public IAppSystem {
+public:
+	static constexpr auto INTERFACE_VERSION{ CVAR_QUERY_INTERFACE_VERSION };
 public:
 	// Can these two convars be aliased?
 	virtual bool AreConVarsLinkable( const ConVar* child, const ConVar* parent ) = 0;
 };
 
 
+#define CVAR_INTERFACE_VERSION "VEngineCvar004"
 //-----------------------------------------------------------------------------
 // Purpose: DLL interface to ConVars/ConCommands
 //-----------------------------------------------------------------------------
 abstract_class ICvar : public IAppSystem {
+public:
+	static constexpr auto INTERFACE_VERSION{ CVAR_INTERFACE_VERSION };
 public:
 	// Allocate a unique DLL identifier
 	virtual CVarDLLIdentifier_t AllocateDLLIdentifier() = 0;
@@ -170,9 +175,6 @@ inline bool ICvar::Iterator::IsValid() {
 inline ConCommandBase* ICvar::Iterator::Get() {
 	return m_pIter->Get();
 }
-
-#define CVAR_INTERFACE_VERSION "VEngineCvar004"
-
 
 //-----------------------------------------------------------------------------
 // These global names are defined by tier1.h, duplicated here so you

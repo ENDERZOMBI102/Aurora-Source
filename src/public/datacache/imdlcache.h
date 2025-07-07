@@ -149,12 +149,15 @@ public:
 }
 */
 
+
+#define MDLCACHE_INTERFACE_VERSION "MDLCache004"
+
 //-----------------------------------------------------------------------------
 // The main MDL cacher
 //-----------------------------------------------------------------------------
-#define MDLCACHE_INTERFACE_VERSION "MDLCache004"
-
 abstract_class IMDLCache : public IAppSystem {
+public:
+	static constexpr auto INTERFACE_VERSION{ MDLCACHE_INTERFACE_VERSION };
 public:
 	// Used to install callbacks for when data is loaded + unloaded
 	// Returns the prior notify

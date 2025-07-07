@@ -39,22 +39,21 @@ public:
 
 static constexpr auto CREATEINTERFACE_PROCNAME = "CreateInterface";
 
-using CreateInterfaceFn = void*(*)( const char* pName, int* pReturnCode );
-using InstantiateInterfaceFn = void*(*)();
+using CreateInterfaceFn = auto(*)( const char* pName, int* pReturnCode ) -> void*;
+using InstantiateInterfaceFn = auto(*)() -> void*;
 
 // Used internally to register classes.
 class InterfaceReg {
 public:
 	InterfaceReg( InstantiateInterfaceFn fn, const char* pName );
-
 private:
-	friend void* CreateInterfaceInternal( const char* name, int* result );
+	friend auto CreateInterfaceInternal( const char* pName, int* pReturnCode ) -> void*;
 
 	InstantiateInterfaceFn m_CreateFn;
 	const char* m_Name;
 
-	InterfaceReg* m_Next;// For the global list.
-	static InterfaceReg* s_InterfaceRegs;
+	InterfaceReg* m_Next;  // For the global list.
+	static inline InterfaceReg* s_InterfaceRegs{ nullptr };
 };
 
 // Use these to expose an interface that can have multiple instances.
@@ -90,6 +89,20 @@ private:
 	static className __g_##className##_singleton;                        \
 	EXPOSE_SINGLE_INTERFACE_GLOBALVAR( className, interfaceName, versionName, __g_##className##_singleton );
 
+namespace Interface {
+	template<typename T>
+	inline constexpr bool is_modern_interface{ std::is_same_v<decltype( T::INTERFACE_VERSION ), const char* const> };
+}
+
+// Use this to expose a singleton modern interface with a global variable you've created.
+#define EXPOSE_SINGLE_INTERFACE_GLOBALVAR_T( className, ifaceName, globalVarName ) \
+	static_assert( std::is_class_v<decltype( globalVarName )>, "Must be a plain object (not * nor &)" ); \
+	static_assert( std::is_base_of_v<ifaceName, className>, "Class must implement the interface" ); \
+	static_assert( std::is_default_constructible_v<className>, "Class must have no other constructor than default" ); \
+	static_assert( Interface::is_modern_interface<ifaceName>, "The given interface doesn't expose its version!" ); \
+	static InterfaceReg __g_Create##className##ifaceName##_reg( []() -> void* { return static_cast<ifaceName*>( &globalVarName ); }, ifaceName::INTERFACE_VERSION ); // NOLINT(*-reserved-identifier)
+
+
 // load/unload components
 class CSysModule;
 
@@ -104,14 +117,14 @@ enum {
 // if pReturnCode is set, it will return one of the following values (IFACE_OK, IFACE_FAILED)
 // extend this for other error conditions/code
 //-----------------------------------------------------------------------------
-DLL_EXPORT void* CreateInterface( const char* pName, int* pReturnCode );
+DLL_EXPORT auto CreateInterface( const char* pName, int* pReturnCode ) -> void*;
 
 //-----------------------------------------------------------------------------
 // UNDONE: This is obsolete, use the module load/unload/get instead!!!
 //-----------------------------------------------------------------------------
-extern CreateInterfaceFn Sys_GetFactory( CSysModule* pModule );
-extern CreateInterfaceFn Sys_GetFactory( const char* pModuleName );
-extern CreateInterfaceFn Sys_GetFactoryThis();
+extern auto Sys_GetFactory( CSysModule* pModule ) -> CreateInterfaceFn;
+extern auto Sys_GetFactory( const char* pModuleName ) -> CreateInterfaceFn;
+extern auto Sys_GetFactoryThis() -> CreateInterfaceFn;
 
 enum Sys_Flags {
 	SYS_NOFLAGS = 0x00,
@@ -129,23 +142,23 @@ enum Sys_Flags {
  * @param flags
  * @return opaque handle to the module (hides system dependency)
  */
-extern CSysModule* Sys_LoadModule( const char* pModuleName, Sys_Flags flags = SYS_NOFLAGS );
+extern auto Sys_LoadModule( const char* pModuleName, Sys_Flags flags = SYS_NOFLAGS ) -> CSysModule*;
 /**
  * Unloads a DLL/component
  * @param pModule handle of the module to unload
  */
-extern void Sys_UnloadModule( CSysModule* pModule );
+extern auto Sys_UnloadModule( CSysModule* pModule ) -> void;
 
 /**
  * Returns the last system error in human-readable form.
  * @return statically allocated string with the error (hides system dependency)
  */
-const char* Sys_LastErrorString();
+auto Sys_LastErrorString() -> const char*;
 
 // This is a helper function to load a module, get its factory, and get a specific interface.
 // You are expected to free all of these things.
 // Returns false and cleans up if any of the steps fail.
-bool Sys_LoadInterface( const char* pModuleName, const char* pInterfaceVersionName, CSysModule** pOutModule, void** pOutInterface );
+auto Sys_LoadInterface( const char* pModuleName, const char* pInterfaceVersionName, CSysModule** pOutModule, void** pOutInterface ) -> bool;
 
 //-----------------------------------------------------------------------------
 // Purpose: Place this as a singleton at module scope (e.g.) and use it to get the factory from the specified module name.
@@ -154,12 +167,12 @@ bool Sys_LoadInterface( const char* pModuleName, const char* pInterfaceVersionNa
 //  then it'll call Sys_UnloadModule on the module so that the refcount is decremented
 //  and the .dll actually can unload from memory.
 //-----------------------------------------------------------------------------
-class CDllDemandLoader {
+class CDllDemandLoader final {
 public:
 	explicit CDllDemandLoader( char const* pchModuleName );
-	virtual ~CDllDemandLoader();
-	CreateInterfaceFn GetFactory();
-	void Unload();
+	~CDllDemandLoader();
+	auto GetFactory() -> CreateInterfaceFn;
+	auto Unload() -> void;
 
 private:
 	char const* m_pchModuleName;

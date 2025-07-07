@@ -45,14 +45,14 @@
 #endif
 
 #if IsWindows()
-	typedef void* HANDLE;
+	using HANDLE = void*;
 #endif
 
 //-----------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------------
 
-const unsigned TT_INFINITE = 0xffffffff;
+constexpr uint32 TT_INFINITE = 0xffffffff;
 
 using ThreadId_t = unsigned long;
 
@@ -76,7 +76,7 @@ PLATFORM_INTERFACE uint ThreadGetCurrentId();
 PLATFORM_INTERFACE ThreadHandle_t ThreadGetCurrentHandle();
 PLATFORM_INTERFACE int ThreadGetPriority( ThreadHandle_t hThread = nullptr );
 PLATFORM_INTERFACE bool ThreadSetPriority( ThreadHandle_t hThread, int priority );
-inline bool ThreadSetPriority( int priority ) {
+inline bool ThreadSetPriority( const int priority ) {
 	return ThreadSetPriority( nullptr, priority );
 }
 PLATFORM_INTERFACE bool ThreadInMainThread();

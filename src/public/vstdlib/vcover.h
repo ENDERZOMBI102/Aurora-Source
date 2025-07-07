@@ -13,43 +13,43 @@ public:
 	CVCoverage() = default;
 
 	[[nodiscard]] bool IsActive() const {
-		return this->m_bActive;
+		return m_bActive;
 	}
 
 	void SetActive( bool bActive ) {
-		Assert( bActive != this->m_bActive );
-		this->m_bActive = bActive;
+		Assert( bActive != m_bActive );
+		m_bActive = bActive;
 		if ( bActive )
-			++this->m_token;
+			++m_token;
 	}
 
 	void Begin() {
-		++this->m_depth;
+		++m_depth;
 	}
 
 	void End() {
-		--this->m_depth;
+		--m_depth;
 	}
 
 	void Reset() {
-		this->m_locations.RemoveAll();
+		m_locations.RemoveAll();
 	}
 
 	[[nodiscard]] bool ShouldCover( unsigned token ) const {
-		return this->m_bActive && this->m_depth > 0 && token != this->m_token;
+		return m_bActive && m_depth > 0 && token != m_token;
 	}
 
 	unsigned Cover( const char* pszFile, int line ) {
 		Location_t location = { pszFile, line };
 
-		this->m_locations.Insert( location );
+		m_locations.Insert( location );
 
-		return this->m_token;
+		return m_token;
 	}
 
 	void Report() {
-		for ( int i = this->m_locations.FirstInorder(); i != CUtlRBTree<CVCoverage::Location_t>::InvalidIndex(); i = this->m_locations.NextInorder( i ) ) {
-			Msg( "%s(%d) :\n", this->m_locations[ i ].pszFile, this->m_locations[ i ].line );
+		for ( int i = m_locations.FirstInorder(); i != CUtlRBTree<CVCoverage::Location_t>::InvalidIndex(); i = m_locations.NextInorder( i ) ) {
+			Msg( "%s(%d) :\n", m_locations[ i ].pszFile, m_locations[ i ].line );
 		}
 	}
 

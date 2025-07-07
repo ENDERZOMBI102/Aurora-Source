@@ -96,7 +96,7 @@ bool CGameAppLoader::Create() {
 	}
 
 	// set the shader API
-	if ( auto* matSys = FindSystem<IMaterialSystem>( MATERIAL_SYSTEM_INTERFACE_VERSION ) ) {
+	if ( auto* matSys = FindSystem<IMaterialSystem>() ) {
 		auto loadEmpty{ m_Dedicated or CommandLine()->FindParm( "-noshaderapi" ) != 0 };
 		g_pMaterialSystem = materials = matSys; // update globals too
 		matSys->SetShaderAPI( loadEmpty ? "shaderapiempty" : "shaderapidx9" );
@@ -114,20 +114,20 @@ bool CGameAppLoader::PreInit() {
 	g_pMaterialSystem->Connect( factory );
 
 	// Must be done after matsys is connected up!
-	g_pMaterialSystemHardwareConfig = FindSystem<IMaterialSystemHardwareConfig>( MATERIALSYSTEM_HARDWARECONFIG_INTERFACE_VERSION );
+	g_pMaterialSystemHardwareConfig = FindSystem<IMaterialSystemHardwareConfig>();
 	if ( not g_pMaterialSystemHardwareConfig ) {
 		return false;
 	}
 
 	// load globals
-	g_pFullFileSystem = g_pFileSystem = FindSystem<IFileSystem>( FILESYSTEM_INTERFACE_VERSION );
-	g_pQueuedLoader = FindSystem<IQueuedLoader>( QUEUEDLOADER_INTERFACE_VERSION );
-	g_pStudioRender = FindSystem<IStudioRender>( STUDIO_RENDER_INTERFACE_VERSION );
-	g_pDataCache = FindSystem<IDataCache>( DATACACHE_INTERFACE_VERSION );
-	g_pMDLCache = FindSystem<IMDLCache>( MDLCACHE_INTERFACE_VERSION );
-	s_LauncherApi = FindSystem<ILauncherAPI>( VENGINE_LAUNCHER_API_VERSION );
+	g_pFullFileSystem = g_pFileSystem = FindSystem<IFileSystem>();
+	g_pQueuedLoader = FindSystem<IQueuedLoader>();
+	g_pStudioRender = FindSystem<IStudioRender>();
+	g_pDataCache = FindSystem<IDataCache>();
+	g_pMDLCache = FindSystem<IMDLCache>();
+	s_LauncherApi = FindSystem<ILauncherAPI>();
 	// if ( m_Dedicated ) {
-	// s_DedicatedApi = FindSystem<IDedicatedServerAPI>( VENGINE_HLDS_API_VERSION );
+	// s_DedicatedApi = FindSystem<IDedicatedServerAPI>();
 	// }
 
 	if ( not g_pFullFileSystem or not g_pMaterialSystem or not s_LauncherApi ) {
