@@ -53,7 +53,7 @@ function(declare_replacement)
 
 	if ( ${replace} )
 		set( "ASRC_DR_${DR_FOR}" $<IF:$<BOOL:${WIN32}>,$<TARGET_NAME:${DR_TARGET}>,$<TARGET_FILE:${DR_TARGET}>> PARENT_SCOPE )
-		message( NOTICE "* enabling reimplemented library `${DR_TARGET}` for `${DR_FOR}`" )
+		message( NOTICE "* using reimplemented library `${DR_TARGET}` for `${DR_FOR}`" )
 	else ()
 		set( "ASRC_DR_${DR_FOR}" $<IF:$<BOOL:${WIN32}>,$<TARGET_NAME:${DR_FOR}>,$<TARGET_FILE:${DR_FOR}>> PARENT_SCOPE )
 		message( NOTICE "* using original library `${DR_FOR}`" )
