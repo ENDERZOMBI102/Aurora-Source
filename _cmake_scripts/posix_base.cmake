@@ -35,7 +35,7 @@ add_link_options(
 add_compile_definitions(
 	$<$<CXX_COMPILER_ID:GNU>:COMPILER_GCC=1>
 	NO_HOOK_MALLOC
-	# NO_MALLOC_OVERRIDE
+	$<$<BOOL:${ASRC_NO_MALLOC_OVERRIDE}>:NO_MALLOC_OVERRIDE>
 	$<${IS_LINUX}:_LINUX>
 	$<${IS_LINUX}:LINUX>
 )
