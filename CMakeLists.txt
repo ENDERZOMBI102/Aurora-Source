@@ -114,9 +114,12 @@ if ( ${IS_WINDOWS} )
 elseif ( ${IS_POSIX} )
 	include("_cmake_scripts/posix_base.cmake")
 endif()
+message( NOTICE "Build group: ${BUILD_GROUP}" )
+message( NOTICE "Game: ${BUILD_GAME}" )
 
 # import the projects
 include("_cmake_scripts/groups.cmake")
+
 
 # Store all targets in a variable name ( See: https://stackoverflow.com/questions/37434946/how-do-i-iterate-over-all-cmake-targets-programmatically/62311397#62311397 )
 function(get_all_targets var)

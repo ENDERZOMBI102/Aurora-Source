@@ -150,6 +150,6 @@ target_compile_options( tier1
 )
 target_link_libraries( tier1
 	PRIVATE
-		${ASRC_tier0}  # may use reimpl or valve's based on -DASRC_USE_REIMPLS
+		${ASRC_DR_tier0}  # may use reimpl or valve's based on -DASRC_USE_REIMPLS
 )
 

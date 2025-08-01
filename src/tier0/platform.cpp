@@ -2,7 +2,6 @@
 // Created by ENDERZOMBI102 on 10/02/2024.
 //
 #include "tier0/platform.h"
-#include "tier0/dbg.h"
 #include <SDL3/SDL_cpuinfo.h>
 #include <cstdio>
 #include <ctime>
@@ -26,13 +25,14 @@ double MonotonicTime() {
 	#if IsWindows()
 		static LARGE_INTEGER freq{}; // cache the value
 		if ( freq.QuadPart == 0 ) {
-			if (! QueryPerformanceFrequency( &freq ) )
+			if ( not QueryPerformanceFrequency( &freq ) ) {
 				freq.QuadPart = 0;
+			}
 		}
 
 		LARGE_INTEGER time;
 		// do we have a valid frequency? if so, use the performance counter
-		if ( freq.QuadPart > 0 && QueryPerformanceCounter( &time ) ) {
+		if ( freq.QuadPart > 0 and QueryPerformanceCounter( &time ) ) {
 			return static_cast<double>( time.QuadPart ) * 1000 / freq.QuadPart;
 		}
 
@@ -51,7 +51,7 @@ namespace {
 	tchar s_CmdLine[2048] { };
 }
 
-void Plat_SetBenchmarkMode( bool bBenchmarkMode ) {
+void Plat_SetBenchmarkMode( const bool bBenchmarkMode ) {
 	s_bBenchmarkMode = bBenchmarkMode;
 }
 bool Plat_IsInBenchmarkMode() {
@@ -73,7 +73,7 @@ char* Plat_ctime( const time_t* timep, char* buf, size_t bufsize ) {
 		return ctime_r( timep, buf );  // TODO: Verify this doesn't exceed the buffer
 	#endif
 }
-struct tm* Plat_gmtime( const time_t* timep, struct tm* result ) {
+struct tm* Plat_gmtime( const time_t* timep, tm* result ) {
 	#if IsWindows()
 		gmtime_s( result, timep );
 		return result;
@@ -81,14 +81,14 @@ struct tm* Plat_gmtime( const time_t* timep, struct tm* result ) {
 		return gmtime_r( timep, result );
 	#endif
 }
-time_t Plat_timegm( struct tm* timeptr ) {
+time_t Plat_timegm( tm* timeptr ) {
 	#if IsWindows()
 		return _mkgmtime( timeptr );
 	#elif IsLinux()
 		return timegm( timeptr );
 	#endif
 }
-struct tm* Plat_localtime( const time_t* timep, struct tm* result ) {
+tm* Plat_localtime( const time_t* timep, tm* result ) {
 	#if IsWindows()
 		localtime_s( result, timep );
 		return result;
@@ -98,21 +98,21 @@ struct tm* Plat_localtime( const time_t* timep, struct tm* result ) {
 }
 
 const CPUInformation* GetCPUInformation() {
-	static char vendor[13] { 0 };
+	static char vendor[13] { };
 	// NOTE: All x86 processors nowadays support the following: SSE, SSE2, HT, SSSE3
 	static CPUInformation info{
 		.m_Size   = sizeof( CPUInformation ),
 		.m_bRDTSC = false,
 		.m_bCMOV  = true,
 		.m_bFCMOV = false,
-		.m_bSSE   = IsPC() || SDL_HasSSE(),
-		.m_bSSE2  = IsPC() || SDL_HasSSE2(),
+		.m_bSSE   = /*IsPC() or */SDL_HasSSE(),
+		.m_bSSE2  = /*IsPC() or */SDL_HasSSE2(),
 		.m_b3DNow = false,
 		.m_bMMX   = SDL_HasMMX() != 0,
 		.m_bHT    = true,
 
-		.m_nLogicalProcessors = static_cast<uint8>( SDL_GetCPUCount() ),
-		.m_nPhysicalProcessors = static_cast<uint8>( SDL_GetCPUCount() ),
+		.m_nLogicalProcessors = static_cast<uint8>( SDL_GetNumLogicalCPUCores() ),
+		.m_nPhysicalProcessors = static_cast<uint8>( SDL_GetNumLogicalCPUCores() ),
 
 		.m_bSSE3  = SDL_HasSSE3() != 0,
 		.m_bSSSE3 = IsPC(),
@@ -128,8 +128,8 @@ const CPUInformation* GetCPUInformation() {
 		.m_nFeatures = { 0, 0, 0 },
 	};
 
-	if (! info.m_szProcessorID[0] ) {
-		int regs[4] { 0 };
+	if ( not info.m_szProcessorID[0] ) {
+		int regs[4] { };
 		// get vendor
 		#if IsPosix()
 			__cpuid( 0, regs[0], regs[1], regs[2], regs[3] );

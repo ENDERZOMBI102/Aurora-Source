@@ -22,7 +22,7 @@ set( SHADERLIB_SOURCE_FILES
 add_library( shaderlib2 STATIC ${SHADERLIB_SOURCE_FILES} )
 target_link_libraries( shaderlib2
 	PUBLIC
-		${ASRC_tier0}  # may use reimpl or valve's based on -DASRC_USE_REIMPLS
+		${ASRC_DR_tier0}  # may use reimpl or valve's based on -DASRC_USE_REIMPLS
 		tier1
 		mathlib
 )

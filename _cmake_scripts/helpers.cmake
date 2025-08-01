@@ -30,7 +30,7 @@ endfunction()
 
 # Declares that a target may be replaced by another via `-DASRC_USE_REIMPLS=1`,
 # or the more granular `-DASRC_USE_REIMPLS=$names`, where `$names` is a comma-separated list of replaced libraries names.
-# As example, to link to the `tier0` or its reimplementation, you can do `target_link_libraries( ${target} ${vis} ${ASRC_tier0} )`
+# As example, to link to the `tier0` or its reimplementation, you can do `target_link_libraries( ${target} ${vis} ${ASRC_DR_tier0} )`
 function(declare_replacement)
 	cmake_parse_arguments( DR "" "TARGET;FOR" "" ${ARGN} )
 	if ( NOT DEFINED "DR_TARGET" )

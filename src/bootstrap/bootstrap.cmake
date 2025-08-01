@@ -16,5 +16,5 @@ set_target_properties( bootstrap
 target_link_libraries( bootstrap
 	PRIVATE
 		${CMAKE_DL_LIBS}
-		${ASRC_tier0}  # may use reimpl or valve's based on -DASRC_USE_REIMPLS
+		${ASRC_DR_tier0}  # may use reimpl or valve's based on -DASRC_USE_REIMPLS
 )
