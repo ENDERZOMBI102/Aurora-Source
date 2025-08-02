@@ -33,7 +33,7 @@ target_link_libraries( filesystem_stdio
 		appframework
 	PRIVATE
 		SDL3::SDL3-shared
-		vpkpp
+		sourcepp::vpkpp
 )
 set_target_properties( filesystem_stdio
 	PROPERTIES

@@ -23,11 +23,10 @@
 #include "vgui/ISurface.h"
 #include "vgui/IVGui.h"
 #include "avi/iavi.h"
-#include <SDL_video.h>
-#include <SDL_version.h>
+#include <SDL3/SDL_video.h>
+#include <SDL3/SDL_version.h>
 // This must be the final include in a .cpp file!!!
 #include "memdbgon.h"
-
 
 
 IFileSystem* g_pFileSystem{nullptr};
@@ -154,9 +153,9 @@ bool CGameAppLoader::PreInit() {
 		hwnd = SDL_GetProperty( SDL_GetWindowProperties( s_Window ), SDL_PROPERTY_WINDOW_WIN32_HWND_POINTER, nullptr );
 	#elif IsPosix()
 		if ( strcmp( SDL_GetCurrentVideoDriver(), "x11" ) == 0 ) {
-			hwnd = reinterpret_cast<void*>( SDL_GetNumberProperty( SDL_GetWindowProperties( s_Window ), SDL_PROPERTY_WINDOW_X11_WINDOW_NUMBER, 0 ) );
+			hwnd = reinterpret_cast<void*>( SDL_GetNumberProperty( SDL_GetWindowProperties( s_Window ), SDL_PROP_WINDOW_X11_WINDOW_NUMBER, 0 ) );
 		} else if ( strcmp( SDL_GetCurrentVideoDriver(), "wayland" ) == 0 ) {
-			hwnd = SDL_GetProperty( SDL_GetWindowProperties( s_Window ), SDL_PROPERTY_WINDOW_WAYLAND_SURFACE_POINTER, nullptr );
+			hwnd = SDL_GetPointerProperty( SDL_GetWindowProperties( s_Window ), SDL_PROP_WINDOW_WAYLAND_SURFACE_POINTER, nullptr );
 		} else {
 			hwnd = nullptr;
 		}

@@ -103,13 +103,13 @@
 	}
 	auto CLauncherMgr::SetApplicationIcon( const char* const pAppIconFile ) -> void {
 		// open image
-		const auto ops{ SDL_RWFromFile( pAppIconFile, "rb" ) };
+		const auto ops{ SDL_IOFromFile( pAppIconFile, "rb" ) };
 		if ( not ops ) {
 			Warning( "Failed to open icon at `%s`: %s", pAppIconFile, SDL_GetError() );
 			return;
 		}
 		// load image
-		const auto surface{ SDL_LoadBMP_RW( ops, true ) };
+		const auto surface{ SDL_LoadBMP_IO( ops, true ) };
 		if ( not surface ) {
 			Warning( "Failed to load icon: %s", SDL_GetError() );
 			return;
