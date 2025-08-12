@@ -127,12 +127,6 @@ IAppSystem* CAppSystemGroup::AddSystem( const AppModule_t pModule, const char* p
 
 	m_SystemDict.Insert( pInterfaceName, index );
 	m_Systems[index] = system;
-
-	printf( "-------------- %s:%s --------------\n", mod.m_pModuleName, pInterfaceName );
-	for ( const auto& it : m_SystemDict ) {
-		printf( "MAP `%s` -> `%d`\n", it.key, it.elem );
-	}
-
 	return system;
 }
 void CAppSystemGroup::AddSystem( IAppSystem* pAppSystem, const char* pInterfaceName ) {
