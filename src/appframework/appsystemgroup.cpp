@@ -21,7 +21,7 @@ CAppSystemGroup::CAppSystemGroup( CAppSystemGroup* pParentAppSystem )
 	: m_pParentAppSystem{pParentAppSystem} { }
 
 int CAppSystemGroup::Run() {
-	AssertMsg( s_RootAppSystem == nullptr, "Running multiple `AppSystemGroup`s concurrently!!!", "aa" );
+	AssertMsg( s_RootAppSystem == nullptr, "Running multiple `AppSystemGroup`s concurrently!!!" );
 	s_RootAppSystem = this;
 	int res{1};
 
@@ -127,6 +127,12 @@ IAppSystem* CAppSystemGroup::AddSystem( const AppModule_t pModule, const char* p
 
 	m_SystemDict.Insert( pInterfaceName, index );
 	m_Systems[index] = system;
+
+	printf( "-------------- %s:%s --------------\n", mod.m_pModuleName, pInterfaceName );
+	for ( const auto& it : m_SystemDict ) {
+		printf( "MAP `%s` -> `%d`\n", it.key, it.elem );
+	}
+
 	return system;
 }
 void CAppSystemGroup::AddSystem( IAppSystem* pAppSystem, const char* pInterfaceName ) {
@@ -161,6 +167,25 @@ bool CAppSystemGroup::AddSystems( AppSystemInfo_t* const pSystems ) {
 }
 
 void* CAppSystemGroup::FindSystem( const char* pInterfaceName ) {
+	// first check if WE have the system
+	const uint16 index{ m_SystemDict.Find( pInterfaceName ) };
+	if ( index != CUtlDict<int, uint16>::InvalidIndex() ) {
+		return m_Systems[index];
+	}
+
+	// or if any of our AppSystems knows it
+	for ( const auto system : s_RootAppSystem->m_Systems ) {
+		if ( auto* iface = system->QueryInterface( pInterfaceName ) ) {
+			return iface;
+		}
+	}
+
+	// ask the parent if we have one
+	if ( m_pParentAppSystem ) {
+		return m_pParentAppSystem->FindSystem( pInterfaceName );
+	}
+
+	// as last resort, check the root factory
 	return GetFactory()( pInterfaceName, nullptr );
 }
 
@@ -168,7 +193,7 @@ CreateInterfaceFn CAppSystemGroup::GetFactory() {
 	static constexpr auto factory = []( const char* pInterfaceName, int* pRetCode ) -> void* {
 		AssertMsg( s_RootAppSystem != nullptr, "RootFactory was asked for an interface when no AppSystemGroup was ran!\n" );
 		// check if we already know it
-		uint16 index{ s_RootAppSystem->m_SystemDict.Find( pInterfaceName ) };
+		const uint16 index{ s_RootAppSystem->m_SystemDict.Find( pInterfaceName ) };
 		if ( index != CUtlDict<int, uint16>::InvalidIndex() ) {
 			if ( pRetCode ) {
 				*pRetCode = IFACE_OK;

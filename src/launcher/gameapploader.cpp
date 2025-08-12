@@ -47,18 +47,13 @@ bool CGameAppLoader::Create() {
 	// are we running a dedicated server?
 	m_Dedicated = CommandLine()->FindParm( "-dedicated" ) != 0;
 
-	constexpr const char* vstdlib = []() constexpr -> const char* {
-		if constexpr ( IsPosix() ) {
-			return "libvstdlib";
-		}
-		return "vstdlib";
-	}();
+	static constexpr const char* vstdlib{ IsPosix() ? "libvstdlib" : "vstdlib" };
 
 	// base dependencies
 	AppSystemInfo_t appSystems[] {
 		{ "filesystem_stdio"  , FILESYSTEM_INTERFACE_VERSION             },
 		{ "engine"            , CVAR_QUERY_INTERFACE_VERSION             },
-		// { vstdlib             , PROCESS_UTILS_INTERFACE_VERSION          },
+		// { vstdlib, PROCESS_UTILS_INTERFACE_VERSION          },
 
 		// { "filesystem_stdio"  , QUEUEDLOADER_INTERFACE_VERSION           },
 
