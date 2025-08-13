@@ -174,6 +174,13 @@ void* CAppSystemGroup::FindSystem( const char* pInterfaceName ) {
 		}
 	}
 
+	// or even each module's factory
+	for ( const auto& mod : s_RootAppSystem->m_Modules ) {
+		if ( auto* iface = mod.m_Factory( pInterfaceName, nullptr ) ) {
+			return iface;
+		}
+	}
+
 	// ask the parent if we have one
 	if ( m_pParentAppSystem ) {
 		return m_pParentAppSystem->FindSystem( pInterfaceName );
