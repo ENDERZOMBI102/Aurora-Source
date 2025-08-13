@@ -1026,7 +1026,7 @@ typedef enum _D3DSHADER_PARAM_REGISTER_TYPE
     D3DSPR_FORCE_DWORD  = 0x7fffffff,          
 } D3DSHADER_PARAM_REGISTER_TYPE;
 
-struct D3DMATRIX 
+typedef struct _D3DMATRIX
 {
     union 
 	{
@@ -1045,7 +1045,7 @@ struct D3DMATRIX
 	operator void* ();
 	bool operator == ( CONST D3DMATRIX& src ) const;
 #endif
-};
+} D3DMATRIX;
 
 
 typedef struct _D3DVERTEXBUFFER_DESC
