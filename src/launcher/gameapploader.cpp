@@ -89,13 +89,24 @@ bool CGameAppLoader::Create() {
 		Assert( AddSystem( LoadModule( "engine" ), VENGINE_HLDS_API_VERSION ) );
 	}
 
-	// set the shader API
-	if ( auto* matSys = FindSystem<IMaterialSystem>() ) {
-		auto loadEmpty{ m_Dedicated or CommandLine()->FindParm( "-noshaderapi" ) != 0 };
-		g_pMaterialSystem = materials = matSys; // update globals too
-		matSys->SetShaderAPI( loadEmpty ? "shaderapiempty" : "shaderapidx9" );
-	} else {
-		Warning( "MATSYS NOT FOUND\n" );
+	// verify we got matsys
+	g_pMaterialSystem = materials = FindSystem<IMaterialSystem>();
+	if ( not g_pMaterialSystem ) {
+		return false;
+	}
+
+	// load the requested shader API
+	const bool loadShaderApiEmpty{ m_Dedicated or CommandLine()->FindParm( "-noshaderapi" ) != 0 };
+	const char* shaderDll{ loadShaderApiEmpty ? "shaderapiempty" : CommandLine()->ParmValue( "-shaderdll" ) };
+	if ( not shaderDll ) {
+		shaderDll = "shaderapidx9.dll";  // we default to shaderapidx9
+	}
+	g_pMaterialSystem->SetShaderAPI( shaderDll );
+	g_pMaterialSystem->Connect( GetFactory() );
+
+	// Must be done after matsys is connected up!
+	g_pMaterialSystemHardwareConfig = FindSystem<IMaterialSystemHardwareConfig>();
+	if ( not g_pMaterialSystemHardwareConfig ) {
 		return false;
 	}
 
@@ -105,13 +116,6 @@ bool CGameAppLoader::PreInit() {
 	auto factory{ GetFactory() };
 	ConnectTier1Libraries( &factory, 1 );
 	ConnectTier2Libraries( &factory, 1 );
-	g_pMaterialSystem->Connect( factory );
-
-	// Must be done after matsys is connected up!
-	g_pMaterialSystemHardwareConfig = FindSystem<IMaterialSystemHardwareConfig>();
-	if ( not g_pMaterialSystemHardwareConfig ) {
-		return false;
-	}
 
 	// load globals
 	g_pFullFileSystem = g_pFileSystem = FindSystem<IFileSystem>();
