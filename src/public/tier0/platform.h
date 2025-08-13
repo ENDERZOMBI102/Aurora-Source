@@ -78,6 +78,7 @@
 	#define IsPosix() true
 
 	#undef IsPlatformOpenGL
+	/** Whether the platform requires the use of ToGL */
 	#define IsPlatformOpenGL() true
 	#define __cdecl  // override __cdecl to be nothing, used in some places (for now >:3) NOLINT(*-reserved-identifier)
 

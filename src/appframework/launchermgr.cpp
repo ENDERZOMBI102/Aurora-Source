@@ -39,10 +39,8 @@
 		uint32 flags{};
 		if ( CommandLine()->FindParm( "-vulkan" ) ) {
 			flags |= SDL_WINDOW_VULKAN;
-		} else {
-			#if defined( DX_TO_GL_ABSTRACTION )
-				flags |= SDL_WINDOW_OPENGL;
-			#endif
+		} else if ( IsPlatformOpenGL() ) {
+			flags |= SDL_WINDOW_OPENGL;
 		}
 		flags |= pWindowed ? 0 : SDL_WINDOW_FULLSCREEN;
 
