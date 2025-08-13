@@ -1,7 +1,7 @@
 - Portals & related
 - VTF 7.6 support
-- Ship Strata Source's VTex2 instead of vtex
-- Lux shaders ( PBR!! (like i would use it, lol) )
+- Ship @craftablescience's maretf instead of vtex
+- Lux shaders ( PBR!! (as if i would use it, lol) )
 - UScript scripting system
   - with vscript compatability "layer"
 - Mapbase's improvements
