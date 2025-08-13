@@ -8,6 +8,8 @@ set( LAUNCHER_SOURCE_FILES
 	"${LAUNCHER_DIR}/gameapploader.hpp"
 	"${LAUNCHER_DIR}/sourcemutex.cpp"
 	"${LAUNCHER_DIR}/sourcemutex.hpp"
+	"${LAUNCHER_DIR}/launchermgr.cpp"
+	"${LAUNCHER_DIR}/launchermgr.hpp"
 
 	# Common files
 	"${SRCDIR}/public/filesystem_init.cpp"

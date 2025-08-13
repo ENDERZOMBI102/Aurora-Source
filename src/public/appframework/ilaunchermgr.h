@@ -27,6 +27,8 @@
 
 	class ILauncherMgr : public IAppSystem {
 	public:
+		static constexpr auto INTERFACE_VERSION{ SDLMGR_INTERFACE_VERSION };
+	public:
 		bool Connect( CreateInterfaceFn factory ) override = 0;
 		void Disconnect() override = 0;
 
@@ -62,17 +64,20 @@
 
 		virtual void GetMouseDelta( int& x, int& y, bool bIgnoreNextMouseDelta = false ) = 0;
 
-		virtual void GetNativeDisplayInfo( int nDisplay, uint& nWidth, uint& nHeight, uint& nRefreshHz ) = 0;// Retrieve the size of the monitor (desktop)
-		virtual void RenderedSize( uint& width, uint& height, bool set ) = 0;                                // either set or retrieve rendered size value (from dxabstract)
-		virtual void DisplayedSize( uint& width, uint& height ) = 0;                                         // query backbuffer size (window size whether FS or windowed)
+		/// Retrieve the size of the monitor (desktop)
+		virtual void GetNativeDisplayInfo( int nDisplay, uint& nWidth, uint& nHeight, uint& nRefreshHz ) = 0;
+		/// Either set or retrieve rendered size value (from dxabstract)
+		virtual void RenderedSize( uint& oWidth, uint& oHeight, bool pSet ) = 0;
+		/// Query backbuffer size (window size whether FS or windowed)
+		virtual void DisplayedSize( uint& oWidth, uint& oHeight ) = 0;
 
 		#if defined( DX_TO_GL_ABSTRACTION )
 			virtual PseudoGLContextPtr GetMainContext() = 0;
 			// Get the NSGLContext for a window's main view - note this is the carbon windowref as an argument
 			virtual PseudoGLContextPtr GetGLContextForWindow( void* windowref ) = 0;
 			virtual PseudoGLContextPtr CreateExtraContext() = 0;
-			virtual void DeleteContext( PseudoGLContextPtr hContext ) = 0;
-			virtual bool MakeContextCurrent( PseudoGLContextPtr hContext ) = 0;
+			virtual void DeleteContext( PseudoGLContextPtr pContext ) = 0;
+			virtual bool MakeContextCurrent( PseudoGLContextPtr pContext ) = 0;
 			virtual GLMDisplayDB* GetDisplayDB() = 0;
 			virtual void GetDesiredPixelFormatAttribsAndRendererInfo( uint** ptrOut, uint* countOut, GLMRendererInfoFields* rendInfoOut ) = 0;
 			virtual void ShowPixels( CShowPixelsParams* params ) = 0;
@@ -84,8 +89,8 @@
 
 		virtual void* GetWindowRef() = 0;
 
-		virtual void SetMouseVisible( bool bState ) = 0;
-		virtual void SetMouseCursor( SDL_Cursor* hCursor ) = 0;
+		virtual void SetMouseVisible( bool pState ) = 0;
+		virtual void SetMouseCursor( SDL_Cursor* pCursor ) = 0;
 		virtual void SetForbidMouseGrab( bool bForbidMouseGrab ) = 0;
 		virtual void OnFrameRendered() = 0;
 

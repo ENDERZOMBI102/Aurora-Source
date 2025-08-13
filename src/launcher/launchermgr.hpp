@@ -2,6 +2,7 @@
 // Created by ENDERZOMBI102 on 08/06/2025.
 // 
 #pragma once
+#include "SDL3/SDL_video.h"
 #include "appframework/ilaunchermgr.h"
 
 #if defined( USE_SDL )
@@ -36,15 +37,15 @@
 		auto GetMouseDelta( int& x, int& y, bool bIgnoreNextMouseDelta ) -> void override;
 
 		auto GetNativeDisplayInfo( int nDisplay, uint& nWidth, uint& nHeight, uint& nRefreshHz ) -> void override;
-		auto RenderedSize( uint& width, uint& height, bool set ) -> void override;
-		auto DisplayedSize( uint& width, uint& height ) -> void override;
+		auto RenderedSize( uint& oWidth, uint& oHeight, bool pSet ) -> void override;
+		auto DisplayedSize( uint& oWidth, uint& oHeight ) -> void override;
 
 		#if defined( DX_TO_GL_ABSTRACTION )
 			auto GetMainContext() -> PseudoGLContextPtr override;
 			auto GetGLContextForWindow( void* windowref ) -> PseudoGLContextPtr override;
 			auto CreateExtraContext() -> PseudoGLContextPtr override;
-			auto DeleteContext( PseudoGLContextPtr hContext ) -> void override;
-			auto MakeContextCurrent( PseudoGLContextPtr hContext ) -> bool override;
+			auto DeleteContext( PseudoGLContextPtr pContext ) -> void override;
+			auto MakeContextCurrent( PseudoGLContextPtr pContext ) -> bool override;
 			auto GetDisplayDB() -> GLMDisplayDB* override;
 			auto GetDesiredPixelFormatAttribsAndRendererInfo( uint** ptrOut, uint* countOut, GLMRendererInfoFields* rendInfoOut ) -> void override;
 			auto ShowPixels( CShowPixelsParams* params ) -> void override;
@@ -56,8 +57,8 @@
 
 		auto GetWindowRef() -> void* override;
 
-		auto SetMouseVisible( bool bState ) -> void override;
-		auto SetMouseCursor( SDL_Cursor* hCursor ) -> void override;
+		auto SetMouseVisible( bool pState ) -> void override;
+		auto SetMouseCursor( SDL_Cursor* pCursor ) -> void override;
 		auto SetForbidMouseGrab( bool bForbidMouseGrab ) -> void override;
 		auto OnFrameRendered() -> void override;
 
@@ -65,8 +66,10 @@
 
 		auto GetPrevGLSwapWindowTime() -> double override;
 	private:
-		SDL_Window* m_Window{nullptr};
-		uint32 m_WindowRefCount{0};
-		bool m_Fullscreen{false};
+		SDL_Window* m_Window{ nullptr };
+		SDL_GLContext m_MainContext{ nullptr };
+		uint32 m_WindowRefCount{ 0 };
+		float64 m_PrevSwapTime{ 0 };
+		bool m_Fullscreen{ false };
 	};
 #endif

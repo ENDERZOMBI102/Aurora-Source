@@ -5,9 +5,6 @@ set( APPFRAMEWORK_SOURCE_FILES
 	# Sources
 	"${APPFRAMEWORK_DIR}/appsystemgroup.cpp"
 	"${APPFRAMEWORK_DIR}/appframework.cpp"
-	"${APPFRAMEWORK_DIR}/launchermgr.cpp"
-	"${APPFRAMEWORK_DIR}/launchermgr.hpp"
-
 
 	# Public units
 	"${SRCDIR}/public/filesystem_init.cpp"

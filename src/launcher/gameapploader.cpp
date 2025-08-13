@@ -25,6 +25,7 @@
 #include "avi/iavi.h"
 #include <SDL3/SDL_video.h>
 #include <SDL3/SDL_version.h>
+#include "appframework/ilaunchermgr.h"
 // This must be the final include in a .cpp file!!!
 #include "memdbgon.h"
 
@@ -146,20 +147,33 @@ bool CGameAppLoader::PreInit() {
 	g_pMaterialSystem->SetAdapter( 0, MATERIAL_INIT_ALLOCATE_FULLSCREEN_TEXTURE );
 	g_pMaterialSystem->ModInit();
 
+	// do we need windowed?
+	bool windowed{ CommandLine()->FindParm( "-startwindowed" ) or CommandLine()->FindParm( "-windowed" ) or CommandLine()->FindParm( "-window" ) or CommandLine()->FindParm( "-sw" ) };
+
+	// if so, of what size?
+	int32 width{ 800 };
+	if ( int32 it = CommandLine()->ParmValue( "-width", 0 ) ) { width = it; }
+	if ( int32 it = CommandLine()->ParmValue( "-w", 0 ) ) { width = it; }
+	int32 height{ 600 };
+	if ( int32 it = CommandLine()->ParmValue( "-height", 0 ) ) { height = it; }
+	if ( int32 it = CommandLine()->ParmValue( "-h", 0 ) ) { height = it; }
+
+	// are small windows not allowed?
+	if ( not CommandLine()->FindParm( "-small" ) ) {
+		width = std::max( 640, width );
+		height = std::max( 480, height );
+	}
+
+	// TODO: Finish implementing `-safe`
+	if ( CommandLine()->FindParm( "-safe" ) ) {
+		windowed = true;
+		width = 640;
+		height = 480;
+	}
+
 	// create the window
-	s_Window = SDL_CreateWindow( "hl2", 800, 600, SDL_WINDOWPOS_CENTERED | SDL_WINDOW_HIGH_PIXEL_DENSITY );
-	void* hwnd;
-	#if IsWindows()
-		hwnd = SDL_GetProperty( SDL_GetWindowProperties( s_Window ), SDL_PROPERTY_WINDOW_WIN32_HWND_POINTER, nullptr );
-	#elif IsPosix()
-		if ( strcmp( SDL_GetCurrentVideoDriver(), "x11" ) == 0 ) {
-			hwnd = reinterpret_cast<void*>( SDL_GetNumberProperty( SDL_GetWindowProperties( s_Window ), SDL_PROP_WINDOW_X11_WINDOW_NUMBER, 0 ) );
-		} else if ( strcmp( SDL_GetCurrentVideoDriver(), "wayland" ) == 0 ) {
-			hwnd = SDL_GetPointerProperty( SDL_GetWindowProperties( s_Window ), SDL_PROP_WINDOW_WAYLAND_SURFACE_POINTER, nullptr );
-		} else {
-			hwnd = nullptr;
-		}
-	#endif
+	Assert( g_pLauncherMgr->CreateGameWindow( "hl2", windowed, width, height ) );
+	void* hwnd{ g_pLauncherMgr->GetWindowRef() };
 	Assert( hwnd );
 
 	// update matsys on our configuration

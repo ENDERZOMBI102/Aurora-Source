@@ -136,7 +136,7 @@ void CAppSystemGroup::AddSystem( IAppSystem* pAppSystem, const char* pInterfaceN
 		return;
 	}
 
-	Log( "Loading given system `%s`\n", pInterfaceName );
+	Log( "Adding given system `%s`\n", pInterfaceName );
 	const auto index{ m_Systems.AddToTail( pAppSystem ) };
 	m_SystemDict.Insert( pInterfaceName, index );
 }
