@@ -52,9 +52,7 @@ CSteamApplication::CSteamApplication( CSteamAppSystemGroup* pAppSystemGroup )
 int CSteamApplication::Startup() {
 	return m_pChildAppSystemGroup->Startup();
 }
-void CSteamApplication::Shutdown() {
-	m_pChildAppSystemGroup->Shutdown();
-}
+void CSteamApplication::Shutdown() { }
 
 // CSteamApplication - IAppSystem
 bool CSteamApplication::Create() {
@@ -85,18 +83,13 @@ bool CSteamApplication::Create() {
 
 	// give the fs module to the child group, so it can play with it
 	m_pChildAppSystemGroup->Setup( m_pFileSystem, this );
-
-	return m_pChildAppSystemGroup->Create();
+	return true;
 }
 bool CSteamApplication::PreInit() {
-	return m_pChildAppSystemGroup->PreInit();
+	return true;
 }
 int CSteamApplication::Main() {
-	return m_pChildAppSystemGroup->Main();
+	return m_pChildAppSystemGroup->Run();
 }
-void CSteamApplication::PostShutdown() {
-	m_pChildAppSystemGroup->PostShutdown();
-}
-void CSteamApplication::Destroy() {
-	m_pChildAppSystemGroup->Destroy();
-}
+void CSteamApplication::PostShutdown() { }
+void CSteamApplication::Destroy() { }

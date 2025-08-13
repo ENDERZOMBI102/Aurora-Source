@@ -89,6 +89,11 @@ bool CGameAppLoader::Create() {
 		Assert( AddSystem( LoadModule( "engine" ), VENGINE_HLDS_API_VERSION ) );
 	}
 
+	// connect tier1/2 libraries
+	auto factory{ GetFactory() };
+	ConnectTier1Libraries( &factory, 1 );
+	ConnectTier2Libraries( &factory, 1 );
+
 	// verify we got matsys
 	g_pMaterialSystem = materials = FindSystem<IMaterialSystem>();
 	if ( not g_pMaterialSystem ) {
@@ -102,20 +107,16 @@ bool CGameAppLoader::Create() {
 		shaderDll = "shaderapidx9.dll";  // we default to shaderapidx9
 	}
 	g_pMaterialSystem->SetShaderAPI( shaderDll );
-	g_pMaterialSystem->Connect( GetFactory() );
+	g_pMaterialSystem->Connect( factory );
 
+	return true;
+}
+bool CGameAppLoader::PreInit() {
 	// Must be done after matsys is connected up!
 	g_pMaterialSystemHardwareConfig = FindSystem<IMaterialSystemHardwareConfig>();
 	if ( not g_pMaterialSystemHardwareConfig ) {
 		return false;
 	}
-
-	return true;
-}
-bool CGameAppLoader::PreInit() {
-	auto factory{ GetFactory() };
-	ConnectTier1Libraries( &factory, 1 );
-	ConnectTier2Libraries( &factory, 1 );
 
 	// load globals
 	g_pFullFileSystem = g_pFileSystem = FindSystem<IFileSystem>();
@@ -133,7 +134,7 @@ bool CGameAppLoader::PreInit() {
 		return false;
 	}
 
-	if ( not (g_pFileSystem and g_pMaterialSystem and g_pStudioRender and g_pMDLCache and (s_DedicatedApi or s_LauncherApi)) ) {
+	if ( not (g_pFileSystem and g_pStudioRender and g_pMDLCache and (s_DedicatedApi or s_LauncherApi)) ) {
 		Error( "Unable to load required library interface(s)!\n" );
 		return false;
 	}
@@ -160,11 +161,10 @@ bool CGameAppLoader::PreInit() {
 		}
 	#endif
 	Assert( hwnd );
-	g_pMaterialSystem->SetView( hwnd );
 
-	// update matsys config
-	const MaterialSystem_Config_t config = g_pMaterialSystem->GetCurrentConfigForVideoCard();
-	g_pMaterialSystem->OverrideConfig( config, false );
+	// update matsys on our configuration
+	MaterialSystem_Config_t config = g_pMaterialSystem->GetCurrentConfigForVideoCard();
+	g_pMaterialSystem->SetMode( hwnd, config );
 
 	return true;
 }

@@ -21,8 +21,9 @@ CAppSystemGroup::CAppSystemGroup( CAppSystemGroup* pParentAppSystem )
 	: m_pParentAppSystem{pParentAppSystem} { }
 
 int CAppSystemGroup::Run() {
-	AssertMsg( s_RootAppSystem == nullptr, "Running multiple `AppSystemGroup`s concurrently!!!" );
-	s_RootAppSystem = this;
+	if ( s_RootAppSystem == nullptr ) {
+		s_RootAppSystem = this;
+	}
 	int res{1};
 
 	if ( not Create() ) {
@@ -167,20 +168,6 @@ void* CAppSystemGroup::FindSystem( const char* pInterfaceName ) {
 		return m_Systems[index];
 	}
 
-	// or if any of our AppSystems knows it
-	for ( const auto system : s_RootAppSystem->m_Systems ) {
-		if ( auto* iface = system->QueryInterface( pInterfaceName ) ) {
-			return iface;
-		}
-	}
-
-	// or even each module's factory
-	for ( const auto& mod : s_RootAppSystem->m_Modules ) {
-		if ( auto* iface = mod.m_Factory( pInterfaceName, nullptr ) ) {
-			return iface;
-		}
-	}
-
 	// ask the parent if we have one
 	if ( m_pParentAppSystem ) {
 		return m_pParentAppSystem->FindSystem( pInterfaceName );
@@ -193,6 +180,7 @@ void* CAppSystemGroup::FindSystem( const char* pInterfaceName ) {
 CreateInterfaceFn CAppSystemGroup::GetFactory() {
 	static constexpr auto factory = []( const char* pInterfaceName, int* pRetCode ) -> void* {
 		AssertMsg( s_RootAppSystem != nullptr, "RootFactory was asked for an interface when no AppSystemGroup was ran!\n" );
+		Log( "Was tasked to find `%s`\n", pInterfaceName );
 		// check if we already know it
 		const uint16 index{ s_RootAppSystem->m_SystemDict.Find( pInterfaceName ) };
 		if ( index != CUtlDict<int, uint16>::InvalidIndex() ) {
@@ -220,7 +208,15 @@ CreateInterfaceFn CAppSystemGroup::GetFactory() {
 		}
 
 		// nothing worked, lets just hope we have something ourselves
-		return Sys_GetFactoryThis()( pInterfaceName, pRetCode );
+		if ( const auto ptr = Sys_GetFactoryThis()( pInterfaceName, pRetCode ) ) {
+			return ptr;
+		}
+
+		Log( "  - Not found!\n" );
+		if ( pRetCode ) {
+			*pRetCode = IFACE_FAILED;
+		}
+		return nullptr;
 	};
 
 	return factory;
@@ -245,13 +241,13 @@ bool CAppSystemGroup::ConnectSystems() {
 			bool found{};
 			for ( const auto& x : m_SystemDict ) {
 				if ( x.elem == i ) {
-					Log( "Loading system `%s`\n", x.key );
+					Log( "Connecting system `%s`\n", x.key );
 					found = true;
 					break;
 				}
 			}
 			if ( not found ) {
-				Log( "Loading system `<unknown>`\n" );
+				Log( "Connecting system `<unknown>`\n" );
 			}
 		} // debug printf - ignore
 		if ( not m_Systems[i]->Connect( factory ) ) {
@@ -261,6 +257,7 @@ bool CAppSystemGroup::ConnectSystems() {
 		}
 	}
 
+	Log( "Finished connecting %d systems\n", m_Systems.Count() );
 	return true;
 }
 void CAppSystemGroup::DisconnectSystems() {
