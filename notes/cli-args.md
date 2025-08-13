@@ -15,6 +15,15 @@ A list, divided in used-by-module section, of all arguments
   - Specifies which game/mod to run.
   - Accepts a path to a `gameinfo.txt`.
   - Used to determine what Source mutex to use.
+- `-startwindowed`, `-windowed`, `-window`, `-sw`: Starts the game in windowed mode.
+- `-small`: Allow window sizing smaller than 640x480.
+- `-width <width>`, `-w <width>`:
+  - In windowed mode, sets the window's width.
+  - Unless `-small` is also given, the minimum width is 640.
+- `-height <height>`, `-h <height>`:
+  - In windowed mode, sets the window's height.
+  - Unless `-small` is also given, the minimum height is 480.
+- `-safe`: Enables video safe mode, which sets the game to windowed, the width to 640, the height to 480, refresh rate to default, and disables antialiasing.
 
 ### `inputsystem`
 - `-nojoy`: Disabled joystick/gamepad initialization.
