@@ -2387,16 +2387,16 @@ HRESULT	IDirect3DDevice9::Create( IDirect3DDevice9Params *params )
 	GLMPRINTF(("-X- IDirect3DDevice9::Create making color render target..."));
 	// color surface
 	result = this->CreateRenderTarget( 
-		m_params.m_presentationParameters.BackBufferWidth,			// width
-		m_params.m_presentationParameters.BackBufferHeight,			// height
-		m_params.m_presentationParameters.BackBufferFormat,			// format
-		m_params.m_presentationParameters.MultiSampleType,			// MSAA depth
-		m_params.m_presentationParameters.MultiSampleQuality,		// MSAA quality
-		true,														// lockable
-		&m_pDefaultColorSurface,										// ppSurface
-		NULL,														// shared handle
-		"InternalRT0"
-		);
+		m_params.m_presentationParameters.BackBufferWidth,    // width
+		m_params.m_presentationParameters.BackBufferHeight,   // height
+		m_params.m_presentationParameters.BackBufferFormat,   // format
+		m_params.m_presentationParameters.MultiSampleType,    // MSAA depth
+		m_params.m_presentationParameters.MultiSampleQuality, // MSAA quality
+		true,                                                 // lockable
+		&m_pDefaultColorSurface,                              // ppSurface
+		nullptr,                                              // shared handle
+		const_cast<char*>( "InternalRT0" )
+	);
 
 	if (result != S_OK)
 	{
