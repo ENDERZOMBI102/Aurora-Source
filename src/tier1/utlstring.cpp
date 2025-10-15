@@ -52,7 +52,7 @@ void CUtlString::SetDirect( const char *pValue, int nChars )
 			return; // Do nothing. Realloc in AllocMemory might move pValue's location resulting in a bad memcpy.
 		}
 
-		Assert( nChars <= Min<int>( strnlen(pValue, nChars) + 1, nChars ) );
+		Assert( nChars <= std::min<int>( strnlen(pValue, nChars) + 1, nChars ) );
 		AllocMemory( nChars );
 		Q_memcpy( m_pString, pValue, nChars );
 	}
@@ -745,7 +745,7 @@ void CUtlString::Append( const char *pchAddition )
 
 void CUtlString::Append( const char *pchAddition, int nChars )
 {
-	nChars = Min<int>( nChars, V_strlen(	pchAddition ) );
+	nChars = std::min<int>( nChars, V_strlen(	pchAddition ) );
 
 	const int lhsLength( Length() );
 	const int rhsLength( nChars );

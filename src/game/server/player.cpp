@@ -3523,7 +3523,7 @@ bool CBasePlayer::IsUserCmdDataValid( CUserCmd *pCmd )
 
 	// Maximum difference between client's and server's tick_count
 	const int nCmdMaxTickDelta = ( 1.f / gpGlobals->interval_per_tick ) * 2.5f;
-	const int nMinDelta = Max( 0, gpGlobals->tickcount - nCmdMaxTickDelta );
+	const int nMinDelta = std::max( 0, gpGlobals->tickcount - nCmdMaxTickDelta );
 	const int nMaxDelta = gpGlobals->tickcount + nCmdMaxTickDelta;
 
 	bool bValid = ( pCmd->tick_count >= nMinDelta && pCmd->tick_count < nMaxDelta ) &&

@@ -836,7 +836,7 @@ bool SnappyDecompressor::RefillTag() {
       size_t length;
       const char* src = reader_->Peek(&length);
       if (length == 0) return false;
-      uint32 to_add = Min(needed - nbuf, (uint32)length);
+      uint32 to_add = std::min(needed - nbuf, static_cast<uint32>( length ) );
       memcpy(scratch_ + nbuf, src, to_add);
       nbuf += to_add;
       reader_->Skip(to_add);
@@ -922,7 +922,7 @@ size_t Compress(Source* reader, Sink* writer) {
 
       while (bytes_read < num_to_read) {
         fragment = reader->Peek(&fragment_size);
-        size_t n = Min(fragment_size, num_to_read - bytes_read);
+        size_t n = std::min(fragment_size, num_to_read - bytes_read);
         memcpy(scratch + bytes_read, fragment, n);
         bytes_read += n;
         reader->Skip(n);
@@ -1030,11 +1030,8 @@ class SnappyIOVecWriter {
         ++curr_iov_index_;
       }
 
-      const size_t to_write = Min(
-          len, output_iov_[curr_iov_index_].iov_len - curr_iov_written_);
-      memcpy(GetIOVecPointer(curr_iov_index_, curr_iov_written_),
-             ip,
-             to_write);
+      const size_t to_write = std::min( len, output_iov_[curr_iov_index_].iov_len - curr_iov_written_);
+		memcpy(GetIOVecPointer(curr_iov_index_, curr_iov_written_), ip, to_write);
       curr_iov_written_ += to_write;
       total_written_ += to_write;
       ip += to_write;
@@ -1089,7 +1086,7 @@ class SnappyIOVecWriter {
     while (len > 0) {
       assert(from_iov_index <= curr_iov_index_);
       if (from_iov_index != curr_iov_index_) {
-        const size_t to_copy = Min(
+        const size_t to_copy = std::min(
             output_iov_[from_iov_index].iov_len - from_iov_offset,
             len);
         Append(GetIOVecPointer(from_iov_index, from_iov_offset), to_copy);
@@ -1100,7 +1097,7 @@ class SnappyIOVecWriter {
         }
       } else {
         assert(curr_iov_written_ <= output_iov_[curr_iov_index_].iov_len);
-        size_t to_copy = Min(output_iov_[curr_iov_index_].iov_len -
+        size_t to_copy = std::min(output_iov_[curr_iov_index_].iov_len -
                                       curr_iov_written_,
                                   len);
         if (to_copy == 0) {

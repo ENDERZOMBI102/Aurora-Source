@@ -1899,7 +1899,7 @@ struct ColorTexelValue {
 
 // ------------------------------------------------------------------------------------------------
 inline int ComputeLinearPos( int _x, int _y, int _resX, int _resY ) {
-	return Min( Max( 0, _y ), _resY - 1 ) * _resX + Min( Max( 0, _x ), _resX - 1 );
+	return std::min( std::max( 0, _y ), _resY - 1 ) * _resX + std::min( std::max( 0, _x ), _resX - 1 );
 }
 
 // ------------------------------------------------------------------------------------------------

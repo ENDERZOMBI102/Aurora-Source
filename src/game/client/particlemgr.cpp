@@ -2293,7 +2293,7 @@ void CParticleMgr::StatsAccumulateActiveParticleSystems()
 {
 #ifdef STAGING_ONLY
 	Profiling_nFrames++;
-	Profiling_nMaxParticles = Max ( Profiling_nMaxParticles, g_pParticleSystemMgr->Debug_GetTotalParticleCount() );
+	Profiling_nMaxParticles = std::max( Profiling_nMaxParticles, g_pParticleSystemMgr->Debug_GetTotalParticleCount() );
 
 	// Accumulate this frame's stats.
 
@@ -2332,10 +2332,10 @@ void CParticleMgr::StatsAccumulateActiveParticleSystems()
 		pGlobalInfo->m_nChildCount				+= pSingleInfo->m_nChildCount;
 		pGlobalInfo->m_nTotalActiveParticles	+= pSingleInfo->m_nTotalActiveParticles;
 		pGlobalInfo->m_nTotalDrawnParticles		+= pSingleInfo->m_nTotalDrawnParticles;
-		pGlobalInfo->m_nCountMax				= Max ( pGlobalInfo->m_nCountMax,					pSingleInfo->m_nCount );
-		pGlobalInfo->m_nChildCountMax			= Max ( pGlobalInfo->m_nChildCountMax,				pSingleInfo->m_nChildCount );
-		pGlobalInfo->m_nTotalActiveParticlesMax	= Max ( pGlobalInfo->m_nTotalActiveParticlesMax,	pSingleInfo->m_nTotalActiveParticles );
-		pGlobalInfo->m_nTotalDrawnParticlesMax	= Max ( pGlobalInfo->m_nTotalDrawnParticlesMax,		pSingleInfo->m_nTotalDrawnParticles );
+		pGlobalInfo->m_nCountMax				= std::max( pGlobalInfo->m_nCountMax,					pSingleInfo->m_nCount );
+		pGlobalInfo->m_nChildCountMax			= std::max( pGlobalInfo->m_nChildCountMax,				pSingleInfo->m_nChildCount );
+		pGlobalInfo->m_nTotalActiveParticlesMax	= std::max( pGlobalInfo->m_nTotalActiveParticlesMax,	pSingleInfo->m_nTotalActiveParticles );
+		pGlobalInfo->m_nTotalDrawnParticlesMax	= std::max( pGlobalInfo->m_nTotalDrawnParticlesMax,		pSingleInfo->m_nTotalDrawnParticles );
 		pGlobalInfo->pDef = pSingleInfo->pDef;
 	}
 

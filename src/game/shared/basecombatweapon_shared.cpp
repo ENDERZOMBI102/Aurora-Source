@@ -1579,7 +1579,7 @@ void CBaseCombatWeapon::AddToCritBucket( float flAmount )
 	{
 		// Treat raw damage as the resource by which we add or subtract from the bucket
 		m_flCritTokenBucket += flAmount;
-		m_flCritTokenBucket = Min( m_flCritTokenBucket, flCap );
+		m_flCritTokenBucket = std::min( m_flCritTokenBucket, flCap );
 	}
 }
 

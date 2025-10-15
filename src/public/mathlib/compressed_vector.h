@@ -46,8 +46,8 @@ inline Vector32& Vector32::operator=( const Vector& vOther ) {
 
 	static float expScale[ 4 ] = { 4.0f, 16.0f, 32.f, 64.f };
 
-	float fmax = Max( fabs( vOther.x ), fabs( vOther.y ) );
-	fmax = Max( fmax, (float) fabs( vOther.z ) );
+	float fmax = std::max( fabs( vOther.x ), fabs( vOther.y ) );
+	fmax = std::max( fmax, (float) fabs( vOther.z ) );
 
 	for ( exp = 0; exp < 3; exp++ ) {
 		if ( fmax < expScale[ exp ] )
@@ -57,9 +57,9 @@ inline Vector32& Vector32::operator=( const Vector& vOther ) {
 
 	float fexp = 512.0f / expScale[ exp ];
 
-	x = Clamp( (int) ( vOther.x * fexp ) + 512, 0, 1023 );
-	y = Clamp( (int) ( vOther.y * fexp ) + 512, 0, 1023 );
-	z = Clamp( (int) ( vOther.z * fexp ) + 512, 0, 1023 );
+	x = Clamp( static_cast<int>( vOther.x * fexp ) + 512, 0, 1023 );
+	y = Clamp( static_cast<int>( vOther.y * fexp ) + 512, 0, 1023 );
+	z = Clamp( static_cast<int>( vOther.z * fexp ) + 512, 0, 1023 );
 	return *this;
 }
 

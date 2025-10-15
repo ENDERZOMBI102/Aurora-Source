@@ -139,7 +139,7 @@
 	} g_FakeLauncherMgr;
 
 	void* SDLMgrFactoryRedirector( const char* pName, int* pReturnCode ) {
-		if ( strcmp( "SDLMgrInterface001", pName ) == 0 ) {
+		if ( strcmp( SDLMGR_INTERFACE_VERSION, pName ) == 0 ) {
 			return &g_FakeLauncherMgr;
 		}
 		return g_fileSystemFactory( pName, pReturnCode );

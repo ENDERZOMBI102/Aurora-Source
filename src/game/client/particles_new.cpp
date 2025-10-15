@@ -530,7 +530,7 @@ int CNewParticleEffect::DrawModel( int flags )
 		}
 
 		// Still need to make sure we set this or they won't follow their attachemnt points.
-		m_flNextSleepTime = Max ( m_flNextSleepTime, ( g_pParticleSystemMgr->GetLastSimulationTime() + m_pDef->m_flNoDrawTimeToGoToSleep ));
+		m_flNextSleepTime = std::max( m_flNextSleepTime, ( g_pParticleSystemMgr->GetLastSimulationTime() + m_pDef->m_flNoDrawTimeToGoToSleep ));
 
 		return 0;
 	}

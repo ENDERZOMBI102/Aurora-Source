@@ -213,7 +213,7 @@ void CalcFovFromProjection( float* pFov, const VMatrix& proj ) {
 	float fov_py = 2.0f * RAD2DEG( atanf( fabsf( ( 1.0f - yoffset ) / yscale ) ) );
 	float fov_ny = 2.0f * RAD2DEG( atanf( fabsf( ( -1.0f - yoffset ) / yscale ) ) );
 
-	*pFov = Max( Max( fov_px, fov_nx ), Max( fov_py, fov_ny ) );
+	*pFov = std::max( std::max( fov_px, fov_nx ), std::max( fov_py, fov_ny ) );
 	// FIXME: hey you know, I could do the Max() series before I call all those expensive atanf()s...
 }
 
@@ -1118,7 +1118,7 @@ bool CClientVirtualReality::ProcessCurrentTrackingState( float fGameFOV ) {
 		// To compensate for the lack of pixels on most HUDs, let's grow this a bit.
 		// Remember that MORE zoom equals LESS fov!
 		fGameFOV *= ( 1.0f / vr_zoom_multiplier.GetFloat() );
-		fGameFOV = Min( fGameFOV, 170.0f );
+		fGameFOV = std::min( fGameFOV, 170.0f );
 
 		// The game has overridden the FOV, e.g. because of a sniper scope. So we need to match this view with whatever actual FOV the HUD has.
 		float wantedGameTanfov = tanf( DEG2RAD( fGameFOV * 0.5f ) );
@@ -1237,10 +1237,10 @@ void CClientVirtualReality::OverlayHUDQuadWithUndistort( const CViewSetup& eyeVi
 	worldToProjection.V3Mul( vLR, pLR );
 
 	float ndcHudBounds[4];
-	ndcHudBounds[0] = Min( Min( pUL.x, pUR.x ), Min( pLL.x, pLR.x ) );
-	ndcHudBounds[1] = Min( Min( pUL.y, pUR.y ), Min( pLL.y, pLR.y ) );
-	ndcHudBounds[2] = Max( Max( pUL.x, pUR.x ), Max( pLL.x, pLR.x ) );
-	ndcHudBounds[3] = Max( Max( pUL.y, pUR.y ), Max( pLL.y, pLR.y ) );
+	ndcHudBounds[0] = std::min( std::min( pUL.x, pUR.x ), std::min( pLL.x, pLR.x ) );
+	ndcHudBounds[1] = std::min( std::min( pUL.y, pUR.y ), std::min( pLL.y, pLR.y ) );
+	ndcHudBounds[2] = std::max( std::max( pUL.x, pUR.x ), std::max( pLL.x, pLR.x ) );
+	ndcHudBounds[3] = std::max( std::max( pUL.y, pUR.y ), std::max( pLL.y, pLR.y ) );
 
 	ISourceVirtualReality::VREye sourceVrEye = ( eyeView.m_eStereoEye == STEREO_EYE_LEFT ) ? ISourceVirtualReality::VREye_Left : ISourceVirtualReality::VREye_Right;
 

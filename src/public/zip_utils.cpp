@@ -708,7 +708,7 @@ void CZipFile::ParseFromBuffer( void *buffer, int bufferlength )
 		}
 
 		char tmpString[1024] = { 0 };
-		buf.Get( tmpString, Min( (unsigned int)zipFileHeader.fileNameLength, (unsigned int)sizeof( tmpString ) ) );
+		buf.Get( tmpString, std::min( (unsigned int)zipFileHeader.fileNameLength, (unsigned int)sizeof( tmpString ) ) );
 		Q_strlower( tmpString );
 
 		// can determine actual filepos, assuming a well formed zip

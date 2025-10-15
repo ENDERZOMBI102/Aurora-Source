@@ -200,8 +200,8 @@ void CHudZoom::Paint( void )
 	// draw dashed lines
 	int dashCount = 2;
 	int ypos = yCrosshair - m_flDashHeight / 2.f;
-	float fGap = m_flDashGap * MAX(scale,0.1f);
-	int dashMax = Max(fX, (float)wide - fX ) / fGap;
+	float fGap = m_flDashGap * std::max(scale,0.1f);
+	int dashMax = std::max(fX, (float)wide - fX ) / fGap;
 	while ( dashCount < dashMax )
 	{
 		int xpos = (int)(fX - fGap * dashCount + 0.5f);

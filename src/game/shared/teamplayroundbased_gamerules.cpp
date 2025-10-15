@@ -3017,7 +3017,7 @@ bool CTeamplayRoundBasedRules::IsInHighlanderMode( void )
 //-----------------------------------------------------------------------------
 int CTeamplayRoundBasedRules::GetBonusRoundTime( bool bFinal /*= false*/ )
 {
-	return bFinal ? mp_bonusroundtime_final.GetInt() : Max( 5, mp_bonusroundtime.GetInt() );
+	return bFinal ? mp_bonusroundtime_final.GetInt() : std::max( 5, mp_bonusroundtime.GetInt() );
 }
 
 //-----------------------------------------------------------------------------

@@ -360,7 +360,7 @@ bool NavAreaBuildPath( CNavArea *startArea, CNavArea *goalArea, const Vector *go
 			// cost, to avoid us spinning our wheels over insignificant cost
 			// benefit, floating point precision bug, or busted cost functor.
 			float minNewCostSoFar = area->GetCostSoFar() * 1.00001f + 0.00001f;
-			newCostSoFar = Max( newCostSoFar, minNewCostSoFar );
+			newCostSoFar = std::max( newCostSoFar, minNewCostSoFar );
 				
 			// stop if path length limit reached
 			if ( bHaveMaxPathLength )
