@@ -38,7 +38,9 @@
 
 template<typename T>
 T AlignValue( T val, const uintptr_t alignment ) {
-	return static_cast<T>( ( static_cast<uintptr_t>( val ) + alignment - 1 ) & ~( alignment - 1 ) );
+	// ReSharper disable CppCStyleCast
+	return (T) ( ( (uintptr_t) val + alignment - 1 ) & ~( alignment - 1 ) );
+	// ReSharper restore CppCStyleCast
 }
 
 
