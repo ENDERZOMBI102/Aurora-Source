@@ -1,7 +1,8 @@
 # Aurora Source
 A "branch" of the source engine, forked off SDK 2013's codebase.
 
-This project aim to recreate the missing pieces of the engine, with completely custom code, using leaks is completely banned, they only hurt and help nothing.
+This project aims to recreate the missing pieces of the engine, with completely custom code,
+using leaks is completely banned, they only hurt and help nothing.
 
 Planned features include:
 - Faster compilers
