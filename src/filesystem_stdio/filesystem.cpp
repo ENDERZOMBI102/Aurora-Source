@@ -17,7 +17,8 @@
 
 namespace {
 	CFileSystemStdio s_FullFileSystem{};
-	CFsDriver* s_RootFsDriver{nullptr};
+	// FIXME: This is only correct on *nix
+	CFsDriver* s_RootFsDriver{ new CRootFsDriver() };
 
 	constexpr auto parseOpenMode( const char* pMode ) -> OpenMode {
 		OpenMode mode{};
@@ -87,8 +88,7 @@ auto CFileSystemStdio::Init() -> InitReturnVal_t {
 		return InitReturnVal_t::INIT_OK;
 	}
 
-	// FIXME: This is only correct on *nix
-	s_RootFsDriver = new CRootFsDriver();
+	s_RootFsDriver->AddRef();
 
 	m_Initialized = true;
 	Log( "[FileSystem] Filesystem module ready!\n" );
