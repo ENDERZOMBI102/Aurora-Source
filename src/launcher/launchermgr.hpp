@@ -4,16 +4,18 @@
 #pragma once
 #include "SDL3/SDL_video.h"
 #include "appframework/ilaunchermgr.h"
+#include "togl/linuxwin/glmdisplaydb.h"
+
 
 #if defined( USE_SDL )
 	class CLauncherMgr : public ILauncherMgr {
-	public:
+	public: // IAppSystem
 		auto Connect( CreateInterfaceFn factory ) -> bool override;
 		auto Disconnect() -> void override;
 		auto QueryInterface( const char* pInterfaceName ) -> void* override;
 		auto Init() -> InitReturnVal_t override;
 		auto Shutdown() -> void override;
-
+	public: // ILauncherMgr
 		auto CreateGameWindow( const char* pTitle, bool pWindowed, int pWidth, int pHeight ) -> bool override;
 
 		auto IncWindowRefCount() -> void override;
@@ -68,6 +70,7 @@
 	private:
 		SDL_Window* m_Window{ nullptr };
 		SDL_GLContext m_MainContext{ nullptr };
+		GLMDisplayDB m_DisplayDb{};
 		uint32 m_WindowRefCount{ 0 };
 		float64 m_PrevSwapTime{ 0 };
 		bool m_Fullscreen{ false };

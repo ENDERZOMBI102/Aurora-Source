@@ -44,10 +44,10 @@
 		m_Window = SDL_CreateWindow( pTitle, pWidth, pHeight, flags );
 
 		// if we're on an ogl platform, also create the context
-		if constexpr ( IsPlatformOpenGL() ) {
-			m_MainContext = SDL_GL_CreateContext( m_Window );
-			AssertFatalMsg( m_MainContext, "Failed to create OGL context: %s\n", SDL_GetError() );
-		}
+		// if constexpr ( IsPlatformOpenGL() ) {
+			// m_MainContext = SDL_GL_CreateContext( m_Window );
+			// AssertFatalMsg( m_MainContext, "Failed to create OGL context: %s\n", SDL_GetError() );
+		// }
 
 		return m_Window != nullptr;
 	}
@@ -169,12 +169,16 @@
 		auto CLauncherMgr::MakeContextCurrent( const PseudoGLContextPtr pContext ) -> bool {
 			return SDL_GL_MakeCurrent( m_Window, static_cast<SDL_GLContext>( pContext ) );
 		}
-		auto CLauncherMgr::GetDisplayDB() -> GLMDisplayDB* { AssertUnreachable(); return {}; }
+		auto CLauncherMgr::GetDisplayDB() -> GLMDisplayDB* {
+			return &m_DisplayDb;
+		}
 		auto CLauncherMgr::GetDesiredPixelFormatAttribsAndRendererInfo( uint** ptrOut, uint* countOut, GLMRendererInfoFields* rendInfoOut ) -> void { AssertUnreachable(); }
 		auto CLauncherMgr::ShowPixels( CShowPixelsParams* params ) -> void { AssertUnreachable(); }
 	#endif
 
-	auto CLauncherMgr::GetStackCrawl( CStackCrawlParams* params ) -> void { AssertUnreachable(); }
+	auto CLauncherMgr::GetStackCrawl( CStackCrawlParams* params ) -> void {
+		AssertUnreachable();
+	}
 
 	auto CLauncherMgr::WaitUntilUserInput( int msSleepTime ) -> void { AssertUnreachable(); }
 

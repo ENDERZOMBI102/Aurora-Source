@@ -38,13 +38,15 @@ namespace {
 	IDedicatedServerAPI* s_DedicatedApi{nullptr};
 	ILauncherAPI* s_LauncherApi{nullptr};
 	IStudioDataCache* s_pStudioDataCache{nullptr};
-	SDL_Window* s_Window{nullptr};
 }
 
 // ------------------
 // CSteamAppLoader
 // ------------------
 bool CGameAppLoader::Create() {
+	extern CAppSystemGroup* g_RootAppSystem;
+	g_RootAppSystem = this;
+
 	// are we running a dedicated server?
 	m_Dedicated = CommandLine()->FindParm( "-dedicated" ) != 0;
 
@@ -108,7 +110,10 @@ bool CGameAppLoader::Create() {
 		shaderDll = "shaderapidx9.dll";  // we default to shaderapidx9
 	}
 	g_pMaterialSystem->SetShaderAPI( shaderDll );
-	g_pMaterialSystem->Connect( factory );
+	if ( not g_pMaterialSystem->Connect( factory ) ) {
+		Warning( "Failed to connect material system!!" );
+		return false;
+	}
 
 	return true;
 }
@@ -130,7 +135,7 @@ bool CGameAppLoader::PreInit() {
 	// s_DedicatedApi = FindSystem<IDedicatedServerAPI>();
 	// }
 
-	if ( not g_pFullFileSystem or not g_pMaterialSystem or not s_LauncherApi ) {
+	if ( not (g_pFullFileSystem and g_pMaterialSystem and (s_DedicatedApi or s_LauncherApi)) ) {
 		Error( "Unable to load EngineAPI!\n" );
 		return false;
 	}
@@ -208,10 +213,11 @@ void CGameAppLoader::PostShutdown() {
 	g_pMaterialSystem->ModShutdown();
 }
 void CGameAppLoader::Destroy() {
+	g_pLauncherMgr->DestroyGameWindow();
+
 	DisconnectTier1Libraries();
 	DisconnectTier2Libraries();
 
-	SDL_DestroyWindow( s_Window );
 	g_pFileSystem = nullptr;
 	g_pMaterialSystem = nullptr;
 }
