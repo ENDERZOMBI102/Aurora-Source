@@ -131,7 +131,8 @@ protected:
 	// Method to look up a named system, in a typesafe manner.
 	template<class T> requires Interface::is_modern_interface<T>
 	T* FindSystem() {
-		return static_cast<T*>( this->FindSystem( T::INTERFACE_VERSION ) );
+		void* const ptr{ this->FindSystem( T::INTERFACE_VERSION ) };
+		return static_cast<T*>( ptr );
 	}
 
 	// Gets at a class factory for the topmost appsystem group in an appsystem stack

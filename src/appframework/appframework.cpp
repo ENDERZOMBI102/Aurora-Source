@@ -49,20 +49,24 @@ void AppShutdown( CAppSystemGroup* pAppSystemGroup ) {
 CSteamApplication::CSteamApplication( CSteamAppSystemGroup* pAppSystemGroup )
 	: m_pChildAppSystemGroup{ pAppSystemGroup } { }
 
-int CSteamApplication::Startup() {
+auto CSteamApplication::Startup() -> int {
 	return m_pChildAppSystemGroup->Startup();
 }
-void CSteamApplication::Shutdown() { }
+auto CSteamApplication::Shutdown() -> void {
+	m_pChildAppSystemGroup->Shutdown();
+}
 
 // CSteamApplication - IAppSystem
-bool CSteamApplication::Create() {
+auto CSteamApplication::Create() -> bool {
 	// load ICVar/cvar
-	AddSystem( static_cast<IAppSystem*>( VStdLib_GetICVarFactory()( CVAR_INTERFACE_VERSION, nullptr ) ), CVAR_INTERFACE_VERSION );
+	if ( not AddSystem( LoadModule( VStdLib_GetICVarFactory() ), CVAR_INTERFACE_VERSION ) ) {
+		return false;
+	}
 
 	// load the fs module
 	char fsDllName[1024];
 	FileSystem_SetErrorMode( FSErrorMode_t::FS_ERRORMODE_AUTO );
-	const auto res{ FileSystem_GetFileSystemDLLName( fsDllName, 1024, m_bSteam ) };
+	const auto res{ FileSystem_GetFileSystemDLLName( fsDllName, std::size( fsDllName ), m_bSteam ) };
 	if ( res != FSReturnCode_t::FS_OK ) {
 		const char* error;
 		switch ( res ) {
@@ -81,15 +85,21 @@ bool CSteamApplication::Create() {
 		return false;
 	}
 
+	g_pFullFileSystem = m_pFileSystem;
+
 	// give the fs module to the child group, so it can play with it
 	m_pChildAppSystemGroup->Setup( m_pFileSystem, this );
-	return true;
+	return m_pChildAppSystemGroup->Create();
 }
-bool CSteamApplication::PreInit() {
-	return true;
+auto CSteamApplication::PreInit() -> bool {
+	return m_pChildAppSystemGroup->PreInit();
 }
-int CSteamApplication::Main() {
-	return m_pChildAppSystemGroup->Run();
+auto CSteamApplication::Main() -> int {
+	return m_pChildAppSystemGroup->Main();
 }
-void CSteamApplication::PostShutdown() { }
-void CSteamApplication::Destroy() { }
+auto CSteamApplication::PostShutdown() -> void {
+	return m_pChildAppSystemGroup->PostShutdown();
+}
+auto CSteamApplication::Destroy() -> void {
+	return m_pChildAppSystemGroup->Destroy();
+}

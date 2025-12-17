@@ -79,16 +79,16 @@ class CSteamApplication : public CAppSystemGroup {
 public:
 	explicit CSteamApplication( CSteamAppSystemGroup* pAppSystemGroup );
 public:  // IAppSystemGroup
-	virtual bool Create();
-	virtual bool PreInit();
-	virtual int Main();
-	virtual void PostShutdown();
-	virtual void Destroy();
+	auto Create() -> bool override;
+	auto PreInit() -> bool override;
+	auto Main() -> int override;
+	auto PostShutdown() -> void override;
+	auto Destroy() -> void override;
 public:
 	// Use this version in cases where you can't control the main loop and
 	// expect to be ticked
-	virtual int Startup();
-	virtual void Shutdown();
+	auto Startup() -> int override;
+	auto Shutdown() -> void override;
 protected:
 	IFileSystem* m_pFileSystem{ nullptr };
 	CSteamAppSystemGroup* m_pChildAppSystemGroup;

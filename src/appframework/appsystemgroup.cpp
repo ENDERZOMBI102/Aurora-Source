@@ -8,8 +8,8 @@
 #include "memdbgon.h"
 
 
+CAppSystemGroup* g_RootAppSystem{ nullptr };
 namespace {
-	CAppSystemGroup* s_RootAppSystem{ nullptr };
 	// TODO: Use this to give better error messages
 	int s_FailedSystemIndex{ -1 };
 }
@@ -21,9 +21,6 @@ CAppSystemGroup::CAppSystemGroup( CAppSystemGroup* pParentAppSystem )
 	: m_pParentAppSystem{pParentAppSystem} { }
 
 int CAppSystemGroup::Run() {
-	if ( s_RootAppSystem == nullptr ) {
-		s_RootAppSystem = this;
-	}
 	int res{1};
 
 	if ( not Create() ) {
@@ -126,8 +123,8 @@ IAppSystem* CAppSystemGroup::AddSystem( const AppModule_t pModule, const char* p
 		return nullptr;
 	}
 
-	m_SystemDict.Insert( pInterfaceName, index );
 	m_Systems[index] = system;
+	m_SystemDict.Insert( pInterfaceName, index );
 	return system;
 }
 void CAppSystemGroup::AddSystem( IAppSystem* pAppSystem, const char* pInterfaceName ) {
@@ -162,46 +159,24 @@ bool CAppSystemGroup::AddSystems( AppSystemInfo_t* const pSystems ) {
 }
 
 void* CAppSystemGroup::FindSystem( const char* pInterfaceName ) {
-	// first check if WE have the system
-	const uint16 index{ m_SystemDict.Find( pInterfaceName ) };
-	if ( index != CUtlDict<int, uint16>::InvalidIndex() ) {
-		return m_Systems[index];
-	}
-
-	// ask the parent if we have one
-	if ( m_pParentAppSystem ) {
-		return m_pParentAppSystem->FindSystem( pInterfaceName );
-	}
-
-	// as last resort, check the root factory
 	return GetFactory()( pInterfaceName, nullptr );
 }
 
 CreateInterfaceFn CAppSystemGroup::GetFactory() {
 	static constexpr auto factory = []( const char* pInterfaceName, int* pRetCode ) -> void* {
-		AssertMsg( s_RootAppSystem != nullptr, "RootFactory was asked for an interface when no AppSystemGroup was ran!\n" );
+		AssertMsg( g_RootAppSystem != nullptr, "RootFactory was asked for an interface when no AppSystemGroup was ran!\n" );
 		Log( "Was tasked to find `%s`\n", pInterfaceName );
 		// check if we already know it
-		const uint16 index{ s_RootAppSystem->m_SystemDict.Find( pInterfaceName ) };
+		const uint16 index{ g_RootAppSystem->m_SystemDict.Find( pInterfaceName ) };
 		if ( index != CUtlDict<int, uint16>::InvalidIndex() ) {
 			if ( pRetCode ) {
 				*pRetCode = IFACE_OK;
 			}
-			return s_RootAppSystem->m_Systems[index];
-		}
-
-		// do any of our appsystems know it?
-		for ( const auto system : s_RootAppSystem->m_Systems ) {
-			if ( auto* iface = system->QueryInterface( pInterfaceName ) ) {
-				if ( pRetCode ) {
-					*pRetCode = IFACE_OK;
-				}
-				return iface;
-			}
+			return g_RootAppSystem->m_Systems[index];
 		}
 
 		// as last resort, just ask each module's factory
-		for ( const auto& mod : s_RootAppSystem->m_Modules ) {
+		for ( const auto& mod : g_RootAppSystem->m_Modules ) {
 			if ( auto* iface = mod.m_Factory( pInterfaceName, pRetCode ) ) {
 				return iface;
 			}
@@ -303,7 +278,6 @@ CSteamAppSystemGroup::CSteamAppSystemGroup( IFileSystem* pFileSystem, CAppSystem
 void CSteamAppSystemGroup::Setup( IFileSystem* pFileSystem, CAppSystemGroup* pParentAppSystem ) {
 	if ( pFileSystem ) {
 		m_pFileSystem = pFileSystem;
-		g_pFullFileSystem = pFileSystem;
 	}
 	if ( pParentAppSystem ) {
 		m_pParentAppSystem = pParentAppSystem;
