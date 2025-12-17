@@ -30,232 +30,233 @@
 #include "tier0/memdbgon.h"
 
 // 7LS TODO : took out cmdline here
-bool g_bUsePseudoBufs = false;        //( Plat_GetCommandLineA() ) ? ( strstr( Plat_GetCommandLineA(), "-gl_enable_pseudobufs" ) != NULL ) : false;
-bool g_bDisableStaticBuffer = false;  //( Plat_GetCommandLineA() ) ? ( strstr( Plat_GetCommandLineA(), "-gl_disable_static_buffer" ) != NULL ) : false;
+bool g_bUsePseudoBufs = false; //( Plat_GetCommandLineA() ) ? ( strstr( Plat_GetCommandLineA(), "-gl_enable_pseudobufs" ) != nullptr ) : false;
+bool g_bDisableStaticBuffer = false; //( Plat_GetCommandLineA() ) ? ( strstr( Plat_GetCommandLineA(), "-gl_disable_static_buffer" ) != nullptr ) : false;
 
 // http://www.opengl.org/registry/specs/ARB/vertex_buffer_object.txt
 // http://www.opengl.org/registry/specs/ARB/pixel_buffer_object.txt
 
 // gl_bufmode: zero means we mark all vertex/index buffers static
 
-// non zero means buffers are initially marked static..
+// non-zero means buffers are initially marked static..
 // ->but can shift to dynamic upon first 'discard' (orphaning)
 
 // #define REPORT_LOCK_TIME	0
 
 ConVar gl_bufmode( "gl_bufmode", "1" );
 
-char ALIGN16 CGLMBuffer::m_StaticBuffers[GL_MAX_STATIC_BUFFERS][GL_STATIC_BUFFER_SIZE] ALIGN16_POST;
-bool CGLMBuffer::m_bStaticBufferUsed[GL_MAX_STATIC_BUFFERS];
+char ALIGN16 CGLMBuffer::m_StaticBuffers[ GL_MAX_STATIC_BUFFERS ][ GL_STATIC_BUFFER_SIZE ] ALIGN16_POST;
+bool CGLMBuffer::m_bStaticBufferUsed[ GL_MAX_STATIC_BUFFERS ];
 
 extern bool g_bNullD3DDevice;
 
 #if GL_ENABLE_INDEX_VERIFICATION
-CGLMBufferSpanManager::CGLMBufferSpanManager()
-	: m_pCtx( NULL ), m_nBufType( kGLMVertexBuffer ), m_nBufSize( 0 ), m_bDynamic( false ), m_nSpanEndMax( -1 ), m_nNumAllocatedBufs( 0 ), m_nTotalBytesAllocated( 0 ) { }
+	CGLMBufferSpanManager::CGLMBufferSpanManager()
+		: m_pCtx( nullptr ), m_nBufType( kGLMVertexBuffer ), m_nBufSize( 0 ), m_bDynamic( false ), m_nSpanEndMax( -1 ), m_nNumAllocatedBufs( 0 ), m_nTotalBytesAllocated( 0 ) { }
 
-CGLMBufferSpanManager::~CGLMBufferSpanManager() {
-	Deinit();
-}
+	CGLMBufferSpanManager::~CGLMBufferSpanManager() { Deinit(); }
 
-void CGLMBufferSpanManager::Init( GLMContext* pContext, EGLMBufferType nBufType, uint nInitialCapacity, uint nBufSize, bool bDynamic ) {
-	Assert( ( nBufType == kGLMIndexBuffer ) || ( nBufType == kGLMVertexBuffer ) );
+	void CGLMBufferSpanManager::Init( GLMContext* pContext, EGLMBufferType nBufType, uint nInitialCapacity, uint nBufSize, bool bDynamic ) {
+		Assert( nBufType == kGLMIndexBuffer or nBufType == kGLMVertexBuffer );
 
-	m_pCtx = pContext;
-	m_nBufType = nBufType;
+		m_pCtx = pContext;
+		m_nBufType = nBufType;
 
-	m_nBufSize = nBufSize;
-	m_bDynamic = bDynamic;
+		m_nBufSize = nBufSize;
+		m_bDynamic = bDynamic;
 
-	m_ActiveSpans.EnsureCapacity( nInitialCapacity );
-	m_DeletedSpans.EnsureCapacity( nInitialCapacity );
-	m_nSpanEndMax = -1;
+		m_ActiveSpans.EnsureCapacity( nInitialCapacity );
+		m_DeletedSpans.EnsureCapacity( nInitialCapacity );
+		m_nSpanEndMax = -1;
 
-	m_nNumAllocatedBufs = 0;
-	m_nTotalBytesAllocated = 0;
-}
-
-bool CGLMBufferSpanManager::AllocDynamicBuf( uint nSize, GLDynamicBuf_t& buf ) {
-	buf.m_nGLType = GetGLBufType();
-	buf.m_nActualBufSize = nSize;
-	buf.m_nHandle = 0;
-	buf.m_nSize = nSize;
-
-	m_nNumAllocatedBufs++;
-	m_nTotalBytesAllocated += buf.m_nActualBufSize;
-
-	return true;
-}
-
-void CGLMBufferSpanManager::ReleaseDynamicBuf( GLDynamicBuf_t& buf ) {
-	Assert( m_nNumAllocatedBufs > 0 );
-	m_nNumAllocatedBufs--;
-
-	Assert( m_nTotalBytesAllocated >= (int) buf.m_nActualBufSize );
-	m_nTotalBytesAllocated -= buf.m_nActualBufSize;
-}
-
-void CGLMBufferSpanManager::Deinit() {
-	if ( !m_pCtx )
-		return;
-
-	for ( int i = 0; i < m_ActiveSpans.Count(); i++ ) {
-		if ( m_ActiveSpans[i].m_bOriginalAlloc )
-			ReleaseDynamicBuf( m_ActiveSpans[i].m_buf );
-	}
-	m_ActiveSpans.SetCountNonDestructively( 0 );
-
-	for ( int i = 0; i < m_DeletedSpans.Count(); i++ )
-		ReleaseDynamicBuf( m_DeletedSpans[i].m_buf );
-
-	m_DeletedSpans.SetCountNonDestructively( 0 );
-
-	m_pCtx->BindGLBufferToCtx( GetGLBufType(), NULL, true );
-
-	m_nSpanEndMax = -1;
-	m_pCtx = NULL;
-
-	Assert( !m_nNumAllocatedBufs );
-	Assert( !m_nTotalBytesAllocated );
-}
-
-void CGLMBufferSpanManager::DiscardAllSpans() {
-	for ( int i = 0; i < m_ActiveSpans.Count(); i++ ) {
-		if ( m_ActiveSpans[i].m_bOriginalAlloc )
-			ReleaseDynamicBuf( m_ActiveSpans[i].m_buf );
-	}
-	m_ActiveSpans.SetCountNonDestructively( 0 );
-
-	for ( int i = 0; i < m_DeletedSpans.Count(); i++ )
-		ReleaseDynamicBuf( m_DeletedSpans[i].m_buf );
-
-	m_DeletedSpans.SetCountNonDestructively( 0 );
-
-	m_nSpanEndMax = -1;
-
-	Assert( !m_nNumAllocatedBufs );
-	Assert( !m_nTotalBytesAllocated );
-}
-
-// TODO: Add logic to detect incorrect usage of bNoOverwrite.
-CGLMBufferSpanManager::ActiveSpan_t* CGLMBufferSpanManager::AddSpan( uint nOffset, uint nMaxSize, uint nActualSize, bool bDiscard, bool bNoOverwrite ) {
-	(void) bDiscard;
-	(void) bNoOverwrite;
-
-	const uint nStart = nOffset;
-	const uint nSize = nActualSize;
-	const uint nEnd = nStart + nSize;
-
-	GLDynamicBuf_t newDynamicBuf;
-	if ( !AllocDynamicBuf( nSize, newDynamicBuf ) ) {
-		DXABSTRACT_BREAK_ON_ERROR();
-		return NULL;
+		m_nNumAllocatedBufs = 0;
+		m_nTotalBytesAllocated = 0;
 	}
 
-	if ( (int) nStart < m_nSpanEndMax ) {
-		// Lock region potentially overlaps another previously locked region (since the last discard) - this is a very rarely (if ever) taken path in Source1 games.
-		int i = 0;
-		while ( i < m_ActiveSpans.Count() ) {
-			ActiveSpan_t& existingSpan = m_ActiveSpans[i];
-			if ( ( nEnd <= existingSpan.m_nStart ) || ( nStart >= existingSpan.m_nEnd ) ) {
-				i++;
-				continue;
+	bool CGLMBufferSpanManager::AllocDynamicBuf( uint nSize, GLDynamicBuf_t& buf ) {
+		buf.m_nGLType = GetGLBufType();
+		buf.m_nActualBufSize = nSize;
+		buf.m_nHandle = 0;
+		buf.m_nSize = nSize;
+
+		m_nNumAllocatedBufs++;
+		m_nTotalBytesAllocated += buf.m_nActualBufSize;
+
+		return true;
+	}
+
+	void CGLMBufferSpanManager::ReleaseDynamicBuf( GLDynamicBuf_t& buf ) {
+		Assert( m_nNumAllocatedBufs > 0 );
+		m_nNumAllocatedBufs--;
+
+		Assert( m_nTotalBytesAllocated >= static_cast<int>( buf.m_nActualBufSize ) );
+		m_nTotalBytesAllocated -= buf.m_nActualBufSize;
+	}
+
+	void CGLMBufferSpanManager::Deinit() {
+		if ( not m_pCtx ) {
+			return;
+		}
+
+		for ( int i = 0; i < m_ActiveSpans.Count(); i += 1 ) {
+			if ( m_ActiveSpans[ i ].m_bOriginalAlloc ) {
+				ReleaseDynamicBuf( m_ActiveSpans[ i ].m_buf );
 			}
+		}
+		m_ActiveSpans.SetCountNonDestructively( 0 );
 
-			Warning( "GL performance warning: AddSpan() at offset %u max size %u actual size %u, on a %s %s buffer of total size %u, overwrites an existing active lock span at offset %u size %u!\n",
-					 nOffset, nMaxSize, nActualSize,
-					 m_bDynamic ? "dynamic" : "static", ( m_nBufType == kGLMVertexBuffer ) ? "vertex" : "index", m_nBufSize,
-					 existingSpan.m_nStart, existingSpan.m_nEnd - existingSpan.m_nStart );
+		for ( int i = 0; i < m_DeletedSpans.Count(); i += 1 ) {
+			ReleaseDynamicBuf( m_DeletedSpans[ i ].m_buf );
+		}
 
-			if ( ( nStart <= existingSpan.m_nStart ) && ( nEnd >= existingSpan.m_nEnd ) ) {
-				if ( existingSpan.m_bOriginalAlloc ) {
-					// New span totally covers existing span
-					// Can't immediately delete the span's buffer because it could be referred to by another (child) span.
-					m_DeletedSpans.AddToTail( existingSpan );
+		m_DeletedSpans.SetCountNonDestructively( 0 );
+
+		m_pCtx->BindGLBufferToCtx( GetGLBufType(), nullptr, true );
+
+		m_nSpanEndMax = -1;
+		m_pCtx = nullptr;
+
+		Assert( not m_nNumAllocatedBufs );
+		Assert( not m_nTotalBytesAllocated );
+	}
+
+	void CGLMBufferSpanManager::DiscardAllSpans() {
+		for ( int i = 0; i < m_ActiveSpans.Count(); i += 1 ) {
+			if ( m_ActiveSpans[ i ].m_bOriginalAlloc ) {
+				ReleaseDynamicBuf( m_ActiveSpans[ i ].m_buf );
+			}
+		}
+		m_ActiveSpans.SetCountNonDestructively( 0 );
+
+		for ( int i = 0; i < m_DeletedSpans.Count(); i += 1 ) {
+			ReleaseDynamicBuf( m_DeletedSpans[ i ].m_buf );
+		}
+
+		m_DeletedSpans.SetCountNonDestructively( 0 );
+
+		m_nSpanEndMax = -1;
+
+		Assert( not m_nNumAllocatedBufs );
+		Assert( not m_nTotalBytesAllocated );
+	}
+
+	// TODO: Add logic to detect incorrect usage of bNoOverwrite.
+	CGLMBufferSpanManager::ActiveSpan_t* CGLMBufferSpanManager::AddSpan( uint nOffset, uint nMaxSize, uint nActualSize, bool bDiscard, bool bNoOverwrite ) {
+		(void) bDiscard;
+		(void) bNoOverwrite;
+
+		const uint nStart = nOffset;
+		const uint nSize = nActualSize;
+		const uint nEnd = nStart + nSize;
+
+		GLDynamicBuf_t newDynamicBuf;
+		if ( not AllocDynamicBuf( nSize, newDynamicBuf ) ) {
+			DXABSTRACT_BREAK_ON_ERROR();
+			return nullptr;
+		}
+
+		if ( (int) nStart < m_nSpanEndMax ) {
+			// Lock region potentially overlaps another previously locked region (since the last discard) - this is a very rarely (if ever) taken path in Source1 games.
+			int i = 0;
+			while ( i < m_ActiveSpans.Count() ) {
+				ActiveSpan_t& existingSpan = m_ActiveSpans[ i ];
+				if ( ( nEnd <= existingSpan.m_nStart ) || ( nStart >= existingSpan.m_nEnd ) ) {
+					i += 1;
+					continue;
 				}
 
-				// Delete span
-				m_ActiveSpans[i] = m_ActiveSpans[m_ActiveSpans.Count() - 1];
-				m_ActiveSpans.SetCountNonDestructively( m_ActiveSpans.Count() - 1 );
-				continue;
-			}
+				Warning( "GL performance warning: AddSpan() at offset %u max size %u actual size %u, on a %s %s buffer of total size %u, overwrites an existing active lock span at offset %u size %u!\n",
+				         nOffset, nMaxSize, nActualSize,
+				         m_bDynamic ? "dynamic" : "static", ( m_nBufType == kGLMVertexBuffer ) ? "vertex" : "index", m_nBufSize,
+				         existingSpan.m_nStart, existingSpan.m_nEnd - existingSpan.m_nStart );
 
-			// New span does NOT fully cover the existing span (partial overlap)
-			if ( nStart < existingSpan.m_nStart ) {
-				// New span starts before existing span, but ends somewhere inside, so shrink it (start moves "right")
-				existingSpan.m_nStart = nEnd;
-			} else if ( nEnd > existingSpan.m_nEnd ) {
-				// New span ends after existing span, but starts somewhere inside (end moves "left")
-				existingSpan.m_nEnd = nStart;
-			} else  //if ( ( nStart >= existingSpan.m_nStart ) && ( nEnd <= existingSpan.m_nEnd ) )
-			{
-				// New span lies inside of existing span
-				if ( nStart == existingSpan.m_nStart ) {
-					// New span begins inside the existing span (start moves "right")
-					existingSpan.m_nStart = nEnd;
-				} else {
-					if ( nEnd < existingSpan.m_nEnd ) {
-						// New span is completely inside existing span
-						m_ActiveSpans.AddToTail( ActiveSpan_t( nEnd, existingSpan.m_nEnd, existingSpan.m_buf, false ) );
+				if ( nStart <= existingSpan.m_nStart and nEnd >= existingSpan.m_nEnd ) {
+					if ( existingSpan.m_bOriginalAlloc ) {
+						// New span totally covers existing span
+						// Can't immediately delete the span's buffer because it could be referred to by another (child) span.
+						m_DeletedSpans.AddToTail( existingSpan );
 					}
 
-					existingSpan.m_nEnd = nStart;
+					// Delete span
+					m_ActiveSpans[ i ] = m_ActiveSpans[ m_ActiveSpans.Count() - 1 ];
+					m_ActiveSpans.SetCountNonDestructively( m_ActiveSpans.Count() - 1 );
+					continue;
 				}
+
+				// New span does NOT fully cover the existing span (partial overlap)
+				if ( nStart < existingSpan.m_nStart ) {
+					// New span starts before existing span, but ends somewhere inside, so shrink it (start moves "right")
+					existingSpan.m_nStart = nEnd;
+				} else if ( nEnd > existingSpan.m_nEnd ) {
+					// New span ends after existing span, but starts somewhere inside (end moves "left")
+					existingSpan.m_nEnd = nStart;
+				} else /*if ( ( nStart >= existingSpan.m_nStart ) && ( nEnd <= existingSpan.m_nEnd ) )*/ {
+					// New span lies inside of existing span
+					if ( nStart == existingSpan.m_nStart ) {
+						// New span begins inside the existing span (start moves "right")
+						existingSpan.m_nStart = nEnd;
+					} else {
+						if ( nEnd < existingSpan.m_nEnd ) {
+							// New span is completely inside existing span
+							m_ActiveSpans.AddToTail( ActiveSpan_t( nEnd, existingSpan.m_nEnd, existingSpan.m_buf, false ) );
+						}
+
+						existingSpan.m_nEnd = nStart;
+					}
+				}
+
+				Assert( existingSpan.m_nStart < existingSpan.m_nEnd );
+				i += 1;
 			}
-
-			Assert( existingSpan.m_nStart < existingSpan.m_nEnd );
-			i++;
 		}
+
+		newDynamicBuf.m_nLockOffset = nStart;
+		newDynamicBuf.m_nLockSize = nSize;
+
+		m_ActiveSpans.AddToTail( ActiveSpan_t( nStart, nEnd, newDynamicBuf, true ) );
+		m_nSpanEndMax = std::max( m_nSpanEndMax, (int) nEnd );
+
+		return &m_ActiveSpans.Tail();
 	}
 
-	newDynamicBuf.m_nLockOffset = nStart;
-	newDynamicBuf.m_nLockSize = nSize;
+	bool CGLMBufferSpanManager::IsValid( uint nOffset, uint nSize ) const {
+		const uint nEnd = nOffset + nSize;
 
-	m_ActiveSpans.AddToTail( ActiveSpan_t( nStart, nEnd, newDynamicBuf, true ) );
-	m_nSpanEndMax = MAX( m_nSpanEndMax, (int) nEnd );
+		int nTotalBytesRemaining = nSize;
 
-	return &m_ActiveSpans.Tail();
-}
+		for ( int i = m_ActiveSpans.Count() - 1; i >= 0; i -= 1 ) {
+			const ActiveSpan_t& span = m_ActiveSpans[ i ];
 
-bool CGLMBufferSpanManager::IsValid( uint nOffset, uint nSize ) const {
-	const uint nEnd = nOffset + nSize;
+			if ( span.m_nEnd <= nOffset ) continue;
+			if ( span.m_nStart >= nEnd ) continue;
 
-	int nTotalBytesRemaining = nSize;
+			uint nIntersectStart = std::max( span.m_nStart, nOffset );
+			uint nIntersectEnd = std::min( span.m_nEnd, nEnd );
+			Assert( nIntersectStart <= nIntersectEnd );
 
-	for ( int i = m_ActiveSpans.Count() - 1; i >= 0; --i ) {
-		const ActiveSpan_t& span = m_ActiveSpans[i];
+			nTotalBytesRemaining -= ( nIntersectEnd - nIntersectStart );
+			Assert( nTotalBytesRemaining >= 0 );
+			if ( nTotalBytesRemaining <= 0 ) break;
+		}
 
-		if ( span.m_nEnd <= nOffset )
-			continue;
-		if ( span.m_nStart >= nEnd )
-			continue;
-
-		uint nIntersectStart = MAX( span.m_nStart, nOffset );
-		uint nIntersectEnd = MIN( span.m_nEnd, nEnd );
-		Assert( nIntersectStart <= nIntersectEnd );
-
-		nTotalBytesRemaining -= ( nIntersectEnd - nIntersectStart );
-		Assert( nTotalBytesRemaining >= 0 );
-		if ( nTotalBytesRemaining <= 0 )
-			break;
+		return nTotalBytesRemaining == 0;
 	}
-
-	return nTotalBytesRemaining == 0;
-}
 #endif  // GL_ENABLE_INDEX_VERIFICATION
 
 // glBufferSubData() with a max size limit, to work around NVidia's threaded driver limits (anything > than roughly 256KB triggers a sync with the server thread).
 void glBufferSubDataMaxSize( GLenum target, GLintptr offset, GLsizeiptr size, const GLvoid* data, uint nMaxSizePerCall ) {
 	#if TOGL_SUPPORT_NULL_DEVICE
-		if ( g_bNullD3DDevice ) return;
+		if ( g_bNullD3DDevice ) {
+			return;
+		}
 	#endif
 
 	uint nBytesLeft = size;
 	uint nOfs = 0;
 	while ( nBytesLeft ) {
-		uint nBytesToCopy = MIN( nMaxSizePerCall, nBytesLeft );
+		const uint nBytesToCopy = std::min( nMaxSizePerCall, nBytesLeft );
 
-		gGL->glBufferSubData( target, offset + nOfs, nBytesToCopy, static_cast<const unsigned char*>( data ) + nOfs );
+		gGL->glBufferSubData( target, offset + nOfs, nBytesToCopy, static_cast<const unsigned char*>(data) + nOfs );
 
 		nBytesLeft -= nBytesToCopy;
 		nOfs += nBytesToCopy;
@@ -283,40 +284,41 @@ CGLMBuffer::CGLMBuffer( GLMContext* pCtx, EGLMBufferType type, uint size, uint o
 			break;
 
 		default:
-			Assert( !"Unknown buffer type" );
+			Assert( not "Unknown buffer type" );
 			DXABSTRACT_BREAK_ON_ERROR();
 	}
 
 	m_nSize = size;
 	m_nActualSize = size;
 	m_bMapped = false;
-	m_pLastMappedAddress = NULL;
+	m_pLastMappedAddress = nullptr;
 
-	m_pStaticBuffer = NULL;
+	m_pStaticBuffer = nullptr;
 	m_nPinnedMemoryOfs = -1;
 
 	m_bEnableAsyncMap = false;
 	m_bEnableExplicitFlush = false;
-	m_dirtyMinOffset = m_dirtyMaxOffset = 0;  // adjust/grow on lock, clear on unlock
+	m_dirtyMinOffset = m_dirtyMaxOffset = 0; // adjust/grow on lock, clear on unlock
 
 	m_pCtx->CheckCurrent();
 	m_nRevision = rand();
 
-	m_pPseudoBuf = NULL;
-	m_pActualPseudoBuf = NULL;
+	m_pPseudoBuf = nullptr;
+	m_pActualPseudoBuf = nullptr;
 
 	m_bPseudo = false;
 
-#if GL_ENABLE_UNLOCK_BUFFER_OVERWRITE_DETECTION
-	m_bPseudo = true;
-#endif
-
-#if GL_ENABLE_INDEX_VERIFICATION
-	m_BufferSpanManager.Init( m_pCtx, m_type, 512, m_nSize, m_bDynamic );
-
-	if ( m_type == kGLMIndexBuffer )
+	#if GL_ENABLE_UNLOCK_BUFFER_OVERWRITE_DETECTION
 		m_bPseudo = true;
-#endif
+	#endif
+
+	#if GL_ENABLE_INDEX_VERIFICATION
+		m_BufferSpanManager.Init( m_pCtx, m_type, 512, m_nSize, m_bDynamic );
+
+		if ( m_type == kGLMIndexBuffer ) {
+			m_bPseudo = true;
+		}
+	#endif
 
 	if ( g_bUsePseudoBufs && m_bDynamic ) {
 		m_bPseudo = true;
@@ -325,36 +327,36 @@ CGLMBuffer::CGLMBuffer( GLMContext* pCtx, EGLMBufferType type, uint size, uint o
 	if ( m_bPseudo ) {
 		m_nHandle = 0;
 
-#if GL_ENABLE_UNLOCK_BUFFER_OVERWRITE_DETECTION
-		m_nDirtyRangeStart = 0xFFFFFFFF;
-		m_nDirtyRangeEnd = 0;
+		#if GL_ENABLE_UNLOCK_BUFFER_OVERWRITE_DETECTION
+			m_nDirtyRangeStart = 0xFFFFFFFF;
+			m_nDirtyRangeEnd = 0;
 
-		m_nActualSize = ALIGN_VALUE( ( m_nSize + sizeof( uint32 ) ), 4096 );
-		m_pPseudoBuf = m_pActualPseudoBuf = (char*) VirtualAlloc( NULL, m_nActualSize, MEM_COMMIT, PAGE_READWRITE );
-		if ( !m_pPseudoBuf ) {
-			Error( "VirtualAlloc() failed!\n" );
-		}
+			m_nActualSize = ALIGN_VALUE( ( m_nSize + sizeof( uint32 ) ), 4096 );
+			m_pPseudoBuf = m_pActualPseudoBuf = (char*) VirtualAlloc( nullptr, m_nActualSize, MEM_COMMIT, PAGE_READWRITE );
+			if ( not m_pPseudoBuf ) {
+				Error( "VirtualAlloc() failed!\n" );
+			}
 
-		for ( uint i = 0; i < m_nActualSize / sizeof( uint32 ); i++ ) {
-			reinterpret_cast<uint32*>( m_pPseudoBuf )[i] = 0xDEADBEEF;
-		}
+			for ( uint i = 0; i < m_nActualSize / sizeof( uint32 ); i += 1 ) {
+				reinterpret_cast<uint32*>( m_pPseudoBuf )[ i ] = 0xDEADBEEF;
+			}
 
-		DWORD nOldProtect;
-		BOOL bResult = VirtualProtect( m_pActualPseudoBuf, m_nActualSize, PAGE_READONLY, &nOldProtect );
-		if ( !bResult ) {
-			Error( "VirtualProtect() failed!\n" );
-		}
-#else
-		m_nActualSize = size + 15;
-		m_pActualPseudoBuf = (char*) malloc( m_nActualSize );
-		m_pPseudoBuf = (char*) ( ( (intp) m_pActualPseudoBuf + 15 ) & ~15 );
-#endif
+			DWORD nOldProtect;
+			BOOL bResult = VirtualProtect( m_pActualPseudoBuf, m_nActualSize, PAGE_READONLY, &nOldProtect );
+			if ( not bResult ) {
+				Error( "VirtualProtect() failed!\n" );
+			}
+		#else
+			m_nActualSize = size + 15;
+			m_pActualPseudoBuf = static_cast<char*>( malloc( m_nActualSize ) );
+			m_pPseudoBuf = reinterpret_cast<char*>( reinterpret_cast<intp>(m_pActualPseudoBuf) + 15 & ~15 );
+		#endif
 
-		m_pCtx->BindBufferToCtx( m_type, NULL );  // exit with no buffer bound
+		m_pCtx->BindBufferToCtx( m_type, nullptr ); // exit with no buffer bound
 	} else {
 		gGL->glGenBuffersARB( 1, &m_nHandle );
 
-		m_pCtx->BindBufferToCtx( m_type, this );  // causes glBindBufferARB
+		m_pCtx->BindBufferToCtx( m_type, this ); // causes glBindBufferARB
 
 		// buffers start out static, but if they get orphaned and gl_bufmode is non zero,
 		// then they will get flipped to dynamic.
@@ -375,15 +377,15 @@ CGLMBuffer::CGLMBuffer( GLMContext* pCtx, EGLMBufferType type, uint size, uint o
 				break;
 
 			default:
-				Assert( !"Unknown buffer type" );
+				Assert( not "Unknown buffer type" );
 				DXABSTRACT_BREAK_ON_ERROR();
 		}
 
-		gGL->glBufferDataARB( m_buffGLTarget, m_nSize, (const GLvoid*) NULL, hint );  // may ultimately need more hints to set the usage correctly (esp for streaming)
+		gGL->glBufferDataARB( m_buffGLTarget, m_nSize, nullptr, hint ); // may ultimately need more hints to set the usage correctly (esp for streaming)
 
 		SetModes( false, true, true );
 
-		m_pCtx->BindBufferToCtx( m_type, NULL );  // unbind me
+		m_pCtx->BindBufferToCtx( m_type, nullptr ); // unbind me
 	}
 }
 
@@ -391,28 +393,28 @@ CGLMBuffer::~CGLMBuffer() {
 	m_pCtx->CheckCurrent();
 
 	if ( m_bPseudo ) {
-#if GL_ENABLE_UNLOCK_BUFFER_OVERWRITE_DETECTION
-		BOOL bResult = VirtualFree( m_pActualPseudoBuf, 0, MEM_RELEASE );
-		if ( !bResult ) {
-			Error( "VirtualFree() failed!\n" );
-		}
-#else
-		free( m_pActualPseudoBuf );
-#endif
-		m_pActualPseudoBuf = NULL;
-		m_pPseudoBuf = NULL;
+		#if GL_ENABLE_UNLOCK_BUFFER_OVERWRITE_DETECTION
+			BOOL bResult = VirtualFree( m_pActualPseudoBuf, 0, MEM_RELEASE );
+			if ( not bResult ) {
+				Error( "VirtualFree() failed!\n" );
+			}
+		#else
+			free( m_pActualPseudoBuf );
+		#endif
+		m_pActualPseudoBuf = nullptr;
+		m_pPseudoBuf = nullptr;
 	} else {
 		gGL->glDeleteBuffersARB( 1, &m_nHandle );
 	}
 
-	m_pCtx = NULL;
+	m_pCtx = nullptr;
 	m_nHandle = 0;
 
-	m_pLastMappedAddress = NULL;
+	m_pLastMappedAddress = nullptr;
 
-#if GL_ENABLE_INDEX_VERIFICATION
-	m_BufferSpanManager.Deinit();
-#endif
+	#if GL_ENABLE_INDEX_VERIFICATION
+		m_BufferSpanManager.Deinit();
+	#endif
 }
 
 void CGLMBuffer::SetModes( bool bAsyncMap, bool bExplicitFlush, bool bForce ) {
@@ -421,18 +423,18 @@ void CGLMBuffer::SetModes( bool bAsyncMap, bool bExplicitFlush, bool bForce ) {
 	if ( m_bPseudo ) {
 		// ignore it...
 	} else {
-		if ( bForce || ( m_bEnableAsyncMap != bAsyncMap ) ) {
+		if ( bForce or m_bEnableAsyncMap != bAsyncMap ) {
 			// note the sense of the parameter, it's TRUE if you *want* serialization, so for async you turn it to false.
-			if ( ( gGL->m_bHave_GL_APPLE_flush_buffer_range ) && ( !gGL->m_bHave_GL_ARB_map_buffer_range ) ) {
+			if ( gGL->m_bHave_GL_APPLE_flush_buffer_range and not gGL->m_bHave_GL_ARB_map_buffer_range ) {
 				gGL->glBufferParameteriAPPLE( m_buffGLTarget, GL_BUFFER_SERIALIZED_MODIFY_APPLE, bAsyncMap == false );
 			}
 			m_bEnableAsyncMap = bAsyncMap;
 		}
 
-		if ( bForce || ( m_bEnableExplicitFlush != bExplicitFlush ) ) {
+		if ( bForce or m_bEnableExplicitFlush != bExplicitFlush ) {
 			// Note that the GL_ARB_map_buffer_range path handles this in the glMapBufferRange() call in Lock().
 			// note the sense of the parameter, it's TRUE if you *want* auto-flush-on-unmap, so for explicit-flush, you turn it to false.
-			if ( ( gGL->m_bHave_GL_APPLE_flush_buffer_range ) && ( !gGL->m_bHave_GL_ARB_map_buffer_range ) ) {
+			if ( gGL->m_bHave_GL_APPLE_flush_buffer_range and not gGL->m_bHave_GL_ARB_map_buffer_range ) {
 				gGL->glBufferParameteriAPPLE( m_buffGLTarget, GL_BUFFER_FLUSHING_UNMAP_APPLE, bExplicitFlush == false );
 			}
 			m_bEnableExplicitFlush = bExplicitFlush;
@@ -441,49 +443,48 @@ void CGLMBuffer::SetModes( bool bAsyncMap, bool bExplicitFlush, bool bForce ) {
 }
 
 #if GL_ENABLE_INDEX_VERIFICATION
-bool CGLMBuffer::IsSpanValid( uint nOffset, uint nSize ) const {
-	return m_BufferSpanManager.IsValid( nOffset, nSize );
-}
+	bool CGLMBuffer::IsSpanValid( uint nOffset, uint nSize ) const {
+		return m_BufferSpanManager.IsValid( nOffset, nSize );
+	}
 #endif
 
 void CGLMBuffer::FlushRange( uint offset, uint size ) {
-	if ( m_pStaticBuffer ) {
-	} else if ( m_bPseudo ) {
+	if ( m_pStaticBuffer ) { } else if ( m_bPseudo ) {
 		// nothing to do
 	} else {
-#ifdef REPORT_LOCK_TIME
-		double flStart = Plat_FloatTime();
-#endif
+		#if defined( REPORT_LOCK_TIME )
+			double flStart = Plat_FloatTime();
+		#endif
 
 		// assumes buffer is bound.
 		if ( gGL->m_bHave_GL_ARB_map_buffer_range ) {
-			gGL->glFlushMappedBufferRange( m_buffGLTarget, (GLintptr) ( offset - m_dirtyMinOffset ), (GLsizeiptr) size );
+			gGL->glFlushMappedBufferRange( m_buffGLTarget, static_cast<GLintptr>( offset - m_dirtyMinOffset ), static_cast<GLsizeiptr>( size ) );
 		} else if ( gGL->m_bHave_GL_APPLE_flush_buffer_range ) {
-			gGL->glFlushMappedBufferRangeAPPLE( m_buffGLTarget, (GLintptr) offset, (GLsizeiptr) size );
+			gGL->glFlushMappedBufferRangeAPPLE( m_buffGLTarget, static_cast<GLintptr>( offset ), static_cast<GLsizeiptr>( size ) );
 		}
 
-#ifdef REPORT_LOCK_TIME
-		double flEnd = Plat_FloatTime();
-		if ( flEnd - flStart > 5.0 / 1000.0 ) {
-			int nDelta = (int) ( ( flEnd - flStart ) * 1000 );
-			if ( nDelta > 2 ) {
-				Msg( "**** " );
+		#if defined( REPORT_LOCK_TIME )
+			double flEnd = Plat_FloatTime();
+			if ( flEnd - flStart > 5.0 / 1000.0 ) {
+				int nDelta = static_cast<int>( ( flEnd - flStart ) * 1000 );
+				if ( nDelta > 2 ) {
+					Msg( "**** " );
+				}
+				Msg( "glFlushMappedBufferRange Time %d: ( Name=%d BufSize=%d ) Target=%p Offset=%d FlushSize=%d\n", nDelta, m_nHandle, m_nSize, m_buffGLTarget, offset - m_dirtyMinOffset, size );
 			}
-			Msg( "glFlushMappedBufferRange Time %d: ( Name=%d BufSize=%d ) Target=%p Offset=%d FlushSize=%d\n", nDelta, m_nHandle, m_nSize, m_buffGLTarget, offset - m_dirtyMinOffset, size );
-		}
-#endif
+		#endif
 
 		// If you don't have any extension support here, you'll flush the whole buffer on unmap. Performance loss, but it's still safe and correct.
 	}
 }
 
 void CGLMBuffer::Lock( GLMBuffLockParams* pParams, char** pAddressOut ) {
-#if GL_TELEMETRY_GPU_ZONES
-	CScopedGLMPIXEvent glmPIXEvent( "CGLMBuffer::Lock" );
-	g_TelemetryGPUStats.m_nTotalBufferLocksAndUnlocks++;
-#endif
+	#if GL_TELEMETRY_GPU_ZONES
+		CScopedGLMPIXEvent glmPIXEvent( "CGLMBuffer::Lock" );
+		g_TelemetryGPUStats.m_nTotalBufferLocksAndUnlocks += 1;
+	#endif
 
-	char* resultPtr = NULL;
+	char* resultPtr = nullptr;
 
 	if ( m_bMapped ) {
 		DXABSTRACT_BREAK_ON_ERROR();
@@ -501,22 +502,22 @@ void CGLMBuffer::Lock( GLMBuffLockParams* pParams, char** pAddressOut ) {
 		return;
 	}
 
-	if ( ( pParams->m_nOffset + pParams->m_nSize ) > m_nSize ) {
+	if ( pParams->m_nOffset + pParams->m_nSize > m_nSize ) {
 		DXABSTRACT_BREAK_ON_ERROR();
 		return;
 	}
 
-#if GL_ENABLE_INDEX_VERIFICATION
-	if ( pParams->m_bDiscard ) {
-		m_BufferSpanManager.DiscardAllSpans();
-	}
-#endif
+	#if GL_ENABLE_INDEX_VERIFICATION
+		if ( pParams->m_bDiscard ) {
+			m_BufferSpanManager.DiscardAllSpans();
+		}
+	#endif
 
-	m_pStaticBuffer = NULL;
+	m_pStaticBuffer = nullptr;
 
 	if ( m_bPseudo ) {
 		if ( pParams->m_bDiscard ) {
-			m_nRevision++;
+			m_nRevision += 1;
 		}
 
 		// async map modes are a no-op
@@ -524,38 +525,38 @@ void CGLMBuffer::Lock( GLMBuffLockParams* pParams, char** pAddressOut ) {
 		// calc lock address
 		resultPtr = m_pPseudoBuf + pParams->m_nOffset;
 
-#if GL_ENABLE_UNLOCK_BUFFER_OVERWRITE_DETECTION
-		BOOL bResult;
-		DWORD nOldProtect;
-		if ( pParams->m_bDiscard ) {
-			bResult = VirtualProtect( m_pActualPseudoBuf, m_nSize, PAGE_READWRITE, &nOldProtect );
-			if ( !bResult ) {
+		#if GL_ENABLE_UNLOCK_BUFFER_OVERWRITE_DETECTION
+			BOOL bResult;
+			DWORD nOldProtect;
+			if ( pParams->m_bDiscard ) {
+				bResult = VirtualProtect( m_pActualPseudoBuf, m_nSize, PAGE_READWRITE, &nOldProtect );
+				if ( not bResult ) {
+					Error( "VirtualProtect() failed!\n" );
+				}
+
+				m_nDirtyRangeStart = 0xFFFFFFFF;
+				m_nDirtyRangeEnd = 0;
+
+				for ( uint i = 0; i < m_nSize / sizeof( uint32 ); i += 1 ) {
+					reinterpret_cast<uint32*>( m_pPseudoBuf )[ i ] = 0xDEADBEEF;
+				}
+
+				bResult = VirtualProtect( m_pActualPseudoBuf, m_nSize, PAGE_READONLY, &nOldProtect );
+				if ( not bResult ) {
+					Error( "VirtualProtect() failed!\n" );
+				}
+			}
+			uint nProtectOfs = m_LockParams.m_nOffset & 4095;
+			uint nProtectEnd = ( m_LockParams.m_nOffset + m_LockParams.m_nSize + 4095 ) & ~4095;
+			uint nProtectSize = nProtectEnd - nProtectOfs;
+			bResult = VirtualProtect( m_pActualPseudoBuf + nProtectOfs, nProtectSize, PAGE_READWRITE, &nOldProtect );
+			if ( not bResult ) {
 				Error( "VirtualProtect() failed!\n" );
 			}
-
-			m_nDirtyRangeStart = 0xFFFFFFFF;
-			m_nDirtyRangeEnd = 0;
-
-			for ( uint i = 0; i < m_nSize / sizeof( uint32 ); i++ ) {
-				reinterpret_cast<uint32*>( m_pPseudoBuf )[i] = 0xDEADBEEF;
-			}
-
-			bResult = VirtualProtect( m_pActualPseudoBuf, m_nSize, PAGE_READONLY, &nOldProtect );
-			if ( !bResult ) {
-				Error( "VirtualProtect() failed!\n" );
-			}
-		}
-		uint nProtectOfs = m_LockParams.m_nOffset & 4095;
-		uint nProtectEnd = ( m_LockParams.m_nOffset + m_LockParams.m_nSize + 4095 ) & ~4095;
-		uint nProtectSize = nProtectEnd - nProtectOfs;
-		bResult = VirtualProtect( m_pActualPseudoBuf + nProtectOfs, nProtectSize, PAGE_READWRITE, &nOldProtect );
-		if ( !bResult ) {
-			Error( "VirtualProtect() failed!\n" );
-		}
-#endif
-	} else if ( m_bDynamic && gGL->m_bHave_GL_AMD_pinned_memory && ( m_pCtx->GetCurPinnedMemoryBuffer()->GetBytesRemaining() >= pParams->m_nSize ) ) {
+		#endif
+	} else if ( m_bDynamic and gGL->m_bHave_GL_AMD_pinned_memory and m_pCtx->GetCurPinnedMemoryBuffer()->GetBytesRemaining() >= pParams->m_nSize ) {
 		if ( pParams->m_bDiscard ) {
-			m_nRevision++;
+			m_nRevision += 1;
 		}
 
 		m_dirtyMinOffset = pParams->m_nOffset;
@@ -565,13 +566,13 @@ void CGLMBuffer::Lock( GLMBuffLockParams* pParams, char** pAddressOut ) {
 
 		m_nPinnedMemoryOfs = pTempBuffer->GetOfs();
 
-		resultPtr = static_cast<char*>( pTempBuffer->GetPtr() ) + m_nPinnedMemoryOfs;
+		resultPtr = static_cast<char*>(pTempBuffer->GetPtr()) + m_nPinnedMemoryOfs;
 
 		pTempBuffer->Append( pParams->m_nSize );
-	} else if ( !g_bDisableStaticBuffer && ( pParams->m_bDiscard || pParams->m_bNoOverwrite ) && ( pParams->m_nSize <= GL_STATIC_BUFFER_SIZE ) ) {
-#if TOGL_SUPPORT_NULL_DEVICE
-		if ( !g_bNullD3DDevice )
-#endif
+	} else if ( not g_bDisableStaticBuffer and ( pParams->m_bDiscard or pParams->m_bNoOverwrite ) and pParams->m_nSize <= GL_STATIC_BUFFER_SIZE ) {
+		#if TOGL_SUPPORT_NULL_DEVICE
+			if ( not g_bNullD3DDevice )
+		#endif
 		{
 			if ( pParams->m_bDiscard ) {
 				m_pCtx->BindBufferToCtx( m_type, this );
@@ -579,9 +580,9 @@ void CGLMBuffer::Lock( GLMBuffLockParams* pParams, char** pAddressOut ) {
 				// observe gl_bufmode on any orphan event.
 				// if orphaned and bufmode is nonzero, flip it to dynamic.
 				GLenum hint = gl_bufmode.GetInt() ? GL_DYNAMIC_DRAW_ARB : GL_STATIC_DRAW_ARB;
-				gGL->glBufferDataARB( m_buffGLTarget, m_nSize, (const GLvoid*) NULL, hint );
+				gGL->glBufferDataARB( m_buffGLTarget, m_nSize, nullptr, hint );
 
-				m_nRevision++;  // revision grows on orphan event
+				m_nRevision += 1; // revision grows on orphan event
 			}
 		}
 
@@ -590,11 +591,11 @@ void CGLMBuffer::Lock( GLMBuffLockParams* pParams, char** pAddressOut ) {
 
 		switch ( m_type ) {
 			case kGLMVertexBuffer: {
-				m_pStaticBuffer = m_StaticBuffers[0];
+				m_pStaticBuffer = m_StaticBuffers[ 0 ];
 				break;
 			}
 			case kGLMIndexBuffer: {
-				m_pStaticBuffer = m_StaticBuffers[1];
+				m_pStaticBuffer = m_StaticBuffers[ 1 ];
 				break;
 			}
 			default: {
@@ -613,11 +614,11 @@ void CGLMBuffer::Lock( GLMBuffLockParams* pParams, char** pAddressOut ) {
 			// observe gl_bufmode on any orphan event.
 			// if orphaned and bufmode is nonzero, flip it to dynamic.
 
-			// We always want to call glBufferData( ..., NULL ) on discards, even though we're using the GL_MAP_INVALIDATE_BUFFER_BIT flag, because this flag is actually only a hint according to AMD.
+			// We always want to call glBufferData( ..., nullptr ) on discards, even though we're using the GL_MAP_INVALIDATE_BUFFER_BIT flag, because this flag is actually only a hint according to AMD.
 			GLenum hint = gl_bufmode.GetInt() ? GL_DYNAMIC_DRAW_ARB : GL_STATIC_DRAW_ARB;
-			gGL->glBufferDataARB( m_buffGLTarget, m_nSize, (const GLvoid*) NULL, hint );
+			gGL->glBufferDataARB( m_buffGLTarget, m_nSize, nullptr, hint );
 
-			m_nRevision++;  // revision grows on orphan event
+			m_nRevision += 1; // revision grows on orphan event
 		}
 
 		// adjust async map option appropriately, leave explicit flush unchanged
@@ -629,47 +630,37 @@ void CGLMBuffer::Lock( GLMBuffLockParams* pParams, char** pAddressOut ) {
 			// m_bEnableAsyncMap is actually pParams->m_bNoOverwrite
 			GLbitfield parms = GL_MAP_WRITE_BIT | ( m_bEnableAsyncMap ? GL_MAP_UNSYNCHRONIZED_BIT : 0 ) | ( pParams->m_bDiscard ? GL_MAP_INVALIDATE_BUFFER_BIT : 0 ) | ( m_bEnableExplicitFlush ? GL_MAP_FLUSH_EXPLICIT_BIT : 0 );
 
-#ifdef REPORT_LOCK_TIME
-			double flStart = Plat_FloatTime();
-#endif
+			#ifdef REPORT_LOCK_TIME
+				double flStart = Plat_FloatTime();
+			#endif
 
-			mapPtr = (char*) gGL->glMapBufferRange( m_buffGLTarget, pParams->m_nOffset, pParams->m_nSize, parms );
+			mapPtr = static_cast<char*>( gGL->glMapBufferRange( m_buffGLTarget, pParams->m_nOffset, pParams->m_nSize, parms ) );
 
-#ifdef REPORT_LOCK_TIME
-			double flEnd = Plat_FloatTime();
-			if ( flEnd - flStart > 5.0 / 1000.0 ) {
-				int nDelta = (int) ( ( flEnd - flStart ) * 1000 );
-				if ( nDelta > 2 ) {
-					Msg( "**** " );
+			#ifdef REPORT_LOCK_TIME
+				double flEnd = Plat_FloatTime();
+				if ( flEnd - flStart > 5.0 / 1000.0 ) {
+					int nDelta = static_cast<int>( ( flEnd - flStart ) * 1000 );
+					if ( nDelta > 2 ) {
+						Msg( "**** " );
+					}
+					Msg( "glMapBufferRange Time=%d: ( Name=%d BufSize=%d ) Target=%p Offset=%d LockSize=%d ", nDelta, m_nHandle, m_nSize, m_buffGLTarget, pParams->m_nOffset, pParams->m_nSize );
+					if ( parms & GL_MAP_WRITE_BIT )             { Msg( "GL_MAP_WRITE_BIT " ); }
+					if ( parms & GL_MAP_UNSYNCHRONIZED_BIT )    { Msg( "GL_MAP_UNSYNCHRONIZED_BIT " ); }
+					if ( parms & GL_MAP_INVALIDATE_BUFFER_BIT ) { Msg( "GL_MAP_INVALIDATE_BUFFER_BIT " ); }
+					if ( parms & GL_MAP_INVALIDATE_RANGE_BIT )  { Msg( "GL_MAP_INVALIDATE_RANGE_BIT " ); }
+					if ( parms & GL_MAP_FLUSH_EXPLICIT_BIT )    { Msg( "GL_MAP_FLUSH_EXPLICIT_BIT " ); }
+					Msg( "\n" );
 				}
-				Msg( "glMapBufferRange Time=%d: ( Name=%d BufSize=%d ) Target=%p Offset=%d LockSize=%d ", nDelta, m_nHandle, m_nSize, m_buffGLTarget, pParams->m_nOffset, pParams->m_nSize );
-				if ( parms & GL_MAP_WRITE_BIT ) {
-					Msg( "GL_MAP_WRITE_BIT " );
-				}
-				if ( parms & GL_MAP_UNSYNCHRONIZED_BIT ) {
-					Msg( "GL_MAP_UNSYNCHRONIZED_BIT " );
-				}
-				if ( parms & GL_MAP_INVALIDATE_BUFFER_BIT ) {
-					Msg( "GL_MAP_INVALIDATE_BUFFER_BIT " );
-				}
-				if ( parms & GL_MAP_INVALIDATE_RANGE_BIT ) {
-					Msg( "GL_MAP_INVALIDATE_RANGE_BIT " );
-				}
-				if ( parms & GL_MAP_FLUSH_EXPLICIT_BIT ) {
-					Msg( "GL_MAP_FLUSH_EXPLICIT_BIT " );
-				}
-				Msg( "\n" );
-			}
-#endif
+			#endif
 		} else {
-			mapPtr = (char*) gGL->glMapBufferARB( m_buffGLTarget, GL_WRITE_ONLY_ARB );
+			mapPtr = static_cast<char*>( gGL->glMapBufferARB( m_buffGLTarget, GL_WRITE_ONLY_ARB ) );
 		}
 
 		Assert( mapPtr );
 
 		// calculate offset location
 		resultPtr = mapPtr;
-		if ( !gGL->m_bHave_GL_ARB_map_buffer_range ) {
+		if ( not gGL->m_bHave_GL_ARB_map_buffer_range ) {
 			resultPtr += pParams->m_nOffset;
 		}
 
@@ -680,20 +671,20 @@ void CGLMBuffer::Lock( GLMBuffLockParams* pParams, char** pAddressOut ) {
 
 	m_bMapped = true;
 
-	m_pLastMappedAddress = (float*) resultPtr;
+	m_pLastMappedAddress = reinterpret_cast<float*>( resultPtr );
 
 	*pAddressOut = resultPtr;
 }
 
 void CGLMBuffer::Unlock( int nActualSize, const void* pActualData ) {
-#if GL_TELEMETRY_GPU_ZONES
-	CScopedGLMPIXEvent glmPIXEvent( "CGLMBuffer::Unlock" );
-	g_TelemetryGPUStats.m_nTotalBufferLocksAndUnlocks++;
-#endif
+	#if GL_TELEMETRY_GPU_ZONES
+		CScopedGLMPIXEvent glmPIXEvent( "CGLMBuffer::Unlock" );
+		g_TelemetryGPUStats.m_nTotalBufferLocksAndUnlocks += 1;
+	#endif
 
 	m_pCtx->CheckCurrent();
 
-	if ( !m_bMapped ) {
+	if ( not m_bMapped ) {
 		DXABSTRACT_BREAK_ON_ERROR();
 		return;
 	}
@@ -702,154 +693,147 @@ void CGLMBuffer::Unlock( int nActualSize, const void* pActualData ) {
 		nActualSize = m_LockParams.m_nSize;
 	}
 
-	if ( nActualSize > (int) m_LockParams.m_nSize ) {
+	if ( nActualSize > static_cast<int>( m_LockParams.m_nSize ) ) {
 		DXABSTRACT_BREAK_ON_ERROR();
 		return;
 	}
 
-#if GL_ENABLE_UNLOCK_BUFFER_OVERWRITE_DETECTION
-	if ( m_bPseudo ) {
-		// Check guard DWORD to detect buffer overruns (but are still within the last 4KB page so they don't get caught via pagefaults)
-		if ( *reinterpret_cast<const uint32*>( m_pPseudoBuf + m_nSize ) != 0xDEADBEEF ) {
-			// If this fires the client app has overwritten the guard DWORD beyond the end of the buffer.
-			DXABSTRACT_BREAK_ON_ERROR();
-		}
-
-		static const uint s_nInitialValues[4] = { 0xEF, 0xBE, 0xAD, 0xDE };
-
-		int nActualModifiedStart, nActualModifiedEnd;
-		for ( nActualModifiedStart = 0; nActualModifiedStart < (int) m_LockParams.m_nSize; ++nActualModifiedStart )
-			if ( reinterpret_cast<const uint8*>( m_pLastMappedAddress )[nActualModifiedStart] != s_nInitialValues[( m_LockParams.m_nOffset + nActualModifiedStart ) & 3] )
-				break;
-
-		for ( nActualModifiedEnd = m_LockParams.m_nSize - 1; nActualModifiedEnd > nActualModifiedStart; --nActualModifiedEnd )
-			if ( reinterpret_cast<const uint8*>( m_pLastMappedAddress )[nActualModifiedEnd] != s_nInitialValues[( m_LockParams.m_nOffset + nActualModifiedEnd ) & 3] )
-				break;
-
-		int nNumActualBytesModified = 0;
-
-		if ( nActualModifiedEnd >= nActualModifiedStart ) {
-			// The modified check is conservative (i.e. it should always err on the side of detecting <= actual bytes than where actually modified, never more).
-			// We primarily care about the case where the user lies about the actual # of modified bytes, which can lead to difficult to debug/inconsistent problems with some drivers.
-			// Round up/down the modified range, because the user's data may alias with the initial buffer values (0xDEADBEEF) so we may miss some bytes that where written.
-			if ( m_type == kGLMIndexBuffer ) {
-				nActualModifiedStart &= ~1;
-				nActualModifiedEnd = MIN( (int) m_LockParams.m_nSize, ( ( nActualModifiedEnd + 1 ) + 1 ) & ~1 ) - 1;
-			} else {
-				nActualModifiedStart &= ~3;
-				nActualModifiedEnd = MIN( (int) m_LockParams.m_nSize, ( ( nActualModifiedEnd + 1 ) + 3 ) & ~3 ) - 1;
+	#if GL_ENABLE_UNLOCK_BUFFER_OVERWRITE_DETECTION
+		if ( m_bPseudo ) {
+			// Check guard DWORD to detect buffer overruns (but are still within the last 4KB page so they don't get caught via pagefaults)
+			if ( *reinterpret_cast<const uint32*>( m_pPseudoBuf + m_nSize ) != 0xDEADBEEF ) {
+				// If this fires the client app has overwritten the guard DWORD beyond the end of the buffer.
+				DXABSTRACT_BREAK_ON_ERROR();
 			}
 
-			nNumActualBytesModified = nActualModifiedEnd + 1;
+			static constexpr uint s_nInitialValues[ 4 ] { 0xEF, 0xBE, 0xAD, 0xDE };
 
-			if ( nActualSize < nNumActualBytesModified ) {
-				// The caller may be lying about the # of actually modified bytes in this lock.
-				// Has this lock region been previously locked? If so, it may have been previously overwritten before. Otherwise, the region had to be the 0xDEADBEEF fill DWORD at lock time.
-				if ( ( m_nDirtyRangeStart > m_nDirtyRangeEnd ) ||
-					 ( m_LockParams.m_nOffset > m_nDirtyRangeEnd ) || ( ( m_LockParams.m_nOffset + m_LockParams.m_nSize ) <= m_nDirtyRangeStart ) ) {
-					// If this fires the client has lied about the actual # of bytes they've modified in the buffer - this will cause unreliable rendering on AMD drivers (because AMD actually pays attention to the actual # of flushed bytes).
-					DXABSTRACT_BREAK_ON_ERROR();
+			int nActualModifiedStart, nActualModifiedEnd;
+			for ( nActualModifiedStart = 0; nActualModifiedStart < (int) m_LockParams.m_nSize; ++nActualModifiedStart ) {
+				if ( reinterpret_cast<const uint8*>(m_pLastMappedAddress)[ nActualModifiedStart ] != s_nInitialValues[ ( m_LockParams.m_nOffset + nActualModifiedStart ) & 3 ] ) {
+					break;
 				}
 			}
 
-			m_nDirtyRangeStart = MIN( m_nDirtyRangeStart, m_LockParams.m_nOffset + nActualModifiedStart );
-			m_nDirtyRangeEnd = MAX( m_nDirtyRangeEnd, m_LockParams.m_nOffset + nActualModifiedEnd );
-		}
-
-	#if GL_ENABLE_INDEX_VERIFICATION
-		if ( nActualModifiedEnd >= nActualModifiedStart ) {
-			int n = nActualModifiedEnd + 1;
-			if ( n != nActualSize ) {
-				// The actual detected modified size is < than the reported size, which is common because the last few DWORD's of the vertex format may not actually be used/written (or read by the vertex shader). So just fudge it so the batch consumption checks work.
-				if ( ( (int) nActualSize - n ) <= 32 ) {
-					n = nActualSize;
+			for ( nActualModifiedEnd = m_LockParams.m_nSize - 1; nActualModifiedEnd > nActualModifiedStart; --nActualModifiedEnd ) {
+				if ( reinterpret_cast<const uint8*>(m_pLastMappedAddress)[ nActualModifiedEnd ] != s_nInitialValues[ ( m_LockParams.m_nOffset + nActualModifiedEnd ) & 3 ] ) {
+					break;
 				}
 			}
 
-			m_BufferSpanManager.AddSpan( m_LockParams.m_nOffset + nActualModifiedStart, m_LockParams.m_nSize, n - nActualModifiedStart, m_LockParams.m_bDiscard, m_LockParams.m_bNoOverwrite );
+			int nNumActualBytesModified = 0;
+
+			if ( nActualModifiedEnd >= nActualModifiedStart ) {
+				// The modified check is conservative (i.e. it should always err on the side of detecting <= actual bytes than where actually modified, never more).
+				// We primarily care about the case where the user lies about the actual # of modified bytes, which can lead to difficult to debug/inconsistent problems with some drivers.
+				// Round up/down the modified range, because the user's data may alias with the initial buffer values (0xDEADBEEF) so we may miss some bytes that where written.
+				if ( m_type == kGLMIndexBuffer ) {
+					nActualModifiedStart &= ~1;
+					nActualModifiedEnd = std::min( (int) m_LockParams.m_nSize, ( ( nActualModifiedEnd + 1 ) + 1 ) & ~1 ) - 1;
+				} else {
+					nActualModifiedStart &= ~3;
+					nActualModifiedEnd = std::min( (int) m_LockParams.m_nSize, ( ( nActualModifiedEnd + 1 ) + 3 ) & ~3 ) - 1;
+				}
+
+				nNumActualBytesModified = nActualModifiedEnd + 1;
+
+				if ( nActualSize < nNumActualBytesModified ) {
+					// The caller may be lying about the # of actually modified bytes in this lock.
+					// Has this lock region been previously locked? If so, it may have been previously overwritten before. Otherwise, the region had to be the 0xDEADBEEF fill DWORD at lock time.
+					if ( ( m_nDirtyRangeStart > m_nDirtyRangeEnd ) or ( m_LockParams.m_nOffset > m_nDirtyRangeEnd ) or ( ( m_LockParams.m_nOffset + m_LockParams.m_nSize ) <= m_nDirtyRangeStart ) ) {
+						// If this fires the client has lied about the actual # of bytes they've modified in the buffer - this will cause unreliable rendering on AMD drivers (because AMD actually pays attention to the actual # of flushed bytes).
+						DXABSTRACT_BREAK_ON_ERROR();
+					}
+				}
+
+				m_nDirtyRangeStart = std::min( m_nDirtyRangeStart, m_LockParams.m_nOffset + nActualModifiedStart );
+				m_nDirtyRangeEnd = std::max( m_nDirtyRangeEnd, m_LockParams.m_nOffset + nActualModifiedEnd );
+			}
+
+			#if GL_ENABLE_INDEX_VERIFICATION
+				if ( nActualModifiedEnd >= nActualModifiedStart ) {
+					int n = nActualModifiedEnd + 1;
+					if ( n != nActualSize ) {
+						// The actual detected modified size is < than the reported size, which is common because the last few DWORD's of the vertex format may not actually be used/written (or read by the vertex shader). So just fudge it so the batch consumption checks work.
+						if ( ( (int) nActualSize - n ) <= 32 ) {
+							n = nActualSize;
+						}
+					}
+
+					m_BufferSpanManager.AddSpan( m_LockParams.m_nOffset + nActualModifiedStart, m_LockParams.m_nSize, n - nActualModifiedStart, m_LockParams.m_bDiscard, m_LockParams.m_bNoOverwrite );
+				}
+			#endif
+		}
+	#elif GL_ENABLE_INDEX_VERIFICATION
+		if ( nActualSize > 0 ) {
+			m_BufferSpanManager.AddSpan( m_LockParams.m_nOffset, m_LockParams.m_nSize, nActualSize, m_LockParams.m_bDiscard, m_LockParams.m_bNoOverwrite );
 		}
 	#endif
-	}
-#elif GL_ENABLE_INDEX_VERIFICATION
-	if ( nActualSize > 0 ) {
-		m_BufferSpanManager.AddSpan( m_LockParams.m_nOffset, m_LockParams.m_nSize, nActualSize, m_LockParams.m_bDiscard, m_LockParams.m_bNoOverwrite );
-	}
-#endif
 
-#if GL_BATCH_PERF_ANALYSIS
-	if ( m_type == kGLMIndexBuffer )
-		g_nTotalIBLockBytes += nActualSize;
-	else if ( m_type == kGLMVertexBuffer )
-		g_nTotalVBLockBytes += nActualSize;
-#endif
+	#if GL_BATCH_PERF_ANALYSIS
+		if ( m_type == kGLMIndexBuffer ) {
+			g_nTotalIBLockBytes += nActualSize;
+		} else if ( m_type == kGLMVertexBuffer ) {
+			g_nTotalVBLockBytes += nActualSize;
+		}
+	#endif
 
 	if ( m_nPinnedMemoryOfs >= 0 ) {
-#if TOGL_SUPPORT_NULL_DEVICE
-		if ( !g_bNullD3DDevice ) {
-#endif
+		#if TOGL_SUPPORT_NULL_DEVICE
+		if ( not g_bNullD3DDevice )
+		#endif
+		{
 			if ( nActualSize ) {
 				m_pCtx->BindBufferToCtx( m_type, this );
 
-				gGL->glCopyBufferSubData(
-					GL_EXTERNAL_VIRTUAL_MEMORY_BUFFER_AMD,
-					m_buffGLTarget,
-					m_nPinnedMemoryOfs,
-					m_dirtyMinOffset,
-					nActualSize );
+				gGL->glCopyBufferSubData( GL_EXTERNAL_VIRTUAL_MEMORY_BUFFER_AMD, m_buffGLTarget, m_nPinnedMemoryOfs, m_dirtyMinOffset, nActualSize );
 			}
-
-#if TOGL_SUPPORT_NULL_DEVICE
 		}
-#endif
 
 		m_nPinnedMemoryOfs = -1;
 	} else if ( m_pStaticBuffer ) {
-#if TOGL_SUPPORT_NULL_DEVICE
+		#if TOGL_SUPPORT_NULL_DEVICE
 		if ( !g_bNullD3DDevice )
-#endif
+		#endif
 		{
 			if ( nActualSize ) {
 				tmZone( TELEMETRY_LEVEL2, TMZF_NONE, "UnlockSubData" );
 
-#ifdef REPORT_LOCK_TIME
-				double flStart = Plat_FloatTime();
-#endif
+				#ifdef REPORT_LOCK_TIME
+					double flStart = Plat_FloatTime();
+				#endif
 				m_pCtx->BindBufferToCtx( m_type, this );
 
-				Assert( nActualSize <= (int) ( m_dirtyMaxOffset - m_dirtyMinOffset ) );
+				Assert( nActualSize <= static_cast<int>(m_dirtyMaxOffset - m_dirtyMinOffset) );
 
 				glBufferSubDataMaxSize( m_buffGLTarget, m_dirtyMinOffset, nActualSize, pActualData ? pActualData : m_pStaticBuffer );
 
-#ifdef REPORT_LOCK_TIME
-				double flEnd = Plat_FloatTime();
-				if ( flEnd - flStart > 5.0 / 1000.0 ) {
-					int nDelta = (int) ( ( flEnd - flStart ) * 1000 );
-					if ( nDelta > 2 ) {
-						Msg( "**** " );
+				#ifdef REPORT_LOCK_TIME
+					double flEnd = Plat_FloatTime();
+					if ( flEnd - flStart > 5.0 / 1000.0 ) {
+						int nDelta = (int) ( ( flEnd - flStart ) * 1000 );
+						if ( nDelta > 2 ) { Msg( "**** " ); }
+						// Msg( "glBufferSubData Time=%d: ( Name=%d BufSize=%d ) Target=%p Offset=%d Size=%d\n", nDelta, m_nHandle, m_nSize, m_buffGLTarget, m_dirtyMinOffset, m_dirtyMaxOffset - m_dirtyMinOffset );
 					}
-					// Msg( "glBufferSubData Time=%d: ( Name=%d BufSize=%d ) Target=%p Offset=%d Size=%d\n", nDelta, m_nHandle, m_nSize, m_buffGLTarget, m_dirtyMinOffset, m_dirtyMaxOffset - m_dirtyMinOffset );
-				}
-#endif
+				#endif
 			}
 		}
 
-		m_pStaticBuffer = NULL;
+		m_pStaticBuffer = nullptr;
 	} else if ( m_bPseudo ) {
-		if ( pActualData ) {
-			memcpy( m_pLastMappedAddress, pActualData, nActualSize );
-		}
+		if ( pActualData ) { memcpy( m_pLastMappedAddress, pActualData, nActualSize ); }
 
-#if GL_ENABLE_UNLOCK_BUFFER_OVERWRITE_DETECTION
-		uint nProtectOfs = m_LockParams.m_nOffset & 4095;
-		uint nProtectEnd = ( m_LockParams.m_nOffset + m_LockParams.m_nSize + 4095 ) & ~4095;
-		uint nProtectSize = nProtectEnd - nProtectOfs;
+		#if GL_ENABLE_UNLOCK_BUFFER_OVERWRITE_DETECTION
+			uint nProtectOfs = m_LockParams.m_nOffset & 4095;
+			uint nProtectEnd = ( m_LockParams.m_nOffset + m_LockParams.m_nSize + 4095 ) & ~4095;
+			uint nProtectSize = nProtectEnd - nProtectOfs;
 
-		DWORD nOldProtect;
-		BOOL bResult = VirtualProtect( m_pActualPseudoBuf + nProtectOfs, nProtectSize, PAGE_READONLY, &nOldProtect );
-		if ( !bResult ) {
-			Error( "VirtualProtect() failed!\n" );
-		}
-#endif
+			DWORD nOldProtect;
+			BOOL bResult = VirtualProtect( m_pActualPseudoBuf + nProtectOfs, nProtectSize, PAGE_READONLY, &nOldProtect );
+			if ( not bResult ) {
+				Error( "VirtualProtect() failed!\n" );
+			}
+		#endif
 	} else {
 		tmZone( TELEMETRY_LEVEL2, TMZF_NONE, "UnlockUnmap" );
 
@@ -859,7 +843,7 @@ void CGLMBuffer::Unlock( int nActualSize, const void* pActualData ) {
 
 		m_pCtx->BindBufferToCtx( m_type, this );
 
-		Assert( nActualSize <= (int) ( m_dirtyMaxOffset - m_dirtyMinOffset ) );
+		Assert( nActualSize <= static_cast<int>( m_dirtyMaxOffset - m_dirtyMinOffset ) );
 
 		// time to do explicit flush (currently m_bEnableExplicitFlush is always true)
 		if ( m_bEnableExplicitFlush ) {
@@ -867,24 +851,24 @@ void CGLMBuffer::Unlock( int nActualSize, const void* pActualData ) {
 		}
 
 		// clear dirty range no matter what
-		m_dirtyMinOffset = m_dirtyMaxOffset = 0;  // adjust/grow on lock, clear on unlock
+		m_dirtyMinOffset = m_dirtyMaxOffset = 0; // adjust/grow on lock, clear on unlock
 
-#ifdef REPORT_LOCK_TIME
-		double flStart = Plat_FloatTime();
-#endif
+		#ifdef REPORT_LOCK_TIME
+			double flStart = Plat_FloatTime();
+		#endif
 
 		gGL->glUnmapBuffer( m_buffGLTarget );
 
-#ifdef REPORT_LOCK_TIME
-		double flEnd = Plat_FloatTime();
-		if ( flEnd - flStart > 5.0 / 1000.0 ) {
-			int nDelta = (int) ( ( flEnd - flStart ) * 1000 );
-			if ( nDelta > 2 ) {
-				Msg( "**** " );
+		#ifdef REPORT_LOCK_TIME
+			double flEnd = Plat_FloatTime();
+			if ( flEnd - flStart > 5.0 / 1000.0 ) {
+				int nDelta = (int) ( ( flEnd - flStart ) * 1000 );
+				if ( nDelta > 2 ) {
+					Msg( "**** " );
+				}
+				Msg( "glUnmapBuffer Time=%d: ( Name=%d BufSize=%d ) Target=%p\n", nDelta, m_nHandle, m_nSize, m_buffGLTarget );
 			}
-			Msg( "glUnmapBuffer Time=%d: ( Name=%d BufSize=%d ) Target=%p\n", nDelta, m_nHandle, m_nSize, m_buffGLTarget );
-		}
-#endif
+		#endif
 	}
 
 	m_bMapped = false;

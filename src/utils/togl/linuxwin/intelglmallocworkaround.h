@@ -35,27 +35,22 @@
 //  ever make it to 10.8.
 //
 //===============================================================================
-
-#ifndef INTELGLMALLOCWORKAROUND_H
-#define	INTELGLMALLOCWORKAROUND_H
-
+#pragma once
 #include <stdlib.h>
 
-class IntelGLMallocWorkaround
-{
+
+class IntelGLMallocWorkaround {
 public:
-	static IntelGLMallocWorkaround *Get();
+	static IntelGLMallocWorkaround* Get();
 	bool Enable();
 
 protected:
-	IntelGLMallocWorkaround() :m_pfnMallocReentry(NULL) {}
-	~IntelGLMallocWorkaround() {}
+	IntelGLMallocWorkaround() : m_pfnMallocReentry( nullptr ) { }
+	~IntelGLMallocWorkaround() = default;
 
-	static IntelGLMallocWorkaround *s_pWorkaround;
-	static void* ZeroingAlloc(size_t);
+	static IntelGLMallocWorkaround* s_pWorkaround;
+	static void* ZeroingAlloc( size_t );
 
-	typedef void* (*pfnMalloc_t)(size_t);
+	using pfnMalloc_t = void* ( * )( size_t );
 	pfnMalloc_t m_pfnMallocReentry;
 };
-
-#endif // INTELGLMALLOCWORKAROUND_H

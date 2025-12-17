@@ -5,8 +5,6 @@
 // $Revision: $
 // $NoKeywords: $
 //=============================================================================//
-
-
 #include <Cocoa/Cocoa.h>
 #include <OpenGL/OpenGL.h>
 #include <OpenGL/gl.h>
@@ -27,8 +25,7 @@
 // some glue to let GLMgr call into NS/ObjC classes.
 // ------------------------------------------------------------------------------------ //
 
-CGLContextObj GetCGLContextFromNSGL( PseudoNSGLContextPtr nsglCtx )
-{
-	return (CGLContextObj)[ (NSOpenGLContext*)nsglCtx CGLContextObj];
+CGLContextObj GetCGLContextFromNSGL( PseudoNSGLContextPtr nsglCtx ) {
+	return (CGLContextObj)[ (NSOpenGLContext*) nsglCtx CGLContextObj ];
 }
 

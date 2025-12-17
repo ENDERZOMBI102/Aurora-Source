@@ -30,6 +30,8 @@
 #if defined( USE_SDL )
 	#include <SDL3/SDL_opengl.h>
 #endif
+#include "basetypes.h"
+
 
 typedef void _PseudoNSGLContext;  // aka NSOpenGLContext
 using PseudoNSGLContextPtr = _PseudoNSGLContext*;
