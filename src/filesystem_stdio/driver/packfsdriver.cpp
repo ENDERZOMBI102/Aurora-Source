@@ -9,16 +9,16 @@
 #include "tier0/memdbgon.h"
 
 
-CPackFsDriver::CPackFsDriver( int32 pId, const char* pAbsolute, const char* pPath )
-	: m_iId{ pId }, m_szNativePath{ V_strdup( pPath ) }, m_PackFile{ vpkpp::PackFile::open( pAbsolute, {} ) }, CFsDriver() { }
+CPackFsDriver::CPackFsDriver( const int32  pId, std::unique_ptr<vpkpp::PackFile> pPack, const char* pPath )
+	: m_iId{ pId }, m_szNativePath{ V_strdup( pPath ) }, m_PackFile{ std::move( pPack ) } { }
 auto CPackFsDriver::GetNativePath() const -> const char* {
-	return this->m_szNativePath;
+	return m_szNativePath;
 }
 auto CPackFsDriver::GetNativeAbsolutePath() const -> const char* {
-	return this->m_PackFile->getFilepath().data();
+	return m_PackFile->getFilepath().data();
 }
 auto CPackFsDriver::GetIdentifier() const -> int32 {
-	return this->m_iId;
+	return m_iId;
 }
 auto CPackFsDriver::GetType() const -> const char* {
 	return "pack";
@@ -31,7 +31,7 @@ auto CPackFsDriver::Open( const char* pPath, OpenMode pMode ) -> FileDescriptor*
 	AssertFatalMsg( pMode, "Was given an empty open mode!" );
 
 	auto maybeEntry{ m_PackFile->findEntry( pPath ) };
-	if (! maybeEntry ) {
+	if ( not maybeEntry ) {
 		return nullptr;
 	}
 	const auto& entry{ *maybeEntry };
@@ -47,7 +47,7 @@ auto CPackFsDriver::Read( const FileDescriptor* pDesc, void* pBuffer, uint32 pCo
 
 	// ReSharper disable once CppDFANullDereference
 	const auto maybeData{ m_PackFile->readEntry( pDesc->m_Path ) };
-	if (! maybeData ) {
+	if ( not maybeData ) {
 		return -1;
 	}
 
@@ -92,7 +92,7 @@ auto CPackFsDriver::Stat( const FileDescriptor* pDesc ) -> std::optional<StatDat
 
 	// ReSharper disable once CppDFANullDereference
 	const auto maybeEntry{ m_PackFile->findEntry( pDesc->m_Path ) };
-	if (! maybeEntry ) {
+	if ( not maybeEntry ) {
 		return {};
 	}
 	const auto& entry{ *maybeEntry };

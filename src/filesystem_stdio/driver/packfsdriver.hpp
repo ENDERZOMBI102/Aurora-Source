@@ -8,7 +8,7 @@
 
 class CPackFsDriver final : public CFsDriver {
 public:
-	CPackFsDriver( int32 pId, const char* pAbsolute, const char* pPath );
+	CPackFsDriver( int32 pId, std::unique_ptr<vpkpp::PackFile> pPack, const char* pPath );
 	~CPackFsDriver() override = default;
 	// metadata
 	[[nodiscard]]
@@ -34,6 +34,6 @@ public:
 private:
 	const int32 m_iId;
 	const char* m_szNativePath;
-	std::unique_ptr<vpkpp::PackFile> m_PackFile;
+	const std::unique_ptr<vpkpp::PackFile> m_PackFile;
 	friend auto CreateSystemClient() -> CFsDriver*;
 };

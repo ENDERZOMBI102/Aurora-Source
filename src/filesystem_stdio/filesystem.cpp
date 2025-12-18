@@ -11,6 +11,8 @@
 #include "utlbuffer.h"
 #include <algorithm>
 #include <utility>
+#include "vpkpp/vpkpp.h"
+#include "bsppp/PakLump.h"
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
 
@@ -58,7 +60,11 @@ namespace {
 
 		const char* ext{ V_GetFileExtension( pPath ) };
 		if ( V_strcmp( ext, "vpk" ) == 0 or V_strcmp( ext, "bsp" ) == 0 ) {
-			return new CPackFsDriver( pId, pAbsolute, pPath );
+			auto pack{ vpkpp::PackFile::open( pAbsolute, {} ) };
+			if ( not pack ) {
+				return {};
+			}
+			return new CPackFsDriver( pId, std::move( pack ), pPath );
 		}
 
 		return {};

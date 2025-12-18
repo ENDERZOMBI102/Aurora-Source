@@ -34,6 +34,7 @@ target_link_libraries( filesystem_stdio
 	PRIVATE
 		SDL3::SDL3-shared
 		sourcepp::vpkpp
+		sourcepp::bsppp
 )
 set_target_properties( filesystem_stdio
 	PROPERTIES
