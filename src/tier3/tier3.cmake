@@ -24,11 +24,12 @@ set( TIER3_SOURCE_FILES
 #	PRIVATE
 #		SDL3::SDL3-shared
 #)
-#link_to_bin( TARGET tier32 )
-#declare_library( TARGET tier32 )
+#link_to_bin( tier32 )
 
 add_library( tier3 IMPORTED STATIC )
 set_target_properties( tier3
 	PROPERTIES
 		IMPORTED_LOCATION "${LIBPUBLIC}/tier3${CMAKE_IMPORT_LIBRARY_SUFFIX}"
 )
+
+#declare_replacement( tier32 FOR tier3 )

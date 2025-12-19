@@ -66,7 +66,7 @@ target_link_libraries( tier02
 		mimalloc
 		SDL3::SDL3-shared
 )
-link_to_bin( TARGET tier02 )
+link_to_bin( tier02 )
 
 add_library( tier0 IMPORTED SHARED )
 if ( UNIX )
@@ -81,4 +81,4 @@ set_target_properties( tier0
 		IMPORTED_NO_SONAME true
 )
 
-declare_replacement( TARGET tier02 FOR tier0 )
+declare_replacement( tier02 FOR tier0 )

@@ -40,7 +40,6 @@ set( CMAKE_BUILD_WITH_INSTALL_RPATH 1 )
 
 # This is a way to emulate groups.vgc
 set( BUILD_GROUP "game" CACHE STRING "Build Group" )
-
 # For the CMake GUIs that support a combobox list
 set_property( CACHE BUILD_GROUP PROPERTY STRINGS
 	"everything"
@@ -51,7 +50,6 @@ set_property( CACHE BUILD_GROUP PROPERTY STRINGS
 
 # Which game are we building?
 set( BUILD_GAME "hl2mp" CACHE STRING "Build Game" )
-
 set_property( CACHE BUILD_GAME PROPERTY STRINGS
 	"hl2mp"
 	"sdk"
@@ -115,7 +113,8 @@ elseif ( ${IS_POSIX} )
 	include("_cmake_scripts/posix_base.cmake")
 endif()
 message( NOTICE "Build group: ${BUILD_GROUP}" )
-message( NOTICE "Game: ${BUILD_GAME}" )
+message( NOTICE "Game       : ${BUILD_GAME}" )
+message( NOTICE "64bit build: ${IS_64BIT}" )
 
 # import the projects
 include("_cmake_scripts/groups.cmake")

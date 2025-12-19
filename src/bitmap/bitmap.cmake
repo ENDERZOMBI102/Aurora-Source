@@ -40,8 +40,9 @@ target_link_libraries( bitmap2
 )
 
 add_library( bitmap IMPORTED STATIC )
-
 set_target_properties( bitmap
 	PROPERTIES
 		IMPORTED_LOCATION "${LIBPUBLIC}/bitmap.a"
 )
+
+declare_replacement( bitmap2 FOR bitmap )

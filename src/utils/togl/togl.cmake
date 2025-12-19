@@ -59,7 +59,7 @@ target_include_directories( togl
 	PRIVATE
 		"${SRCDIR}/public/togl/linuxwin"
 )
-link_to_bin( TARGET togl )
+link_to_bin( togl )
 
 target_compile_definitions( togl
 	PRIVATE

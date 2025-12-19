@@ -26,7 +26,7 @@ target_link_libraries( shaderlib2
 		tier1
 		mathlib
 )
-link_to_bin( TARGET shaderlib2 )
+link_to_bin( shaderlib2 )
 
 add_library( shaderlib IMPORTED STATIC )
 set_target_properties( shaderlib
@@ -34,4 +34,4 @@ set_target_properties( shaderlib
 		IMPORTED_LOCATION "${LIBPUBLIC}/shaderlib${CMAKE_STATIC_LIBRARY_SUFFIX}"
 )
 
-declare_replacement( TARGET shaderlib2 FOR shaderlib )
+declare_replacement( shaderlib2 FOR shaderlib )

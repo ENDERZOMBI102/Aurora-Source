@@ -37,7 +37,7 @@ target_link_libraries( vstdlib2
 		${ASRC_DR_tier0}  # may use reimpl or valve's based on -DASRC_USE_REIMPLS
 		tier1
 )
-link_to_bin( TARGET vstdlib2 )
+link_to_bin( vstdlib2 )
 
 
 add_library( vstdlib IMPORTED SHARED )
@@ -53,4 +53,4 @@ set_target_properties( vstdlib
 		IMPORTED_NO_SONAME true
 )
 
-declare_replacement( TARGET vstdlib2 FOR vstdlib )
+declare_replacement( vstdlib2 FOR vstdlib )

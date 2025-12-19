@@ -14,29 +14,19 @@ function(target_strip_symbols target)
 endfunction()
 
 # Creates a symlink from the target's output binary to the game/bin directory
-function(link_to_bin)
-	cmake_parse_arguments( LTB "" "TARGET" "" ${ARGN} )
-	if ( NOT DEFINED "LTB_TARGET" )
-		message( SEND_ERROR "Missing `TARGET` parameter!" )
-		return()
-	endif ()
-
+function(link_to_bin target)
 	add_custom_command(
-		TARGET ${LTB_TARGET}
+		TARGET ${target}
 		POST_BUILD
-			COMMAND ${CMAKE_COMMAND} -E $<IF:$<BOOL:${WIN32}>,copy,create_symlink> $<TARGET_FILE:${LTB_TARGET}> ${GAMEDIR}/bin/$<TARGET_FILE_NAME:${LTB_TARGET}>
+			COMMAND ${CMAKE_COMMAND} -E $<IF:$<BOOL:${WIN32}>,copy,create_symlink> $<TARGET_FILE:${target}> ${GAMEDIR}/bin/$<TARGET_FILE_NAME:${target}>
 	)
 endfunction()
 
 # Declares that a target may be replaced by another via `-DASRC_USE_REIMPLS=1`,
 # or the more granular `-DASRC_USE_REIMPLS=$names`, where `$names` is a comma-separated list of replaced libraries names.
 # As example, to link to the `tier0` or its reimplementation, you can do `target_link_libraries( ${target} ${vis} ${ASRC_DR_tier0} )`
-function(declare_replacement)
-	cmake_parse_arguments( DR "" "TARGET;FOR" "" ${ARGN} )
-	if ( NOT DEFINED "DR_TARGET" )
-		message( SEND_ERROR "Missing `TARGET` parameter!" )
-		return()
-	endif ()
+function(declare_replacement target)
+	cmake_parse_arguments( DR "" "FOR" "" ${ARGN} )
 	if ( NOT DEFINED "DR_FOR" )
 		message( SEND_ERROR "Missing `FOR` parameter!" )
 		return()
@@ -52,10 +42,10 @@ function(declare_replacement)
 	endif ()
 
 	if ( ${replace} )
-		set( "ASRC_DR_${DR_FOR}" $<IF:$<BOOL:${WIN32}>,$<TARGET_NAME:${DR_TARGET}>,$<TARGET_FILE:${DR_TARGET}>> PARENT_SCOPE )
-		message( NOTICE "* using reimplemented library `${DR_TARGET}` for `${DR_FOR}`" )
+		set( "ASRC_DR_${DR_FOR}" $<IF:$<BOOL:${WIN32}>,$<TARGET_NAME:${target}>,$<TARGET_FILE:${target}>> PARENT_SCOPE )
+		message( NOTICE "  * using reimplemented library `${target}` for `${DR_FOR}`" )
 	else ()
 		set( "ASRC_DR_${DR_FOR}" $<IF:$<BOOL:${WIN32}>,$<TARGET_NAME:${DR_FOR}>,$<TARGET_FILE:${DR_FOR}>> PARENT_SCOPE )
-		message( NOTICE "* using original library `${DR_FOR}`" )
+		message( NOTICE "  * using original library `${DR_FOR}`" )
 	endif ()
 endfunction()
