@@ -29,9 +29,9 @@
 //-----------------------------------------------------------------------------
 // DLL-exported methods for particular kinds of memory
 //-----------------------------------------------------------------------------
-MEM_INTERFACE void* MemAllocScratch( int nMemSize );
+MEM_INTERFACE auto MemAllocScratch( int32 pMemSize ) -> void*;
 MEM_INTERFACE void MemFreeScratch();
 
 #if IsLinux()
-	MEM_INTERFACE void ZeroMemory( void *mem, size_t length );
+	MEM_INTERFACE void ZeroMemory( void *pMem, size_t pLength );
 #endif
