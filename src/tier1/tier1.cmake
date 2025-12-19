@@ -146,7 +146,7 @@ target_compile_definitions( tier1
 )
 target_compile_options( tier1
 	PRIVATE
-		"-fPIE"
+		"-fPIC"
 )
 target_link_libraries( tier1
 	PRIVATE
