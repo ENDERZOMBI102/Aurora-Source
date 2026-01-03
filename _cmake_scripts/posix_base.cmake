@@ -13,10 +13,11 @@ add_compile_options(
 	-Werror=return-type
 	-fdiagnostics-color
 	# TODO: Enable these when ready
-	#-Werror=conversion
-	#-Wconversion
+#	-Wconversion
+#	-Werror=conversion
+#	-fvisibility=hidden
 	-Wno-narrowing
-	$<$<COMPILE_LANGUAGE:CXX>:-Winvalid-offsetof>
+	$<$<COMPILE_LANGUAGE:CXX>:-Winvalid-offsetof> # we have our own version
 	$<${IS_LINUX}:-U_FORTIFY_SOURCE>
 	-Usprintf
 	-Ustrncpy
