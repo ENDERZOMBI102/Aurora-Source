@@ -64,6 +64,7 @@ target_compile_definitions( tier02
 target_link_libraries( tier02
 	PRIVATE
 		mimalloc
+	PUBLIC
 		SDL3::SDL3-shared
 )
 link_to_bin( tier02 )

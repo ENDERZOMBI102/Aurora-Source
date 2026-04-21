@@ -34,7 +34,7 @@ add_library( vstdlib2 SHARED ${VSTDLIB_SOURCE_FILES} )
 target_compile_definitions( vstdlib2 PRIVATE VSTDLIB_DLL_EXPORT )
 target_link_libraries( vstdlib2
 	PRIVATE
-		${ASRC_DR_tier0}  # may use reimpl or valve's based on -DASRC_USE_REIMPLS
+		asrc::dr::tier0  # may use reimpl or valve's based on -DASRC_USE_REIMPLS
 		tier1
 )
 link_to_bin( vstdlib2 )
@@ -53,4 +53,4 @@ set_target_properties( vstdlib
 		IMPORTED_NO_SONAME true
 )
 
-declare_replacement( vstdlib2 FOR vstdlib )
+declare_replacement( vstdlib FOR vstdlib )

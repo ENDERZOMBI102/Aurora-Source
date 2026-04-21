@@ -139,17 +139,16 @@ set_source_files_properties( "$<${IS_WINDOWS}:${TIER1_DIR}/processor_detect.cpp>
 )
 
 add_library( tier1 STATIC ${TIER1_SOURCE_FILES} )
-
 target_compile_definitions( tier1
 	PRIVATE
 		TIER1_STATIC_LIB
 )
-target_compile_options( tier1
-	PRIVATE
-		"-fPIC"
+set_target_properties( tier1
+	PROPERTIES
+		POSITION_INDEPENDENT_CODE ON
 )
 target_link_libraries( tier1
 	PRIVATE
-		${ASRC_DR_tier0}  # may use reimpl or valve's based on -DASRC_USE_REIMPLS
+		asrc::dr::tier0  # may use reimpl or valve's based on -DASRC_USE_REIMPLS
 )
 

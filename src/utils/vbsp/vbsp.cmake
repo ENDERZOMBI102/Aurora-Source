@@ -1,9 +1,7 @@
 # vbsp.cmake
 
-set(VBSP_DIR ${CMAKE_CURRENT_LIST_DIR})
-set(
-	VBSP_SOURCE_FILES
-
+set( VBSP_DIR ${CMAKE_CURRENT_LIST_DIR} )
+set( VBSP_SOURCE_FILES
 	"${VBSP_DIR}/boundbox.cpp"
 	"${VBSP_DIR}/brushbsp.cpp"
 	"${SRCDIR}/public/collisionutils.cpp"
@@ -140,25 +138,25 @@ set(
 	"${SRCDIR}/public/worldsize.h"
 )
 
-add_executable(vbsp ${VBSP_SOURCE_FILES})
+add_executable( vbsp ${VBSP_SOURCE_FILES} )
 
-set_target_properties(vbsp
+set_target_properties( vbsp
 	PROPERTIES
 		RUNTIME_OUTPUT_DIRECTORY "${GAMEDIR}/bin"
 )
 
-target_include_directories(vbsp
+target_include_directories( vbsp
 	PRIVATE
 		"${SRCDIR}/utils/common"
 )
 
-target_compile_definitions(vbsp
+target_compile_definitions( vbsp
 	PRIVATE
 		MACRO_MATHLIB
 		PROTECTED_THINGS_DISABLE
 )
 
-target_link_libraries(vbsp
+target_link_libraries( vbsp
 	PRIVATE
 		$<${IS_WINDOWS}:ws2_32>
 		$<${IS_WINDOWS}:odbc32>
@@ -168,12 +166,12 @@ target_link_libraries(vbsp
 		fgdlib
 		lzma
 		mathlib
-		tier2
-		vtf
-		bitmap
+		tier02  # may use reimpl or valve's based on -DASRC_USE_REIMPLS
+		vstdlib2
 		tier1
-		${ASRC_DR_tier0}  # may use reimpl or valve's based on -DASRC_USE_REIMPLS
-		${ASRC_DR_vstdlib}
+		asrc::dr::tier2
+		asrc::dr::vtf
+		asrc::dr::bitmap
 #		OpengGL
 	INTERFACE
 		SDL3::SDL3-shared

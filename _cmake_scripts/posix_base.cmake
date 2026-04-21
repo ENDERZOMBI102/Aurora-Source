@@ -8,7 +8,7 @@ find_package( Threads REQUIRED )
 
 add_compile_options(
 	-g
-	-m32
+	$<$<NOT:${IS_64BIT}>:-m32>
 	$<$<COMPILE_LANGUAGE:CXX>:-fpermissive>
 	-Werror=return-type
 	-fdiagnostics-color
@@ -28,7 +28,7 @@ add_compile_options(
 )
 
 add_link_options(
-	-m32
+	$<$<NOT:${IS_64BIT}>:-m32>
 	"LINKER:-rpath,\$ORIGIN" # FIXME: Dynamic Linker runtime on linux is fucked and doesn't load `.so`s from the exe's folder...
 )
 
@@ -36,7 +36,7 @@ add_link_options(
 add_compile_definitions(
 	$<$<CXX_COMPILER_ID:GNU>:COMPILER_GCC=1>
 	NO_HOOK_MALLOC
-	$<$<BOOL:${ASRC_NO_MALLOC_OVERRIDE}>:NO_MALLOC_OVERRIDE>
+	NO_MALLOC_OVERRIDE
 	$<${IS_LINUX}:_LINUX>
 	$<${IS_LINUX}:LINUX>
 )
@@ -68,9 +68,17 @@ if ( ${IS_LINUX} )
 endif()
 
 add_compile_options(
-	$<${IS_LINUX}:-march=pentium4>
-	-msse2 -mfpmath=sse -mtune=core2
+	-msse2
+	-mfpmath=sse
+	-mtune=core2
 )
+if ( ${IS_LINUX} )
+	if ( ${IS_64BIT} )
+		add_compile_options( -march=x86-64-v2 )
+	else ()
+		add_compile_options( -march=pentium4 )
+	endif ()
+endif ()
 
 list( APPEND ADDITIONAL_SOURCES_EXE
 	"${SRCDIR}/public/tier0/memoverride.cpp"

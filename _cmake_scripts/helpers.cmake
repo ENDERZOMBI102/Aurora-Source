@@ -24,7 +24,7 @@ endfunction()
 
 # Declares that a target may be replaced by another via `-DASRC_USE_REIMPLS=1`,
 # or the more granular `-DASRC_USE_REIMPLS=$names`, where `$names` is a comma-separated list of replaced libraries names.
-# As example, to link to the `tier0` or its reimplementation, you can do `target_link_libraries( ${target} ${vis} ${ASRC_DR_tier0} )`
+# As example, to link to the `tier0` or its reimplementation, you can do `target_link_libraries( ${target} ${vis} asrc::dr::tier0 )`
 function(declare_replacement target)
 	cmake_parse_arguments( DR "" "FOR" "" ${ARGN} )
 	if ( NOT DEFINED "DR_FOR" )
@@ -42,10 +42,10 @@ function(declare_replacement target)
 	endif ()
 
 	if ( ${replace} )
-		set( "ASRC_DR_${DR_FOR}" $<IF:$<BOOL:${WIN32}>,$<TARGET_NAME:${target}>,$<TARGET_FILE:${target}>> PARENT_SCOPE )
+		add_library( asrc::dr::${DR_FOR} ALIAS ${target} )
 		message( NOTICE "  * using reimplemented library `${target}` for `${DR_FOR}`" )
 	else ()
-		set( "ASRC_DR_${DR_FOR}" $<IF:$<BOOL:${WIN32}>,$<TARGET_NAME:${DR_FOR}>,$<TARGET_FILE:${DR_FOR}>> PARENT_SCOPE )
+		add_library( asrc::dr::${DR_FOR} ALIAS ${DR_FOR} )
 		message( NOTICE "  * using original library `${DR_FOR}`" )
 	endif ()
 endfunction()

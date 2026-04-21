@@ -43,8 +43,8 @@ message( NOTICE "Projects   :" )
 
 # libraries
 group_include( "${SRCDIR}/tier0/tier0.cmake"                           IN "everything" "game" "compilers" "shaders" )
-group_include( "${SRCDIR}/vstdlib/vstdlib.cmake"                       IN "everything" "game" "compilers" )
 group_include( "${SRCDIR}/tier1/tier1.cmake"                           IN "everything" "game" "compilers" "shaders" )
+group_include( "${SRCDIR}/vstdlib/vstdlib.cmake"                       IN "everything" "game" "compilers" )
 group_include( "${SRCDIR}/tier2/tier2.cmake"                           IN "everything" "game" "compilers" )
 group_include( "${SRCDIR}/tier3/tier3.cmake"                           IN "everything" "game" )
 group_include( "${SRCDIR}/appframework/appframework.cmake"             IN "everything" )
@@ -55,6 +55,7 @@ group_include( "${SRCDIR}/raytrace_cuda/raytrace_cuda.cmake"           IN       
 group_include( "${SRCDIR}/vgui2/vgui_controls/vgui_controls.cmake"     IN "everything" "game" )
 group_include( "${SRCDIR}/fgdlib/fgdlib.cmake"                         IN "everything"        "compilers" )
 group_include( "${SRCDIR}/bitmap/bitmap.cmake"                         IN "everything" )
+group_include( "${SRCDIR}/vtf/vtf.cmake"                               IN "everything" "game" "compilers" )
 group_include( "${SRCDIR}/materialsystem/shaderlib/shaderlib.cmake"    IN "everything"                    "shaders" )
 
 # modules

@@ -23,16 +23,16 @@ set( TIER2_SOURCE_FILES
 	"${SRCDIR}/public/tier2/vconfig.h"
 )
 
-#add_library( tier22 SHARED ${TIER2_SOURCE_FILES} )
-#target_compile_definitions( tier22
-#	PRIVATE
-#		TIER0_DLL_EXPORT
-#)
-#target_link_libraries( tier22
-#	PRIVATE
-#		SDL3::SDL3-shared
-#)
-#link_to_bin( tier22 )
+add_library( tier22 STATIC ${TIER2_SOURCE_FILES} )
+target_link_libraries( tier22
+	PRIVATE
+		asrc::dr::tier0  # may use reimpl or valve's based on -DASRC_USE_REIMPLS
+)
+set_target_properties( tier1
+	PROPERTIES
+		POSITION_INDEPENDENT_CODE ON
+)
+
 
 add_library( tier2 IMPORTED STATIC )
 set_target_properties( tier2
@@ -40,4 +40,4 @@ set_target_properties( tier2
 		IMPORTED_LOCATION "${LIBPUBLIC}/tier2${CMAKE_IMPORT_LIBRARY_SUFFIX}"
 )
 
-#declare_replacement( tier22 FOR tier2 )
+declare_replacement( tier22 FOR tier2 )

@@ -29,9 +29,9 @@ endif ()
 
 target_link_libraries( vvis_launcher
 	PRIVATE
-		${ASRC_DR_tier0}  # may use reimpl or valve's based on -DASRC_USE_REIMPLS
+		asrc::dr::tier0  # may use reimpl or valve's based on -DASRC_USE_REIMPLS
 		tier1
-		${ASRC_DR_vstdlib}
+		asrc::dr::vstdlib
 		${CMAKE_DL_LIBS}
 		SDL3::SDL3-shared # needed by tier02
 )

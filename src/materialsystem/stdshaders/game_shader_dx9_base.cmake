@@ -54,10 +54,10 @@ function( target_use_game_shader_dx9_base target )
 	target_link_libraries( ${target}
 		PRIVATE
 			"$<${IS_WINDOWS}:version;winmm>"
-			${ASRC_DR_tier0}  # may use reimpl or valve's based on -DASRC_USE_REIMPLS
+			asrc::dr::tier0  # may use reimpl or valve's based on -DASRC_USE_REIMPLS
 			tier1
 			mathlib
-			${ASRC_DR_vstdlib}
-			${ASRC_DR_shaderlib}
+			asrc::dr::vstdlib
+			asrc::dr::shaderlib
 	)
 endfunction()

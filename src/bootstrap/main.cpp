@@ -84,7 +84,7 @@ namespace {
 
 int main( const int argc, const char** argv ) {
 	const char* binName{};
-	const char* binDir = ( {
+	const char* binDir = ({
 		const auto path{ argv[0] };
 		const size_t fullLength{ std::strlen( path ) };
 		size_t length{ fullLength - 1 };
@@ -108,7 +108,7 @@ int main( const int argc, const char** argv ) {
 
 	std::string biName{ binName };
 	if ( biName != "aurosrc" EXE_EXT_STRING ) {
-		biName.replace( 7, strlen( EXE_EXT_STRING ), "" );
+		biName.erase( biName.length() - strlen( EXE_EXT_STRING ) );
 		newArgv.insert( newArgv.begin() + 1, "-game" );
 		newArgv.insert( newArgv.begin() + 2, biName.c_str() );
 	}
@@ -117,11 +117,11 @@ int main( const int argc, const char** argv ) {
 	#if defined( PLATFORM_POSIX )
 		const auto old{ std::getenv( "LD_LIBRARY_PATH" ) };
 		// the value is copied, so no need to worry about the tmp object
-		std:setenv( "LD_LIBRARY_PATH", old ? std::format( "{}:{}", binDir, old ).c_str() : binDir, true );
+		setenv( "LD_LIBRARY_PATH", old ? std::format( "{}:{}", binDir, old ).c_str() : binDir, true );
 	#endif
 
 	// create absolute launcher dll path
-	const auto launcherDll{ std::format( "{}launcher{}", binDir, DLL_EXT_STRING ) };
+	const auto launcherDll{ std::format( "{}launcher" DLL_EXT_STRING, binDir ) };
 
 	// open launcher dll
 	const auto lib{ Strap_LoadModule( launcherDll.c_str() ) };

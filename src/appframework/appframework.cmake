@@ -30,7 +30,7 @@ target_include_directories( appframework
 )
 target_link_libraries( appframework
 	PRIVATE
-		${ASRC_DR_tier0}  # may use reimpl or valve's based on -DASRC_USE_REIMPLS
-		${ASRC_DR_vstdlib}
+		asrc::dr::tier0  # may use reimpl or valve's based on -DASRC_USE_REIMPLS
+		asrc::dr::vstdlib
 		SDL3::SDL3-shared
 )

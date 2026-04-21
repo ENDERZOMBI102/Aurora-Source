@@ -24,9 +24,9 @@ target_include_directories( inputsystem
 target_link_libraries( inputsystem
 	PRIVATE
 		appframework
-		${ASRC_DR_tier0}  # may use reimpl or valve's based on -DASRC_USE_REIMPLS
+		asrc::dr::tier0  # may use reimpl or valve's based on -DASRC_USE_REIMPLS
 		tier1
-		${ASRC_DR_vstdlib}
+		asrc::dr::vstdlib
 		tier2
 		SDL3::SDL3-shared
 )
