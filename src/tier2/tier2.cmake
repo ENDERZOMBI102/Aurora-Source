@@ -2,7 +2,9 @@
 
 set( TIER2_DIR ${CMAKE_CURRENT_LIST_DIR} )
 set( TIER2_SOURCE_FILES
-#	"${TIER2_DIR}/dbg.cpp"
+	"${TIER2_DIR}/vconfig.cpp"
+	"${TIER2_DIR}/tier2.cpp"
+	"${TIER2_DIR}/tier2dm.cpp"
 
 	# Header files
 #	"${TIER2_DIR}/memalloc.hpp"

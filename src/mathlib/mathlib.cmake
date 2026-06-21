@@ -28,7 +28,7 @@ set( MATHLIB_SOURCE_FILES
 	# Public Header Files
 	"$<$<OR:${IS_WINDOWS},${IS_LINUX}>:${SRCDIR}/public/mathlib/amd3dx.h>"
 	"${SRCDIR}/public/mathlib/anorms.h"
-	"${SRCDIR}/public/mathlib/bumpvects.h"		
+	"${SRCDIR}/public/mathlib/bumpvects.h"
 	"${SRCDIR}/public/mathlib/compressed_3d_unitvec.h"
 	"${SRCDIR}/public/mathlib/compressed_light_cube.h"
 	"${SRCDIR}/public/mathlib/compressed_vector.h"
@@ -41,9 +41,9 @@ set( MATHLIB_SOURCE_FILES
 	"${SRCDIR}/public/mathlib/polyhedron.h"
 	"${SRCDIR}/public/mathlib/quantize.h"
 	"${SRCDIR}/public/mathlib/simdvectormatrix.h"
-	"${SRCDIR}/public/mathlib/spherical_geometry.h"		
-	"${SRCDIR}/public/mathlib/ssemath.h"		
-	"${SRCDIR}/public/mathlib/ssequaternion.h"		
+	"${SRCDIR}/public/mathlib/spherical_geometry.h"
+	"${SRCDIR}/public/mathlib/ssemath.h"
+	"${SRCDIR}/public/mathlib/ssequaternion.h"
 	"${SRCDIR}/public/mathlib/vector.h"
 	"${SRCDIR}/public/mathlib/vector2d.h"
 	"${SRCDIR}/public/mathlib/vector4d.h"
@@ -57,11 +57,17 @@ set( MATHLIB_SOURCE_FILES
 )
 
 add_library( mathlib STATIC ${MATHLIB_SOURCE_FILES} )
-
 target_include_directories( mathlib
-	PRIVATE "${SRCDIR}/public/mathlib"
+	PRIVATE
+		"${SRCDIR}/public/mathlib"
 )
 
 target_compile_definitions( mathlib
-	PRIVATE MATHLIB_LIB
+	PRIVATE
+		MATHLIB_LIB
 )
+target_link_libraries( mathlib
+	PRIVATE
+		asrc::dr::tier0  # may use reimpl or valve's based on -DASRC_USE_REIMPLS
+)
+
