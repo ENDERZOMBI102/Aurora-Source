@@ -152,6 +152,7 @@ int CFileSystemStdio::Write( const void* pInput, int size, FileHandle_t file ) {
 	return count;
 }
 
+// FIXME: We're not handling the write search paths correctly, anyone is allowed to to write anywhere, instead of only allowing it in `default_write_path`!
 FileHandle_t CFileSystemStdio::Open( const char* pFileName, const char* pOptions, const char* pathID ) {
 	// parse the options
 	const auto mode{ parseOpenMode( pOptions ) };

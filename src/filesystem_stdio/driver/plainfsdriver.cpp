@@ -2,6 +2,7 @@
 // Created by ENDERZOMBI102 on 23/02/2024.
 //
 #include "plainfsdriver.hpp"
+#include <utility>
 #include <dirent.h>
 #include <fcntl.h>
 #include <sys/stat.h>
@@ -72,37 +73,50 @@ auto CPlainFsDriver::Open( const char* pPath, OpenMode pMode ) -> FileDescriptor
 		if ( file == -1 ) {
 			return nullptr;
 		}
-	#elif IsWindows()
-		#error "Not implemented yet"
-	#endif
 
-	auto desc{ FileDescriptor::Make() };
-	desc->m_Handle = file;
-	return desc;
+		auto desc{ FileDescriptor::Make() };
+		desc->m_Handle = file;
+		return desc;
+	#else
+		std::unreachable();
+	#endif
 }
 auto CPlainFsDriver::Read( const FileDescriptor* pDesc, void* pBuffer, uint32 pCount ) -> int32 {
 	AssertFatalMsg( pDesc, "Was given a `NULL` file handle!" );
 	AssertFatalMsg( pBuffer, "Was given a `NULL` buffer ptr!" );
 
-	return pread64( static_cast<int>( pDesc->m_Handle ), pBuffer, pCount, static_cast<__off64_t>( pDesc->m_Offset ) );
+	#if IsLinux()
+		return pread64( static_cast<int>( pDesc->m_Handle ), pBuffer, pCount, static_cast<__off64_t>( pDesc->m_Offset ) );
+	#else
+		std::unreachable();
+	#endif
+
 }
 auto CPlainFsDriver::Write( const FileDescriptor* pDesc, const void* pBuffer, uint32 pCount ) -> int32 {
 	AssertFatalMsg( pDesc, "Was given a `NULL` file handle!" );
 	AssertFatalMsg( pBuffer, "Was given a `NULL` buffer ptr!" );
 
-	return pwrite64( static_cast<int>( pDesc->m_Handle ), pBuffer, pCount, static_cast<__off64_t>( pDesc->m_Offset ) );
+	#if IsLinux()
+		return pwrite64( static_cast<int>( pDesc->m_Handle ), pBuffer, pCount, static_cast<__off64_t>( pDesc->m_Offset ) );
+	#else
+		std::unreachable();
+	#endif
 }
 auto CPlainFsDriver::Flush( const FileDescriptor* pDesc ) -> bool {
 	AssertFatalMsg( pDesc, "Was given a `NULL` file handle!" );
 
-	#if IsWindows()
-		AssertUnreachable();
+	#if IsLinux()
+		return true;
+	#else
+		std::unreachable();
 	#endif
-
-	return true;
 }
 auto CPlainFsDriver::Close( const FileDescriptor* pDesc ) -> void {
-	close( static_cast<int>( pDesc->m_Handle ) );
+	#if IsLinux()
+		close( static_cast<int>( pDesc->m_Handle ) );
+	#else
+		std::unreachable();
+	#endif
 }
 
 // TODO: Verify if this is feature-complete
@@ -110,43 +124,51 @@ auto CPlainFsDriver::ListDir( const char* pPattern, CUtlVector<const char*>& pRe
 	const auto path{ V_strdup( pPattern ) };
 	V_StripFilename( path );
 
-	// first check if we can open the dir
-	const auto dir{ opendir( path ) };
-	if ( dir == nullptr ) {
-		return false;
-	}
-	// iterate in it
-	for ( const auto* entry{ readdir( dir ) }; entry != nullptr; entry = readdir( dir ) ) {
-		char buffer[MAX_PATH];
-		V_ComposeFileName( path, entry->d_name, buffer, std::size( buffer ) );
-		if ( Wildcard::Match( buffer, pPattern, true ) ) {
-			// printf( "%s: %s -> %s | %s\n", __FUNCTION__, pPattern, buffer, entry->d_name );
-			pResult.AddToTail( V_strdup( entry->d_name ) );
+	#if IsLinux()
+		// first check if we can open the dir
+		const auto dir{ opendir( path ) };
+		if ( dir == nullptr ) {
+			return false;
 		}
-	}
-	closedir( dir );
-	delete[] path;
-	return true;
+		// iterate in it
+		for ( const auto* entry{ readdir( dir ) }; entry != nullptr; entry = readdir( dir ) ) {
+			char buffer[MAX_PATH];
+			V_ComposeFileName( path, entry->d_name, buffer, std::size( buffer ) );
+			if ( Wildcard::Match( buffer, pPattern, true ) ) {
+				// printf( "%s: %s -> %s | %s\n", __FUNCTION__, pPattern, buffer, entry->d_name );
+				pResult.AddToTail( V_strdup( entry->d_name ) );
+			}
+		}
+		closedir( dir );
+		delete[] path;
+		return true;
+	#else
+		std::unreachable();
+	#endif
 }
 auto CPlainFsDriver::Create( const char* pPath, FileType pType, OpenMode pMode ) -> FileDescriptor* { return {}; }
 auto CPlainFsDriver::Remove( const FileDescriptor* pDesc ) -> void { }
 auto CPlainFsDriver::Stat( const FileDescriptor* pDesc ) -> std::optional<StatData> {
-	// get stat data
-	struct stat64 it {};
-	if ( fstat64( static_cast<int>( pDesc->m_Handle ), &it ) != 0 ) {
-		return {};  // error happened :/
-	}
+	#if IsLinux()
+		// get stat data
+		struct stat64 it {};
+		if ( fstat64( static_cast<int>( pDesc->m_Handle ), &it ) != 0 ) {
+			return {};  // error happened :/
+		}
 
 		// find the type
-	auto fileType{ FileType::Unknown };
-	if ( S_ISDIR( it.st_mode ) ) {
-		fileType = FileType::Directory;
-	} else if ( S_ISREG( it.st_mode ) ) {
-		fileType = FileType::Regular;
-	} else if ( S_ISSOCK( it.st_mode ) ) {
-		fileType = FileType::Socket;
-	}
+		auto fileType{ FileType::Unknown };
+		if ( S_ISDIR( it.st_mode ) ) {
+			fileType = FileType::Directory;
+		} else if ( S_ISREG( it.st_mode ) ) {
+			fileType = FileType::Regular;
+		} else if ( S_ISSOCK( it.st_mode ) ) {
+			fileType = FileType::Socket;
+		}
 
-	// return value
-	return { StatData{ fileType, static_cast<uint64>( it.st_atim.tv_nsec ), static_cast<uint64>( it.st_mtim.tv_nsec ), static_cast<uint64>( it.st_size ) } };
+		// return value
+		return { StatData{ fileType, static_cast<uint64>( it.st_atim.tv_nsec ), static_cast<uint64>( it.st_mtim.tv_nsec ), static_cast<uint64>( it.st_size ) } };
+	#else
+		std::unreachable();
+	#endif
 }
