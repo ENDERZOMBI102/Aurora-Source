@@ -249,3 +249,12 @@ bool Is64BitOS() {
 		#error "Is64BitOS: Not implemented"
 	#endif
 }
+
+#if defined( TIER0_DLL_EXPORT )
+	extern "C" int V_tier0_stricmp( const char* s1, const char* s2 ) {
+		auto p1{ reinterpret_cast<const uint8*>( s1 ) };
+		auto p2{ reinterpret_cast<const uint8*>( s2 ) };
+		for ( ; *p1 && *p2 && tolower( *p1 ) == tolower( *p2 ); p1 += 1, p2 += 1 ) { }
+		return tolower( *p1 ) - tolower( *p2 );
+	}
+#endif
