@@ -106,6 +106,7 @@ add_subdirectory( "${SRC_DIR}/mathlib" )
 add_subdirectory( "${SRC_DIR}/fgdlib" )
 add_subdirectory( "${SRC_DIR}/bitmap" )
 add_subdirectory( "${SRC_DIR}/appframework" )
+add_subdirectory( "${SRC_DIR}/raytrace" )
 add_subdirectory( "${SRC_DIR}/materialsystem/shaderlib" )
 # -- Modules
 add_subdirectory( "${SRC_DIR}/filesystem_stdio" )

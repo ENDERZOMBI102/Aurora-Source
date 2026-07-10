@@ -12,5 +12,5 @@ set(
 add_library(raytrace STATIC ${RAYTRACE_SOURCE_FILES})
 target_include_directories(
 	raytrace PRIVATE
-	"${SRCDIR}/utils/common"
+	"${SRC_DIR}/utils/common"
 )
