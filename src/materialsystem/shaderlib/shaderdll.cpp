@@ -104,4 +104,4 @@ IShaderDLLInternal* GetShaderDLLInternal() {
 //-----------------------------------------------------------------------------
 // Singleton interface
 //-----------------------------------------------------------------------------
-EXPOSE_INTERFACE_FN( GetShaderDLLInternal, IShaderDLLInternal, SHADER_DLL_INTERFACE_VERSION );
+EXPOSE_INTERFACE_FN( reinterpret_cast<InstantiateInterfaceFn>( GetShaderDLLInternal ), IShaderDLLInternal, SHADER_DLL_INTERFACE_VERSION );

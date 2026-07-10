@@ -2,21 +2,21 @@ project( shaderlib C CXX )
 
 set( SHADERLIB_DIR ${CMAKE_CURRENT_LIST_DIR} )
 set( SOURCE_FILES
-		# Sources
-		"${SHADERLIB_DIR}/baseshader.cpp"
-		"${SHADERLIB_DIR}/shaderdll.cpp"
-		"${SHADERLIB_DIR}/shaderdll.hpp"
-		"${SHADERLIB_DIR}/shaderdll_global.h"
-		"${SHADERLIB_DIR}/shaderlib_cvar.cpp"
-		"${SHADERLIB_DIR}/shaderlib_cvar.h"
-		"${SHADERLIB_DIR}/ishadersystem.h"
+	# Sources
+	"${SHADERLIB_DIR}/baseshader.cpp"
+	"${SHADERLIB_DIR}/shaderdll.cpp"
+	"${SHADERLIB_DIR}/shaderdll.hpp"
+	"${SHADERLIB_DIR}/shaderdll_global.h"
+	"${SHADERLIB_DIR}/shaderlib_cvar.cpp"
+	"${SHADERLIB_DIR}/shaderlib_cvar.h"
+	"${SHADERLIB_DIR}/ishadersystem.h"
 
-		# Public units
+	# Public units
 
-		# Public headers
-		"${SRC_DIR}/public/shaderlib/BaseShader.h"
-		"${SRC_DIR}/public/shaderlib/cshader.h"
-		"${SRC_DIR}/public/shaderlib/ShaderDLL.h"
+	# Public headers
+	"${SRC_DIR}/public/shaderlib/BaseShader.h"
+	"${SRC_DIR}/public/shaderlib/cshader.h"
+	"${SRC_DIR}/public/shaderlib/ShaderDLL.h"
 )
 
 # Preprocessor defs
