@@ -36,7 +36,7 @@ set( POSIX_DEFINES   )
 add_library( bitmap STATIC )
 
 # What this library reimplements
-set( REIMPLEMENTS "${LIBPUBLIC}/bitmap" )
+set( REIMPLEMENTS "${LIBPUBLIC_DIR}/bitmap" )
 
 # Include this to handle all the defines
 include( "${CMAKESCRIPTS_DIR}/project-base.cmake" )

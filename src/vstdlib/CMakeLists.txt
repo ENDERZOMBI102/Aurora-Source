@@ -50,7 +50,7 @@ set( PLATFORM_32BIT_DEFINES )
 add_library( vstdlib SHARED )
 
 # What this library reimplements
-set( REIMPLEMENTS "${LIBPUBLIC}/tier0" )
+set( REIMPLEMENTS "${LIBPUBLIC_DIR}/vstdlib" )
 
 # Include this to handle all the defines
 include( ${CMAKESCRIPTS_DIR}/project-base.cmake )

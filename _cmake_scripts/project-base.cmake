@@ -14,8 +14,8 @@
 # 
 #================================================#
 # CMake vars defined by source base:
-#	-	LIBCOMMON
-#	-	LIBPUBLIC
+#	-	LIBCOMMON_DIR
+#	-	LIBPUBLIC_DIR
 #	-	PUBLIC_INCLUDE
 #	-	COMMON_INCLUDE
 #================================================#
@@ -253,12 +253,18 @@ endif()
 #================================================#
 # Handle the include dirs
 #================================================#
-list( APPEND POSIX32_INCLUDE_DIRS )
+list( APPEND INCLUDE_DIRS
+	"${SRC_DIR}/common"
+	"${SRC_DIR}/public"
+	"${SRC_DIR}/public/tier0"
+	"${SRC_DIR}/public/tier1"
+)
+list( APPEND POSIX32_INCLUDE_DIRS ${POSIX32_INCLUDE_DIRS} )
 # For windows only
-list( APPEND INCLUDE_DIRS ${DX9SDK}/Include/ )
+list( APPEND WINDOWS_INCLUDE_DIRS "${DX9SDK}/Include/" )
 
-if( ${IS_WINDOWS} )
-	list(APPEND INCLUDE_DIRS ${WINDOWS_INCLUDE_DIRS})
+if ( ${IS_WINDOWS} )
+	list( APPEND INCLUDE_DIRS ${WINDOWS_INCLUDE_DIRS} )
 	# WIN32 includes
 	if ( NOT ${IS_64BIT} )
 		list( APPEND INCLUDE_DIRS ${WIN32_INCLUDE_DIRS} )
@@ -268,9 +274,8 @@ if( ${IS_WINDOWS} )
 	if ( ${IS_64BIT} )
 		list( APPEND INCLUDE_DIRS ${WIN64_INCLUDE_DIRS} )
 	endif ()
-endif()
-
-if( ${IS_POSIX} )
+endif ()
+if ( ${IS_POSIX} )
 	list( APPEND INCLUDE_DIRS ${POSIX_INCLUDE_DIRS} )
 	# POSIX32 includes
 	if ( NOT ${IS_64BIT} )
@@ -287,9 +292,8 @@ endif()
 #================================================#
 # Handle the link directories
 #================================================#
-set( POSIX32_LINK_DIRS "${POSIX32_LINK_DIRS}" )
-set( POSIX64_LINK_DIRS "${POSIX64_LINK_DIRS}" )
-
+list( APPEND POSIX32_LINK_DIRS ${POSIX32_LINK_DIRS} )
+list( APPEND POSIX64_LINK_DIRS ${POSIX64_LINK_DIRS} )
 # For windows only
 list( APPEND WINDOWS_LINK_DIRS "${DX9SDK}/Lib/" )
 
@@ -340,7 +344,11 @@ endforeach()
 #================================================#
 # Add the target
 #================================================#
-link_directories( ${PUBLIC_LIB}/linux32 ${COMMON_LIB}/linux32 )
+target_link_directories( ${PROJECT_NAME}
+	PRIVATE
+		${LIBPUBLIC_DIR}
+		${LIBCOMMON_DIR}
+)
 
 #================================================#
 # Handle all the link libraries
@@ -358,7 +366,6 @@ link_directories( ${PUBLIC_LIB}/linux32 ${COMMON_LIB}/linux32 )
 # 	-	vstdlib
 # 	-	tier0
 # 	-	tier1
-#
 #
 
 # We can loop through all the libs and use find library to find everything the user specified
@@ -389,7 +396,9 @@ set_target_properties( ${PROJECT_NAME}
 		FOLDER "${IDE_FOLDER}"
 		LINKER_LANGUAGE CXX
 )
-message( NOTICE "${PROJECT_NAME} IS IN ${IDE_FOLDER}" )
+
+set_property( DIRECTORY ${ROOT_DIR} APPEND PROPERTY ASRC_${IDE_FOLDER} "${PROJECT_NAME}" )
+
 if ( ${THIS_IS_A_STATIC_LIB} )
 	set_target_properties( ${PROJECT_NAME} PROPERTIES POSITION_INDEPENDENT_CODE ON )
 endif ()

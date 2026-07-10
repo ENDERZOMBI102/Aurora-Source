@@ -35,7 +35,7 @@ set( POSIX_DEFINES   )
 add_library( appframework STATIC )
 
 # What this library reimplements
-set( REIMPLEMENTS "${LIBPUBLIC}/appframework" )
+set( REIMPLEMENTS "${LIBPUBLIC_DIR}/appframework" )
 
 # Include this to handle all the defines
 include( "${CMAKESCRIPTS_DIR}/project-base.cmake" )

@@ -1,5 +1,6 @@
 cmake_minimum_required( VERSION 3.27 FATAL_ERROR )
 
+# Pre-configure checks
 if ( CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_CURRENT_BINARY_DIR )
 	message( FATAL_ERROR "Prevented in-tree build. Please create a `build` directory and run \"cmake -S ${CMAKE_SOURCE_DIR} -B .\" from there" )
 endif ()
@@ -14,9 +15,8 @@ if ( "${CMAKE_SIZEOF_VOID_P}" EQUAL "8" )
 	set( IS_64BIT 1 )
 endif ()
 
+# Setup configuration types
 set( CMAKE_CONFIGURATION_TYPES "Debug;Release" CACHE STRING "" FORCE )
-
-message( NOTICE "Running CMake v${CMAKE_VERSION}" )
 
 project(
 	AuroraSource
@@ -26,59 +26,70 @@ project(
 		LANGUAGES CXX C ASM
 )
 
+# Setup cmake standards
+set( CMAKE_C_STANDARD 23 )
+set( CMAKE_C_STANDARD_REQUIRED ON )
+set( CMAKE_C_VISIBILITY_PRESET hidden )
+set( CMAKE_CXX_STANDARD 23 )
+set( CMAKE_CXX_STANDARD_REQUIRED ON )
+set( CMAKE_CXX_VISIBILITY_PRESET hidden )
+set( CMAKE_BUILD_RPATH_USE_ORIGIN 1 )
+set( CMAKE_BUILD_RPATH $ORIGIN )
+set( CMAKE_INSTALL_RPATH $ORIGIN )
+set( CMAKE_BUILD_WITH_INSTALL_RPATH 1 )
+
 # For some reason, checking if CMAKE_BUILD_TYPE is defined is unreliable
 # So simply check if it's empty instead
 if ( "${CMAKE_BUILD_TYPE}" STREQUAL "" )
 	set( CMAKE_BUILD_TYPE "Release" CACHE STRING "Build type" FORCE )
 endif()
 
-# This is a way to emulate groups.vgc
-set( BUILD_GROUP "game" CACHE STRING "Build Group" )
-# For the CMake GUIs that support a combobox list
-set_property( CACHE BUILD_GROUP PROPERTY STRINGS
-	"everything"
-	"game"
-	"shaders"
-	"compilers"
-)
+# Platform-dependant constants
+set( IS_WINDOWS 0 )
+set( IS_LINUX 0 )
+set( IS_OSX 0 )
+set( IS_POSIX 0 )
+if ( WIN32 )
+	set( IS_WINDOWS 1 )
+	if ( IS_64BIT )
+		set( platSubDir "/win64" )
+	else ()
+		set( platSubDir "" )
+	endif ()
+	set( CMAKE_IMPORT_LIBRARY_SUFFIX ".lib" )
+elseif ( UNIX )
+	set( IS_POSIX 1 )
+	if ( LINUX )
+		set( IS_LINUX 1 )
+		if ( IS_64BIT )
+			set( platSubDir "/linux64" )
+		else ()
+			set( platSubDir "/linux32" )
+		endif ()
+	endif()
+	#	set( CMAKE_IMPORT_LIBRARY_SUFFIX ".a" )
+endif()
 
-# Which game are we building?
-set( BUILD_GAME "hl2mp" CACHE STRING "Build Game" )
-set_property( CACHE BUILD_GAME PROPERTY STRINGS
-	"hl2mp"
-	"sdk"
-)
-
-set( ROOT_DIR "${CMAKE_CURRENT_LIST_DIR}" )
-set( SRC_DIR "${CMAKE_CURRENT_LIST_DIR}/src" )
-set( GAME_DIR "${CMAKE_CURRENT_LIST_DIR}/game" )
-set( THIRDPARTY_DIR "${CMAKE_CURRENT_LIST_DIR}/thirdparty" )
+# Various path constants we use all around the scripts
+set( ROOT_DIR         "${CMAKE_CURRENT_LIST_DIR}" )
+set( SRC_DIR          "${CMAKE_CURRENT_LIST_DIR}/src" )
+set( GAME_DIR         "${CMAKE_CURRENT_LIST_DIR}/game" )
+set( THIRDPARTY_DIR   "${CMAKE_CURRENT_LIST_DIR}/thirdparty" )
 set( CMAKESCRIPTS_DIR "${CMAKE_CURRENT_LIST_DIR}/_cmake_scripts" )
-include( "${CMAKESCRIPTS_DIR}/project-init.cmake" )
+set( LIBPUBLIC_DIR    "${SRC_DIR}/lib/public${platSubDir}" )
+set( LIBCOMMON_DIR    "${SRC_DIR}/lib/common${platSubDir}" )
+unset( platSubDir )
 
-# Setup third party BEFORE we "customize" our compilation process
+# Configuration options for the user
+include( "${CMAKESCRIPTS_DIR}/options.cmake" )
+
+# init "project" properties
+foreach ( type IN ITEMS "Executable" "Game" "Library" "Module" )
+	set_property( DIRECTORY ${ROOT_DIR} PROPERTY ASRC_${type} "" )
+endforeach ()
+
+# Load third party libraries
 include( "${THIRDPARTY_DIR}/init.cmake" )
-
-set( LIBPUBLIC "${SRC_DIR}/lib/public${PLATSUBDIR}" )
-set( LIBCOMMON "${SRC_DIR}/lib/common${PLATSUBDIR}" )
-
-link_directories(
-	${LIBPUBLIC}
-	${LIBCOMMON}
-)
-
-include_directories(
-	"${SRC_DIR}/common"
-	"${SRC_DIR}/public"
-	"${SRC_DIR}/public/tier0"
-	"${SRC_DIR}/public/tier1"
-)
-
-message( NOTICE "\n--- Aurora Source ---" )
-message( NOTICE "Platform   : ${CMAKE_SYSTEM_NAME}" )
-message( NOTICE "Build group: ${BUILD_GROUP}" )
-message( NOTICE "Game       : ${BUILD_GAME}" )
-message( NOTICE "64bit build: ${IS_64BIT}" )
 
 # Import the projects
 # -- Libraries
@@ -91,6 +102,7 @@ add_subdirectory( "${SRC_DIR}/mathlib" )
 add_subdirectory( "${SRC_DIR}/fgdlib" )
 add_subdirectory( "${SRC_DIR}/bitmap" )
 add_subdirectory( "${SRC_DIR}/appframework" )
+add_subdirectory( "${SRC_DIR}/materialsystem/shaderlib" )
 # -- Modules
 add_subdirectory( "${SRC_DIR}/filesystem_stdio" )
 add_subdirectory( "${SRC_DIR}/launcher" )
@@ -99,3 +111,32 @@ add_subdirectory( "${SRC_DIR}/bootstrap" )
 add_subdirectory( "${SRC_DIR}/utils/vbsp" )
 add_subdirectory( "${SRC_DIR}/utils/vvis" )
 add_subdirectory( "${SRC_DIR}/utils/vvis_launcher" )
+
+# Print info
+block()
+	set( targets "" )
+	set( targetCount 0 )
+	foreach ( type IN ITEMS "Executable" "Game" "Library" "Module" )
+		get_property( values DIRECTORY ${ROOT_DIR} PROPERTY ASRC_${type} )
+		# number of targets
+		list( LENGTH values count )
+		math( EXPR targetCount "${targetCount} + ${count}" )
+		# joint target list
+		string( JOIN ", " string ${values} )
+		# spaces after type name
+		string( LENGTH "${type}" typeLen )
+		math( EXPR spacesLen "11 - ${typeLen}" )
+		string( REPEAT " " ${spacesLen} spaces )
+		# final string
+		set( targets  "${targets}${type}${spaces}: ${string}\n" )
+	endforeach ()
+
+	message( NOTICE "\n--- Aurora Source ---" )
+	message( NOTICE "CMake      : v${CMAKE_VERSION}" )
+	message( NOTICE "Platform   : ${CMAKE_SYSTEM_NAME}" )
+	message( NOTICE "Build group: ${BUILD_GROUP} (${targetCount} targets)" )
+	message( NOTICE "Game       : ${BUILD_GAME}" )
+	message( NOTICE "64bit build: ${IS_64BIT}" )
+	message( NOTICE "---    Targets    ---" )
+	message( NOTICE "${targets}" )
+endblock()

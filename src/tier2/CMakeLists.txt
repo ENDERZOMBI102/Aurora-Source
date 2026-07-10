@@ -42,7 +42,7 @@ set( POSIX_DEFINES   )
 add_library( tier2 STATIC )
 
 # What this library reimplements
-set( REIMPLEMENTS "${LIBPUBLIC}/tier2" )
+set( REIMPLEMENTS "${LIBPUBLIC_DIR}/tier2" )
 
 # Include this to handle all the defines
 include( ${CMAKESCRIPTS_DIR}/project-base.cmake )

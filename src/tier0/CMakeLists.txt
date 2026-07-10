@@ -74,7 +74,7 @@ set( OUTPUT_FILE_NAME "libtier0" )
 add_library( tier0 SHARED )
 
 # What this library reimplements
-set( REIMPLEMENTS "${LIBPUBLIC}/tier0" )
+set( REIMPLEMENTS "${LIBPUBLIC_DIR}/tier0" )
 
 # Include this to handle all the defines
 include( "${CMAKESCRIPTS_DIR}/project-base.cmake" )
