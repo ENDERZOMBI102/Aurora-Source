@@ -83,13 +83,17 @@ unset( platSubDir )
 # Configuration options for the user
 include( "${CMAKESCRIPTS_DIR}/options.cmake" )
 
-# init "project" properties
+# Init "project" properties
 foreach ( type IN ITEMS "Executable" "Game" "Library" "Module" )
 	set_property( DIRECTORY ${ROOT_DIR} PROPERTY ASRC_${type} "" )
 endforeach ()
 
-# Load third party libraries
+# Import third-party libraries
+if ( NOT ${ASRC_3RD_PARTY_LOGS} )
+	set( CMAKE_MESSAGE_LOG_LEVEL "WARNING" )
+endif ()
 include( "${THIRDPARTY_DIR}/init.cmake" )
+set( CMAKE_MESSAGE_LOG_LEVEL "STATUS" )
 
 # Import the projects
 # -- Libraries

@@ -20,6 +20,7 @@ option( RETAIL "Build in retail mode" OFF )
 option( STAGING_ONLY "Staging only" OFF )
 option( USE_TOGL "Use the `togl` translation layer" ${IS_LINUX} )
 option( BUILD_REPLAY "Build replay support" OFF )
+option( ASRC_3RD_PARTY_LOGS "Toggles 3rd party libraries cmake output" OFF )
 set( ASRC_SKIP_x86_CHECK ${ASRC_SKIP_x86_CHECK} CACHE STRING "Skip the 64bit build checks" )
 
 # Technically options, but hardcoded (for now at least)
