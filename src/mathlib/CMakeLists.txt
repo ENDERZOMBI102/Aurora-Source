@@ -67,7 +67,7 @@ set( POSIX64_DEFINES )
 set( WINDOWS_DEFINES )
 set( POSIX_DEFINES   )
 
-add_library( mathlib SHARED )
+add_library( mathlib STATIC )
 
 # Include this to handle all the defines
 include( "${CMAKESCRIPTS_DIR}/project-base.cmake" )
