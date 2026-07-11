@@ -26,18 +26,6 @@ project(
 		LANGUAGES CXX C ASM
 )
 
-# Setup cmake standards
-set( CMAKE_C_STANDARD 23 )
-set( CMAKE_C_STANDARD_REQUIRED ON )
-set( CMAKE_C_VISIBILITY_PRESET hidden )
-set( CMAKE_CXX_STANDARD 23 )
-set( CMAKE_CXX_STANDARD_REQUIRED ON )
-set( CMAKE_CXX_VISIBILITY_PRESET hidden )
-set( CMAKE_BUILD_RPATH_USE_ORIGIN 1 )
-set( CMAKE_BUILD_RPATH $ORIGIN )
-set( CMAKE_INSTALL_RPATH $ORIGIN )
-set( CMAKE_BUILD_WITH_INSTALL_RPATH 1 )
-
 # For some reason, checking if CMAKE_BUILD_TYPE is defined is unreliable
 # So simply check if it's empty instead
 if ( "${CMAKE_BUILD_TYPE}" STREQUAL "" )
@@ -87,6 +75,18 @@ include( "${CMAKESCRIPTS_DIR}/options.cmake" )
 foreach ( type IN ITEMS "Executable" "Game" "Library" "Module" )
 	set_property( DIRECTORY ${ROOT_DIR} PROPERTY ASRC_${type} "" )
 endforeach ()
+
+# Setup cmake standards
+set( CMAKE_C_STANDARD 23 )
+set( CMAKE_C_STANDARD_REQUIRED ON )
+set( CMAKE_C_VISIBILITY_PRESET "hidden" )
+set( CMAKE_CXX_STANDARD 23 )
+set( CMAKE_CXX_STANDARD_REQUIRED ON )
+set( CMAKE_CXX_VISIBILITY_PRESET "hidden" )
+set( CMAKE_INSTALL_RPATH "$ORIGIN" )
+set( CMAKE_BUILD_WITH_INSTALL_RPATH ON )
+set( CMAKE_LIBRARY_OUTPUT_DIRECTORY "${GAME_DIR}/bin/" )
+set( CMAKE_RUNTIME_OUTPUT_DIRECTORY "${GAME_DIR}/bin/" )
 
 # Import third-party libraries
 if ( NOT ${ASRC_3RD_PARTY_LOGS} )

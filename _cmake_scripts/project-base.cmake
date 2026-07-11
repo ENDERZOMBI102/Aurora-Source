@@ -71,7 +71,12 @@ if ( ${IS_POSIX} )
 	)
 
 	# NO undefined in shared libs
-	set( CMAKE_SHARED_LINKER_FLAGS "-Wl,--no-undefined ${CMAKE_SHARED_LINKER_FLAGS}" )
+	if ( ${THIS_IS_A_SHARED_LIB} )
+		target_link_options( ${PROJECT_NAME}
+			PRIVATE
+				"LINKER:--no-undefined"
+		)
+	endif ()
 
 	# Warnings
 	target_compile_options( ${PROJECT_NAME}
@@ -99,12 +104,12 @@ if ( ${IS_POSIX} )
 
 	if ( ${IS_LINUX} )
 		target_compile_options( ${PROJECT_NAME} PRIVATE "-U_FORTIFY_SOURCE" )
-		add_link_options( "-l:-rpath,\$ORIGIN" )
+		target_link_options( ${PROJECT_NAME} PRIVATE "LINKER:-rpath,\$ORIGIN" )
 		if ( ${IS_64BIT} )
-			add_link_options( "-l:ld-linux-x86_64.so.2" )
+			target_link_options( ${PROJECT_NAME} PRIVATE "-l:ld-linux-x86_64.so.2" )
 			set( CMAKE_LIBRARY_PATH "/usr/lib/x86_64-linux-gnu/" )
 		else ()
-			add_link_options( "-l:ld-linux.so.2" )
+			target_link_options( ${PROJECT_NAME} PRIVATE "-l:ld-linux.so.2" )
 			set( CMAKE_LIBRARY_PATH "/usr/lib/i386-linux-gnu/ /usr/lib32" )
 		endif ()
 	endif ()
@@ -396,6 +401,9 @@ set_target_properties( ${PROJECT_NAME}
 		FOLDER "${IDE_FOLDER}"
 		LINKER_LANGUAGE CXX
 )
+if ( DEFINED OUTPUT_FILE_NAME )
+	set_target_properties( ${PROJECT_NAME} PROPERTIES OUTPUT_NAME "${OUTPUT_FILE_NAME}" )
+endif ()
 
 set_property( DIRECTORY ${ROOT_DIR} APPEND PROPERTY ASRC_${IDE_FOLDER} "${PROJECT_NAME}" )
 
