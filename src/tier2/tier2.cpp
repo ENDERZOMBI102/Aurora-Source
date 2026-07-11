@@ -12,6 +12,19 @@
 #include "vgui_controls/RichText.h"
 
 
+IFileSystem* g_pFullFileSystem;
+IMaterialSystem* materials;
+IMaterialSystem* g_pMaterialSystem;
+IInputSystem* g_pInputSystem;
+INetworkSystem* g_pNetworkSystem;
+IMaterialSystemHardwareConfig* g_pMaterialSystemHardwareConfig;
+IDebugTextureInfo* g_pMaterialSystemDebugTextureInfo;
+IVBAllocTracker* g_VBAllocTracker;
+IColorCorrectionSystem* colorcorrection;
+IP4* p4;
+IMdlLib* mdllib;
+IQueuedLoader* g_pQueuedLoader;
+
 void ConnectTier2Libraries( const CreateInterfaceFn* pFactoryList, const int pFactoryCount ) {
 	for ( int i{ 0 }; i < pFactoryCount; i += 1 ) {
 		if ( g_pFullFileSystem == nullptr ) {
