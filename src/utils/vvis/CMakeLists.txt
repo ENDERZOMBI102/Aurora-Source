@@ -73,19 +73,18 @@ set( POSIX64_DEFINES )
 set( WINDOWS_DEFINES )
 set( POSIX_DEFINES   )
 
-# Set the output file name
-set( OUTPUT_FILE_NAME "vvis_dll" )
-
 add_library( vvis_dll MODULE )
 
 # Include this to handle all the defines
 include( "${CMAKESCRIPTS_DIR}/project-base.cmake" )
 
 target_include_directories( vvis_dll
-	PRIVATE "${SRC_DIR}/utils/common"
+	PRIVATE
+		"${SRC_DIR}/utils/common"
 )
 target_compile_definitions( vvis_dll
-	PRIVATE PROTECTED_THINGS_DISABLE
+	PRIVATE
+		PROTECTED_THINGS_DISABLE
 )
 target_link_libraries( vvis_dll
 	PRIVATE

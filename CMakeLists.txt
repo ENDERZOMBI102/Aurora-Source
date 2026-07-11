@@ -98,6 +98,7 @@ set( CMAKE_MESSAGE_LOG_LEVEL "STATUS" )
 # Import the projects
 # -- Libraries
 add_subdirectory( "${SRC_DIR}/tier0" )
+add_subdirectory( "${SRC_DIR}/utils/lzma" )
 add_subdirectory( "${SRC_DIR}/tier1" )
 add_subdirectory( "${SRC_DIR}/vstdlib" )
 add_subdirectory( "${SRC_DIR}/tier2" )
@@ -116,6 +117,8 @@ add_subdirectory( "${SRC_DIR}/bootstrap" )
 add_subdirectory( "${SRC_DIR}/utils/vbsp" )
 add_subdirectory( "${SRC_DIR}/utils/vvis" )
 add_subdirectory( "${SRC_DIR}/utils/vvis_launcher" )
+add_subdirectory( "${SRC_DIR}/utils/vrad" )
+add_subdirectory( "${SRC_DIR}/utils/vrad_launcher" )
 
 # Print info
 block()
