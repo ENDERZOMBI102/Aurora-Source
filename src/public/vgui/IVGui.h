@@ -5,30 +5,33 @@
 // $NoKeywords: $
 //===========================================================================//
 #pragma once
-#include "tier1/interface.h"
 #include <vgui/VGUI.h>
-
+#include "tier1/interface.h"
 #include "appframework/IAppSystem.h"
+
 
 class KeyValues;
 
 namespace vgui {
-
 	// safe handle to a panel - can be converted to and from a VPANEL
-	typedef unsigned long HPanel;
-	typedef int HContext;
+	using HPanel = unsigned long;
+	using HContext = int;
 
 	enum {
 		DEFAULT_VGUI_CONTEXT = ( (vgui::HContext) ~0 )
 	};
 
 	// safe handle to a panel - can be converted to and from a VPANEL
-	typedef unsigned long HPanel;
+	using HPanel = unsigned long;
+
+	#define VGUI_IVGUI_INTERFACE_VERSION "VGUI_ivgui008"
 
 	//-----------------------------------------------------------------------------
 	// Purpose: Interface to core vgui components
 	//-----------------------------------------------------------------------------
 	class IVGui : public IAppSystem {
+	public:
+		static constexpr auto INTERFACE_VERSION{ VGUI_IVGUI_INTERFACE_VERSION };
 	public:
 		// activates vgui message pump
 		virtual void Start() = 0;
@@ -93,7 +96,4 @@ namespace vgui {
 		// add a tick signal like above, but to the head of the list of tick signals
 		virtual void AddTickSignalToHead( VPANEL panel, int intervalMilliseconds = 0 ) = 0;
 	};
-
-#define VGUI_IVGUI_INTERFACE_VERSION "VGUI_ivgui008"
-
-};// namespace vgui
+}; // namespace vgui

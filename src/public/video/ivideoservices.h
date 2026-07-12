@@ -457,6 +457,8 @@ public:
 
 class IVideoServices : public IAppSystem {
 public:
+	static constexpr auto INTERFACE_VERSION{ VIDEO_SERVICES_INTERFACE_VERSION };
+public:
 	// Query the available video systems
 	virtual int GetAvailableVideoSystemCount() = 0;
 	virtual VideoSystem_t GetAvailableVideoSystem( int n ) = 0;

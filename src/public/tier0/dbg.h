@@ -11,6 +11,7 @@
 #include "platform.h"
 #include <cstdarg>
 #include <cstdio>
+#include <utility>
 
 
 
@@ -319,7 +320,9 @@ DBG_INTERFACE bool HushAsserts();
 #endif// DBGFLAG_ASSERTFATAL
 
 
-#define AssertUnreachable() _AssertMsg( false, _T("Assertion Failed: Codepoint reached!"), nullptr, false )
+#define AssertUnreachable() \
+	_AssertMsg( false, _T("Assertion Failed: Codepoint reached!"), nullptr, false ); \
+	std::unreachable()
 
 // Assert macros
 // Assert is used to detect an important but survivable error.

@@ -22,13 +22,13 @@ struct InputEvent_t;
 //-----------------------------------------------------------------------------
 // Callbacks for mouse getting + setting
 //-----------------------------------------------------------------------------
-typedef void ( *GetMouseCallback_t )( int& x, int& y );
-typedef void ( *SetMouseCallback_t )( int x, int y );
+using GetMouseCallback_t = void ( * )( int& x, int& y );
+using SetMouseCallback_t = void ( * )( int x, int y );
 
 //-----------------------------------------------------------------------------
 // Callbacks for sound playing
 //-----------------------------------------------------------------------------
-typedef void ( *PlaySoundFunc_t )( const char* pFileName );
+using PlaySoundFunc_t = void ( * )( const char* pFileName );
 
 
 //-----------------------------------------------------------------------------
@@ -38,6 +38,8 @@ typedef void ( *PlaySoundFunc_t )( const char* pFileName );
 //-----------------------------------------------------------------------------
 #define MAT_SYSTEM_SURFACE_INTERFACE_VERSION "MatSystemSurface008"
 class IMatSystemSurface : public vgui::ISurface {
+public:
+	static constexpr auto INTERFACE_VERSION{ MAT_SYSTEM_SURFACE_INTERFACE_VERSION };
 public:
 	// Hook needed to get input to work.
 	// If the app drives the input (like the engine needs to do for VCR mode),

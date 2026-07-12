@@ -22,10 +22,14 @@ namespace vgui {
 	//!! must be removed
 	class Panel;
 
+	#define VGUI_PANEL_INTERFACE_VERSION "VGUI_Panel009"
+
 	//-----------------------------------------------------------------------------
 	// Purpose: interface from Client panels -> vgui panels
 	//-----------------------------------------------------------------------------
 	class IPanel : public IBaseInterface {
+	public:
+		static constexpr auto INTERFACE_VERSION{ VGUI_PANEL_INTERFACE_VERSION };
 	public:
 		virtual void Init( VPANEL vguiPanel, IClientPanel* panel ) = 0;
 
@@ -119,6 +123,4 @@ namespace vgui {
 		// sibling pins
 		virtual void SetSiblingPin( VPANEL vguiPanel, VPANEL newSibling, byte iMyCornerToPin = 0, byte iSiblingCornerToPinTo = 0 ) = 0;
 	};
-
-	#define VGUI_PANEL_INTERFACE_VERSION "VGUI_Panel009"
 }// namespace vgui

@@ -8,7 +8,6 @@ set( SOURCE_FILES
 	"${TIER2_DIR}/tier2dm.cpp"
 
 	# Private Header files
-#	"${TIER2_DIR}/memalloc.hpp"
 
 	# Public Source files
 
@@ -46,7 +45,6 @@ set( REIMPLEMENTS "${LIBPUBLIC_DIR}/tier2" )
 
 # Include this to handle all the defines
 include( ${CMAKESCRIPTS_DIR}/project-base.cmake )
-
 target_link_libraries( ${PROJECT_NAME}
 	PRIVATE
 		tier0

@@ -202,6 +202,8 @@ private:
 //-----------------------------------------------------------------------------
 abstract_class ISoundEmitterSystemBase : public IAppSystem {
 public:
+	static constexpr auto INTERFACE_VERSION{ SOUNDEMITTERSYSTEM_INTERFACE_VERSION };
+public:
 	// Init, shutdown called after we know what mod is running
 	virtual bool ModInit() = 0;
 	virtual void ModShutdown() = 0;

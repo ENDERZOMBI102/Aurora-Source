@@ -66,17 +66,19 @@ void DisconnectTier3Libraries();
 
 
 //-----------------------------------------------------------------------------
-// Helper empty implementation of an IAppSystem for tier2 libraries
+// Helper empty implementation of an IAppSystem for tier3 libraries
 //-----------------------------------------------------------------------------
 template<class IInterface, int ConVarFlag = 0>
 class CTier3AppSystem : public CTier2AppSystem<IInterface, ConVarFlag> {
 	using BaseClass =  CTier2AppSystem<IInterface, ConVarFlag>;
 public:
-	CTier3AppSystem( bool bIsPrimaryAppSystem = true ) : BaseClass( bIsPrimaryAppSystem ) { }
+	explicit CTier3AppSystem( bool bIsPrimaryAppSystem = true )
+		: BaseClass( bIsPrimaryAppSystem ) { }
 
-	virtual bool Connect( CreateInterfaceFn factory ) {
-		if ( !BaseClass::Connect( factory ) )
+	bool Connect( CreateInterfaceFn factory ) override {
+		if ( not BaseClass::Connect( factory ) ) {
 			return false;
+		}
 
 		if ( BaseClass::IsPrimaryAppSystem() ) {
 			ConnectTier3Libraries( &factory, 1 );
@@ -84,7 +86,7 @@ public:
 		return true;
 	}
 
-	virtual void Disconnect() {
+	void Disconnect() override {
 		if ( BaseClass::IsPrimaryAppSystem() ) {
 			DisconnectTier3Libraries();
 		}

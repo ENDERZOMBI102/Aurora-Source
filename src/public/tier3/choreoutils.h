@@ -17,13 +17,13 @@ class CStudioHdr;
 //-----------------------------------------------------------------------------
 // Finds sound files associated with events
 //-----------------------------------------------------------------------------
-const char* GetSoundForEvent( CChoreoEvent* pEvent, CStudioHdr* pStudioHdr );
+auto GetSoundForEvent( CChoreoEvent* pEvent, CStudioHdr* pStudioHdr ) -> const char*;
 
 
 //-----------------------------------------------------------------------------
 // Fixes up the duration of a choreo scene based on wav files + animations
 // Returns true if a change needed to be made
 //-----------------------------------------------------------------------------
-bool AutoAddGestureKeys( CChoreoEvent* e, CStudioHdr* pStudioHdr, float* pPoseParameters, bool bCheckOnly );
-bool UpdateGestureLength( CChoreoEvent* e, CStudioHdr* pStudioHdr, float* pPoseParameters, bool bCheckOnly );
-bool UpdateSequenceLength( CChoreoEvent* e, CStudioHdr* pStudioHdr, float* pPoseParameters, bool bCheckOnly, bool bVerbose );
+auto AutoAddGestureKeys( CChoreoEvent* e, CStudioHdr* pStudioHdr, float* pPoseParameters, bool bCheckOnly ) -> bool;
+auto UpdateGestureLength( CChoreoEvent* e, CStudioHdr* pStudioHdr, float* pPoseParameters, bool bCheckOnly ) -> bool;
+auto UpdateSequenceLength( CChoreoEvent* e, CStudioHdr* pStudioHdr, float* pPoseParameters, bool bCheckOnly, bool bVerbose ) -> bool;

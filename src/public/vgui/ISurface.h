@@ -100,10 +100,14 @@ namespace vgui {
 		int y1;
 	};
 
+	#define VGUI_SURFACE_INTERFACE_VERSION "VGUI_Surface030"
+
 	//-----------------------------------------------------------------------------
 	// Purpose: Wraps contextless windows system functions
 	//-----------------------------------------------------------------------------
 	class ISurface : public IAppSystem {
+	public:
+		static constexpr auto INTERFACE_VERSION{ VGUI_SURFACE_INTERFACE_VERSION };
 	public:
 		// call to Shutdown surface; surface can no longer be used after this is called
 		virtual void Shutdown() = 0;
@@ -385,5 +389,3 @@ namespace vgui {
 	};
 
 }// namespace vgui
-
-#define VGUI_SURFACE_INTERFACE_VERSION "VGUI_Surface030"

@@ -9,7 +9,11 @@
 #include "tier1/interface.h"
 
 
+#define IVTEX_INTERFACE_VERSION "VTEX_003"
+
 class IVTex : public IAppSystem {
+public:
+	static constexpr auto INTERFACE_VERSION{ IVTEX_INTERFACE_VERSION };
 public:
 	// For use by command-line tools
 	virtual int VTex( int argc, char** argv ) = 0;
@@ -17,5 +21,3 @@ public:
 	// For use by engine
 	virtual int VTex( CreateInterfaceFn filesystemFactory, const char* pGameDir, int argc, char** argv ) = 0;
 };
-
-#define IVTEX_VERSION_STRING "VTEX_003"

@@ -56,7 +56,11 @@ namespace vgui {
 	};
 
 
+	#define VGUI_SCHEME_INTERFACE_VERSION "VGUI_Scheme010"
+
 	class ISchemeManager : public IBaseInterface {
+	public:
+		static constexpr auto INTERFACE_VERSION{ VGUI_SCHEME_INTERFACE_VERSION };
 	public:
 		// loads a scheme from a file
 		// first scheme loaded becomes the default scheme, and all subsequent loaded scheme are derivitives of that
@@ -105,6 +109,4 @@ namespace vgui {
 		// Returns true if image evicted, false otherwise
 		virtual bool DeleteImage( const char* pImageName ) = 0;
 	};
-
-	#define VGUI_SCHEME_INTERFACE_VERSION "VGUI_Scheme010"
 }// namespace vgui

@@ -15,12 +15,15 @@
 
 class KeyValues;
 
+#define VGUI_SYSTEM_INTERFACE_VERSION "VGUI_System010"
 namespace vgui {
 
 	//-----------------------------------------------------------------------------
 	// Purpose: Wraps contextless windows system functions
 	//-----------------------------------------------------------------------------
 	class ISystem : public IBaseInterface {
+	public:
+		static constexpr auto INTERFACE_VERSION{ VGUI_SURFACE_INTERFACE_VERSION };
 	public:
 		// call when done with ISystem to clean up any memory allocation
 		virtual void Shutdown() = 0;
@@ -118,5 +121,3 @@ namespace vgui {
 	};
 
 }// namespace vgui
-
-#define VGUI_SYSTEM_INTERFACE_VERSION "VGUI_System010"

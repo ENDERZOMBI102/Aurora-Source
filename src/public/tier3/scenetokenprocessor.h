@@ -8,5 +8,5 @@
 
 class ISceneTokenProcessor;
 
-ISceneTokenProcessor* GetTokenProcessor();
-void SetTokenProcessorBuffer( const char* buf );
+auto GetTokenProcessor() -> ISceneTokenProcessor*;
+auto SetTokenProcessorBuffer( const char* pBuffer ) -> void;

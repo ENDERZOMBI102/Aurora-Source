@@ -7,27 +7,30 @@
 #include "tier2/tier2dm.h"
 #include "tier3/tier3.h"
 
+
 //-----------------------------------------------------------------------------
-// Helper empty implementation of an IAppSystem for tier2 libraries
+// Helper empty implementation of an IAppSystem for tier3 libraries
 //-----------------------------------------------------------------------------
 template<class IInterface, int ConVarFlag = 0>
 class CTier3DmAppSystem : public CTier2DmAppSystem<IInterface, ConVarFlag> {
-	typedef CTier2DmAppSystem<IInterface, ConVarFlag> BaseClass;
+	using BaseClass = CTier2DmAppSystem<IInterface, ConVarFlag>;
 public:
-	CTier3DmAppSystem( bool bIsPrimaryAppSystem = true ) : BaseClass( bIsPrimaryAppSystem ) { }
+	explicit CTier3DmAppSystem( bool bIsPrimaryAppSystem = true )
+		: BaseClass( bIsPrimaryAppSystem ) { }
 
-	virtual bool Connect( CreateInterfaceFn factory ) {
-		if ( !BaseClass::Connect( factory ) )
+	bool Connect( CreateInterfaceFn factory ) override {
+		if ( not BaseClass::Connect( factory ) ) {
 			return false;
+		}
 
-		if ( IsPrimaryAppSystem() ) {
+		if ( BaseClass::IsPrimaryAppSystem() ) {
 			ConnectTier3Libraries( &factory, 1 );
 		}
 		return true;
 	}
 
-	virtual void Disconnect() {
-		if ( IsPrimaryAppSystem() ) {
+	void Disconnect() override {
+		if ( BaseClass::IsPrimaryAppSystem() ) {
 			DisconnectTier3Libraries();
 		}
 		BaseClass::Disconnect();

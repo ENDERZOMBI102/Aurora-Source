@@ -34,8 +34,11 @@ namespace vgui {
 	#define MESSAGE_CURSOR_POS -1
 	#define MESSAGE_CURRENT_KEYFOCUS -2
 
+	#define VGUI_INPUT_INTERFACE_VERSION "VGUI_Input005"
 
 	class IInput : public IBaseInterface {
+	public:
+		static constexpr auto INTERFACE_VERSION{ VGUI_INPUT_INTERFACE_VERSION };
 	public:
 		virtual void SetMouseFocus( VPANEL newMouseFocus ) = 0;
 		virtual void SetMouseCapture( VPANEL panel ) = 0;
@@ -172,5 +175,4 @@ namespace vgui {
 
 		virtual VPANEL GetMouseCapture() = 0;
 	};
-	#define VGUI_INPUT_INTERFACE_VERSION "VGUI_Input005"
 }// namespace vgui

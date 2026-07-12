@@ -167,6 +167,8 @@ struct truncatedcone_t {
 
 abstract_class IPhysicsCollision {
 public:
+	static constexpr auto INTERFACE_VERSION{ VPHYSICS_COLLISION_INTERFACE_VERSION };
+public:
 	virtual ~IPhysicsCollision() {}
 
 	// produce a convex element from verts (convex hull around verts)
