@@ -109,6 +109,7 @@ add_subdirectory( "${SRC_DIR}/bitmap" )
 add_subdirectory( "${SRC_DIR}/appframework" )
 add_subdirectory( "${SRC_DIR}/raytrace" )
 add_subdirectory( "${SRC_DIR}/materialsystem/shaderlib" )
+add_subdirectory( "${SRC_DIR}/vgui2/vgui_controls" )
 # -- Modules
 add_subdirectory( "${SRC_DIR}/filesystem_stdio" )
 add_subdirectory( "${SRC_DIR}/utils/togl" )

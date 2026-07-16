@@ -23,7 +23,7 @@ namespace vgui {
 	//-----------------------------------------------------------------------------
 	class ISystem : public IBaseInterface {
 	public:
-		static constexpr auto INTERFACE_VERSION{ VGUI_SURFACE_INTERFACE_VERSION };
+		static constexpr auto INTERFACE_VERSION{ VGUI_SYSTEM_INTERFACE_VERSION };
 	public:
 		// call when done with ISystem to clean up any memory allocation
 		virtual void Shutdown() = 0;
