@@ -113,6 +113,7 @@ add_subdirectory( "${SRC_DIR}/materialsystem/shaderlib" )
 add_subdirectory( "${SRC_DIR}/filesystem_stdio" )
 add_subdirectory( "${SRC_DIR}/utils/togl" )
 add_subdirectory( "${SRC_DIR}/launcher" )
+add_subdirectory( "${SRC_DIR}/utils/serverplugin_sample" )
 # -- Executables
 add_subdirectory( "${SRC_DIR}/bootstrap" )
 add_subdirectory( "${SRC_DIR}/utils/vbsp" )
