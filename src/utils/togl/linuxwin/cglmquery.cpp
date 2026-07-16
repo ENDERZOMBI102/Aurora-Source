@@ -25,7 +25,7 @@
 // cglmquery.cpp
 //
 //===============================================================================
-#include "glmgrbasics.h"
+#include "togl/linuxwin/glmgrbasics.h"
 #include "togl/rendermechanism.h"
 
 #if !IsWindows()

@@ -111,6 +111,7 @@ add_subdirectory( "${SRC_DIR}/raytrace" )
 add_subdirectory( "${SRC_DIR}/materialsystem/shaderlib" )
 # -- Modules
 add_subdirectory( "${SRC_DIR}/filesystem_stdio" )
+add_subdirectory( "${SRC_DIR}/utils/togl" )
 add_subdirectory( "${SRC_DIR}/launcher" )
 # -- Executables
 add_subdirectory( "${SRC_DIR}/bootstrap" )
