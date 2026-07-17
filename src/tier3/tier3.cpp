@@ -36,7 +36,7 @@ IPhysicsCollision* g_pPhysicsCollision;
 ISoundEmitterSystemBase* g_pSoundEmitterSystem;
 IVTex* g_pVTex;
 
-void ConnectTier3Libraries( const CreateInterfaceFn* pFactoryList, const int pFactoryCount ) {
+void ConnectTier3Libraries( CreateInterfaceFn* const pFactoryList, const int pFactoryCount ) {
 	for ( int i{ 0 }; i < pFactoryCount; i += 1 ) {
 		if ( g_pStudioRender == nullptr ) {
 			g_pStudioRender = studiorender = static_cast<IStudioRender*>( pFactoryList[i]( STUDIO_RENDER_INTERFACE_VERSION, nullptr ) );

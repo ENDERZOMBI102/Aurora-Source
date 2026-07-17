@@ -118,7 +118,7 @@ static auto Sys_GetProcAddress( const char* pModuleName, const char* pName ) -> 
 	}
 #endif
 
-auto Sys_LoadLibrary( const char* pLibraryName, Sys_Flags flags ) -> HMODULE {
+auto Sys_LoadLibrary( const char* pLibraryName, const Sys_Flags flags ) -> HMODULE {
 	char str[ 1024 ];
 	// Note: DLL_EXT_STRING can be "_srv.so" or "_360.dll".
 	//       So be careful when using the V_*Extension* routines...
@@ -127,7 +127,7 @@ auto Sys_LoadLibrary( const char* pLibraryName, Sys_Flags flags ) -> HMODULE {
 
 	V_strncpy( str, pLibraryName, sizeof( str ) );
 
-	// always force the final extension to be .dll
+	// always force the final extension to be the platform's native extension
 	V_SetExtension( str, pModuleExtension, sizeof( str ) );
 
 	V_FixSlashes( str );

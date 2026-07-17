@@ -48,4 +48,6 @@ include( ${CMAKESCRIPTS_DIR}/project-base.cmake )
 target_link_libraries( ${PROJECT_NAME}
 	PRIVATE
 		tier0
+	PUBLIC
+		mathlib
 )
