@@ -31,20 +31,25 @@ if ( TRGT_TYPE STREQUAL "SHARED_LIBRARY" )
 	set( THIS_IS_A_SHARED_LIB 1 )
 	list( APPEND DEFINES -D_USRDLL -D_SHAREDLIB -D_DLL_ -D_DLL )
 	set( FOLDER "Library" )
+	set( EXTENSION ${CMAKE_SHARED_LIBRARY_SUFFIX} )
 elseif ( TRGT_TYPE STREQUAL "STATIC_LIBRARY" )
 	set( THIS_IS_A_LIBRARY 1 )
 	set( THIS_IS_A_STATIC_LIB 1 )
 	list( APPEND DEFINES -D_LIB -DLIB )
 	set( FOLDER "Library" )
+	set( EXTENSION ${CMAKE_STATIC_LIBRARY_SUFFIX} )
 elseif ( TRGT_TYPE STREQUAL "MODULE_LIBRARY" )
 	set( THIS_IS_A_LIBRARY 1 )
 	set( THIS_IS_A_MODULE_LIB 1 )
 	list( APPEND DEFINES -D_LIB -DLIB )
 	set( FOLDER "Module" )
+	set( EXTENSION ${CMAKE_SHARED_MODULE_SUFFIX} )
 elseif ( TRGT_TYPE STREQUAL "EXECUTABLE" )
     set( THIS_IS_A_EXE 1 )
     set( FOLDER "Executable" )
+	set( EXTENSION ${CMAKE_EXECUTABLE_SUFFIX} )
 endif ()
+get_target_property( TRGT_IMPORTED ${PROJECT_NAME} IMPORTED )
 if ( "${IDE_FOLDER}" STREQUAL "" )
 	set( IDE_FOLDER ${FOLDER} )
 endif ()
@@ -349,11 +354,13 @@ endforeach()
 #================================================#
 # Add the target
 #================================================#
-target_link_directories( ${PROJECT_NAME}
-	PRIVATE
-		${LIBPUBLIC_DIR}
-		${LIBCOMMON_DIR}
-)
+if ( NOT ${TRGT_IMPORTED} )
+	target_link_directories( ${PROJECT_NAME}
+		PRIVATE
+			${LIBPUBLIC_DIR}
+			${LIBCOMMON_DIR}
+	)
+endif ()
 
 #================================================#
 # Handle all the link libraries
@@ -388,20 +395,29 @@ foreach( link_lib IN LISTS LINK_LIBS )
 	endif()
 endforeach()
 
-target_sources( ${PROJECT_NAME} PRIVATE ${SOURCE_FILES} )
+# set sources
+if ( ${TRGT_IMPORTED} )
+	set_target_properties( ${PROJECT_NAME} PROPERTIES IMPORTED_LOCATION "${REIMPLEMENTS}.${EXTENSION}" )
+else ()
+	target_sources( ${PROJECT_NAME} PRIVATE ${SOURCE_FILES} )
+endif ()
 
-target_include_directories( ${PROJECT_NAME} PUBLIC ${INCLUDE_DIRS} )
+if ( NOT ${TRGT_IMPORTED} )
+	target_include_directories( ${PROJECT_NAME} PUBLIC ${INCLUDE_DIRS} )
+endif ()
 target_link_libraries( ${PROJECT_NAME} PUBLIC ${DEPENDENCIES} )
 if ( ${IS_WINDOWS} )
-	target_link_libraries( ${PROJECT_NAME} ${LINK_LIBS} )
+	target_link_libraries( ${PROJECT_NAME} PRIVATE ${LINK_LIBS} )
 endif ()
-target_compile_definitions( ${PROJECT_NAME} PUBLIC ${DEFINES} )
+if ( NOT ${TRGT_IMPORTED} )
+	target_compile_definitions( ${PROJECT_NAME} PUBLIC ${DEFINES} )
+endif ()
 set_target_properties( ${PROJECT_NAME}
 	PROPERTIES
 		FOLDER "${IDE_FOLDER}"
 		LINKER_LANGUAGE CXX
 )
-if ( DEFINED OUTPUT_FILE_NAME )
+if ( DEFINED OUTPUT_FILE_NAME AND NOT ${TRGT_IMPORTED} )
 	set_target_properties( ${PROJECT_NAME} PROPERTIES OUTPUT_NAME "${OUTPUT_FILE_NAME}" )
 endif ()
 
