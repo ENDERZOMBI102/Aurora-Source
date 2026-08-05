@@ -68,9 +68,6 @@ set( POSIX64_DEFINES )
 set( WINDOWS_DEFINES )
 set( POSIX_DEFINES   )
 
-# Set the output file name
-set( OUTPUT_FILE_NAME "libtier0" )
-
 add_library( tier0 SHARED )
 
 # What this library reimplements

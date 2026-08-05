@@ -93,7 +93,7 @@ target_link_libraries( vvis_dll
 		$<${IS_WINDOWS}:ws2_32>
 
 		lzma
-		tier0  # may use reimpl or valve's based on -DASRC_USE_REIMPLS
+		tier0
 		tier1
 		mathlib
 		vstdlib

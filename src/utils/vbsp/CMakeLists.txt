@@ -169,7 +169,7 @@ target_link_libraries( vbsp
 		$<${IS_WINDOWS}:odbccp32>
 		$<${IS_WINDOWS}:winmm>
 
-		tier0  # may use reimpl or valve's based on -DASRC_USE_REIMPLS
+		tier0
 		tier1
 		vstdlib
 		tier2

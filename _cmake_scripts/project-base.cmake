@@ -55,6 +55,14 @@ if ( "${IDE_FOLDER}" STREQUAL "" )
 endif ()
 unset( FOLDER )
 
+# Helper macros & functions
+macro( append_if )
+	cmake_parse_arguments( aif "" "TO" "VALUES" ${ARGN} )
+	if ( ${aif_UNPARSED_ARGUMENTS} )
+		list( APPEND ${aif_TO} ${aif_VALUES} )
+	endif ()
+endmacro()
+
 
 #================================================#
 # Handle compile options
@@ -128,7 +136,7 @@ endif()
 #	-	_DEBUG, _CRT_SECURE_NO_DEPRECATE, _CRT_NONSTDC_NO_DEPRECATE
 #	-	_HAS_ITERATOR_DEBUGGING, DEBUG, _ALLOW_RUNTIME_LIBRARY_MISMATCH
 # For win debug:
-# 	-	_ALLOW_MSCC_VER_MISMATCHs
+# 	-	_ALLOW_MSCC_VER_MISMATCH
 list( APPEND DEFINES
 	# compile toggles
 	$<$<BOOL:${RETAIL}>:_RETAIL>
@@ -149,8 +157,9 @@ list( APPEND DEFINES
     USE_SDL # We use SDL instead of whatever windows provides
     _DLL_EXT=${CMAKE_SHARED_LIBRARY_SUFFIX}
     FRAME_POINTER_OMISSION_DISABLED
-    NO_MALLOC_OVERRIDE
 )
+append_if( NOT ${ASOURCE_OVERRIDE_MALLOC} VALUES "NO_MALLOC_OVERRIDE" TO DEFINES )
+
 list( APPEND WINDOWS_DEFINES
     "_WIN32"
     "WIN32"
@@ -225,7 +234,7 @@ endif()
 #================================================#
 
 # needed for dlls and exes on windows
-if ( THIS_IS_A_EXE EQUAL 1 OR THIS_IS_A_SHARED_LIB EQUAL 1 )
+if ( "${THIS_IS_A_EXE}" OR "${THIS_IS_A_SHARED_LIB}" )
 	list( APPEND WINDOWS_LINK_LIBS "shell32.lib" "user32.lib" "advapi32.lib" "gdi32.lib" "comdlg32.lib" "ole32.lib" )
 endif ()
 list( APPEND POSIX_LINK_LIBS tcmalloc_minimal )
@@ -395,41 +404,65 @@ foreach( link_lib IN LISTS LINK_LIBS )
 	endif()
 endforeach()
 
-# set sources
+# finally, declare the target
 if ( ${TRGT_IMPORTED} )
 	set_target_properties( ${PROJECT_NAME} PROPERTIES IMPORTED_LOCATION "${REIMPLEMENTS}.${EXTENSION}" )
+
+	target_link_libraries( ${PROJECT_NAME} PUBLIC ${DEPENDENCIES} )
+
+	if ( ${IS_WINDOWS} )
+		target_link_libraries( ${PROJECT_NAME} PRIVATE ${LINK_LIBS} )
+	endif ()
+
+
 else ()
 	target_sources( ${PROJECT_NAME} PRIVATE ${SOURCE_FILES} )
+
+	target_include_directories( ${PROJECT_NAME} PUBLIC ${INCLUDE_DIRS} )
+
+	target_link_libraries( ${PROJECT_NAME} PUBLIC ${DEPENDENCIES} )
+
+	if ( ${IS_WINDOWS} )
+		target_link_libraries( ${PROJECT_NAME} PRIVATE ${LINK_LIBS} )
+	endif ()
+
+	target_compile_definitions( ${PROJECT_NAME} PUBLIC ${DEFINES} )
+
+	if ( DEFINED OUTPUT_FILE_DIR )
+		set_target_properties( ${PROJECT_NAME}
+			PROPERTIES
+				RUNTIME_OUTPUT_DIRECTORY "${OUTPUT_FILE_DIR}"
+				LIBRARY_OUTPUT_DIRECTORY "${OUTPUT_FILE_DIR}"
+		)
+	elseif ( "${THIS_IS_A_SHARED_LIB}" OR "${THIS_IS_A_MODULE_LIB}" )
+		set_target_properties( ${PROJECT_NAME}
+			PROPERTIES
+				RUNTIME_OUTPUT_DIRECTORY "${GAME_DIR}/bin2/"
+				LIBRARY_OUTPUT_DIRECTORY "${GAME_DIR}/bin2/"
+		)
+	endif ()
+
+	if ( DEFINED OUTPUT_FILE_NAME )
+		set_target_properties( ${PROJECT_NAME} PROPERTIES OUTPUT_NAME "${OUTPUT_FILE_NAME}" )
+	endif ()
+
+	if ( ${PRECOMPILED_HEADERS} )
+		target_precompile_headers( ${PROJECT_NAME} PUBLIC ${PRECOMPILED_HEADERS} )
+	endif()
+
+	if ( "${THIS_IS_A_STATIC_LIB}" )
+		set_target_properties( ${PROJECT_NAME} PROPERTIES POSITION_INDEPENDENT_CODE ON )
+	endif ()
 endif ()
 
-if ( NOT ${TRGT_IMPORTED} )
-	target_include_directories( ${PROJECT_NAME} PUBLIC ${INCLUDE_DIRS} )
-endif ()
-target_link_libraries( ${PROJECT_NAME} PUBLIC ${DEPENDENCIES} )
-if ( ${IS_WINDOWS} )
-	target_link_libraries( ${PROJECT_NAME} PRIVATE ${LINK_LIBS} )
-endif ()
-if ( NOT ${TRGT_IMPORTED} )
-	target_compile_definitions( ${PROJECT_NAME} PUBLIC ${DEFINES} )
-endif ()
 set_target_properties( ${PROJECT_NAME}
 	PROPERTIES
 		FOLDER "${IDE_FOLDER}"
 		LINKER_LANGUAGE CXX
 )
-if ( DEFINED OUTPUT_FILE_NAME AND NOT ${TRGT_IMPORTED} )
-	set_target_properties( ${PROJECT_NAME} PROPERTIES OUTPUT_NAME "${OUTPUT_FILE_NAME}" )
-endif ()
 
-set_property( DIRECTORY ${ROOT_DIR} APPEND PROPERTY ASRC_${IDE_FOLDER} "${PROJECT_NAME}" )
+set_property( DIRECTORY ${ROOT_DIR} APPEND PROPERTY ASOURCE_${IDE_FOLDER} "${PROJECT_NAME}" )
 
-if ( ${THIS_IS_A_STATIC_LIB} )
-	set_target_properties( ${PROJECT_NAME} PROPERTIES POSITION_INDEPENDENT_CODE ON )
-endif ()
-if ( ${THIS_IS_A_MODULE_LIB} )
+if ( "${THIS_IS_A_MODULE_LIB}" )
 	set_target_properties( ${PROJECT_NAME} PROPERTIES PREFIX "" )
 endif ()
-
-if ( ${PRECOMPILED_HEADERS} )
-	target_precompile_headers( ${PROJECT_NAME} PUBLIC ${PRECOMPILED_HEADERS} )
-endif()

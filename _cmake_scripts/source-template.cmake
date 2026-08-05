@@ -51,6 +51,8 @@ set( POSIX64_INCLUDE_DIRS )
 
 # Set the output file name
 set( OUTPUT_FILE_NAME "name" )
+# Set the output file location
+set( OUTPUT_FILE_DIR "sdk/bin/" )
 
 # Where to put the project in IDEs.
 # When left undefined/unspecified, will use the target type to derive it.
