@@ -69,15 +69,12 @@ auto CSteamApplication::Create() -> bool {
 	const auto res{ FileSystem_GetFileSystemDLLName( fsDllName, std::size( fsDllName ), m_bSteam ) };
 	if ( res != FSReturnCode_t::FS_OK ) {
 		const char* error;
-		switch ( res ) {
-			case FS_MISSING_GAMEINFO_FILE: error = "MISSING_GAMEINFO_FILE"; break;
-			case FS_INVALID_GAMEINFO_FILE: error = "INVALID_GAMEINFO_FILE"; break;
-			case FS_INVALID_PARAMETERS: error = "INVALID_PARAMETERS"; break;
-			case FS_UNABLE_TO_INIT: error = "UNABLE_TO_INIT"; break;
-			case FS_MISSING_STEAM_DLL: error = "MISSING_STEAM_DLL"; break;
-			default: error = "N/A"; break;
+		switch ( fsRetCode ) {
+			case FS_INVALID_PARAMETERS: error = "invalid parameters."; break;
+			case FS_UNABLE_TO_INIT: error = "unable to find a valid implementation."; break;
+			default: AssertUnreachable();
 		}
-		Warning( "Failed to find filesystem module. (%s)\n", error );
+		Warning( "Failed to find filesystem module: %s\n", error );
 		return false;
 	}
 	m_pFileSystem = dynamic_cast<IFileSystem*>( AddSystem( LoadModule( fsDllName ), FILESYSTEM_INTERFACE_VERSION ) );

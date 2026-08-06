@@ -250,7 +250,7 @@ static bool Sys_GetExecutableName( char* out, int len ) {
 		}
 	#else
 		if ( CommandLine()->GetParm( 0 ) ) {
-			Q_MakeAbsolutePath( out, len, CommandLine()->GetParm( 0 ) );
+			V_MakeAbsolutePath( out, len, CommandLine()->GetParm( 0 ) );
 		} else {
 			return false;
 		}
@@ -269,7 +269,7 @@ bool FileSystem_GetExecutableDir( char* exedir, int exeDirLen ) {
 			pProject = getenv( GAMEDIR_TOKEN );
 		}
 		if ( pProject ) {
-			Q_snprintf( exedir, exeDirLen, "%s%c..%cbin", pProject, CORRECT_PATH_SEPARATOR, CORRECT_PATH_SEPARATOR );
+			V_snprintf( exedir, exeDirLen, "%s%c..%cbin", pProject, CORRECT_PATH_SEPARATOR, CORRECT_PATH_SEPARATOR );
 			return true;
 		}
 		return false;
@@ -278,18 +278,18 @@ bool FileSystem_GetExecutableDir( char* exedir, int exeDirLen ) {
 	if ( !Sys_GetExecutableName( exedir, exeDirLen ) ) {
 		return false;
 	}
-	Q_StripFilename( exedir );
+	V_StripFilename( exedir );
 
-	Q_FixSlashes( exedir );
+	V_FixSlashes( exedir );
 
 	// Return the bin directory as the executable dir if it's not in there
 	// because that's really where we're running from...
 	char ext[ MAX_PATH ];
-	Q_StrRight( exedir, 4, ext, sizeof( ext ) );
-	if ( ext[ 0 ] != CORRECT_PATH_SEPARATOR || Q_stricmp( ext + 1, "bin" ) != 0 ) {
-		Q_strncat( exedir, CORRECT_PATH_SEPARATOR_S, exeDirLen, COPY_ALL_CHARACTERS );
-		Q_strncat( exedir, "bin", exeDirLen, COPY_ALL_CHARACTERS );
-		Q_FixSlashes( exedir );
+	V_StrRight( exedir, 4, ext, sizeof( ext ) );
+	if ( ext[ 0 ] != CORRECT_PATH_SEPARATOR or Q_stricmp( ext + 1, "bin" ) != 0 ) {
+		V_strncat( exedir, CORRECT_PATH_SEPARATOR_S, exeDirLen, COPY_ALL_CHARACTERS );
+		V_strncat( exedir, "bin", exeDirLen, COPY_ALL_CHARACTERS );
+		V_FixSlashes( exedir );
 	}
 
 	return true;
@@ -297,7 +297,7 @@ bool FileSystem_GetExecutableDir( char* exedir, int exeDirLen ) {
 
 static bool FileSystem_GetBaseDir( char* baseDir, int baseDirLen ) {
 	if ( FileSystem_GetExecutableDir( baseDir, baseDirLen ) ) {
-		Q_StripFilename( baseDir );
+		V_StripFilename( baseDir );
 		return true;
 	}
 
