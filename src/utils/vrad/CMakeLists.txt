@@ -160,32 +160,12 @@ set( SOURCE_FILES
 	"${SRC_DIR}/public/worldsize.h"
 )
 
-# Preprocessor defs
-set( DEFINES )
-
-# Platform-specific preprocessor defines
-set( WIN32_DEFINES   )
-set( POSIX32_DEFINES )
-set( WIN64_DEFINES   )
-set( POSIX64_DEFINES )
-set( WINDOWS_DEFINES )
-set( POSIX_DEFINES   )
-
-add_library( vrad_dll MODULE )
+add_library( ${PROJECT_NAME} MODULE )
 
 # Include this to handle all the defines
 include( "${CMAKESCRIPTS_DIR}/project-base.cmake" )
 
-target_include_directories( vrad_dll
-	PRIVATE
-		"${SRC_DIR}/utils/common"
-)
-target_compile_definitions( vrad_dll
-	PRIVATE
-		PROTECTED_THINGS_DISABLE
-		VRAD
-)
-target_link_libraries( vrad_dll
+target_link_libraries( ${PROJECT_NAME}
 	PRIVATE
 		$<${IS_WINDOWS}:ws2_32>
 
@@ -197,4 +177,13 @@ target_link_libraries( vrad_dll
 		bitmap
 		tier2
 		lzma
+)
+target_include_directories( ${PROJECT_NAME}
+	PRIVATE
+		"${SRC_DIR}/utils/common"
+)
+target_compile_definitions( ${PROJECT_NAME}
+	PRIVATE
+		PROTECTED_THINGS_DISABLE
+		VRAD
 )

@@ -56,32 +56,21 @@ set( SOURCE_FILES
 	"$<$<OR:${IS_WINDOWS},${IS_LINUX}>:${MATHLIB_DIR}/3dnow.h>"
 )
 
-# Preprocessor defs
-set( DEFINES )
-
-# Platform-specific preprocessor defines
-set( WIN32_DEFINES   )
-set( POSIX32_DEFINES )
-set( WIN64_DEFINES   )
-set( POSIX64_DEFINES )
-set( WINDOWS_DEFINES )
-set( POSIX_DEFINES   )
-
-add_library( mathlib STATIC )
+add_library( ${PROJECT_NAME} STATIC )
 
 # Include this to handle all the defines
 include( "${CMAKESCRIPTS_DIR}/project-base.cmake" )
 
-target_include_directories( mathlib
-	PRIVATE
-		"${SRC_DIR}/public/mathlib"
-)
-target_link_libraries( mathlib
+target_link_libraries( ${PROJECT_NAME}
 	PRIVATE
 		tier0
 		tier1
 )
-target_compile_definitions( mathlib
+target_include_directories( ${PROJECT_NAME}
+	PRIVATE
+		"${SRC_DIR}/public/mathlib"
+)
+target_compile_definitions( ${PROJECT_NAME}
 	PRIVATE
 		"MATHLIB_LIB"
 )

@@ -9,29 +9,19 @@ set( SOURCE_FILES
 	"${SRC_DIR}/public/tier1/interface.h"
 )
 
-# Preprocessor defs
-set( DEFINES )
-
-# Platform-specific preprocessor defines
-set( WIN32_DEFINES   )
-set( POSIX32_DEFINES )
-set( WIN64_DEFINES   )
-set( POSIX64_DEFINES )
-set( WINDOWS_DEFINES )
-set( POSIX_DEFINES   )
-
 # Set the output file name
 set( OUTPUT_FILE_NAME "vvis" )
 
-add_executable( vvis_launcher )
+add_executable( ${PROJECT_NAME} )
 
 # Include this to handle all the defines
 include( "${CMAKESCRIPTS_DIR}/project-base.cmake" )
 
-target_link_libraries( vvis_launcher
+target_link_libraries( ${PROJECT_NAME}
 	PRIVATE
 		tier0
 		tier1
 		${CMAKE_DL_LIBS}
 )
-add_dependencies( vvis_launcher vvis_dll #[[filesystem_stdio]] )
+
+add_dependencies( ${PROJECT_NAME} vvis_dll #[[filesystem_stdio]] )

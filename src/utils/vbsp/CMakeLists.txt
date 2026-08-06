@@ -138,31 +138,12 @@ set( SOURCE_FILES
 	"${SRC_DIR}/public/worldsize.h"
 )
 
-# Preprocessor defs
-set( DEFINES )
-
-# Platform-specific preprocessor defines
-set( WIN32_DEFINES   )
-set( POSIX32_DEFINES )
-set( WIN64_DEFINES   )
-set( POSIX64_DEFINES )
-set( WINDOWS_DEFINES )
-set( POSIX_DEFINES   )
-
-add_executable( vbsp )
+add_executable( ${PROJECT_NAME} )
 
 # Include this to handle all the defines
 include( "${CMAKESCRIPTS_DIR}/project-base.cmake" )
 
-target_include_directories( vbsp
-	PRIVATE "${SRC_DIR}/utils/common"
-)
-target_compile_definitions( vbsp
-	PRIVATE
-		MACRO_MATHLIB
-		PROTECTED_THINGS_DISABLE
-)
-target_link_libraries( vbsp
+target_link_libraries( ${PROJECT_NAME}
 	PRIVATE
 		$<${IS_WINDOWS}:ws2_32>
 		$<${IS_WINDOWS}:odbc32>
@@ -180,4 +161,13 @@ target_link_libraries( vbsp
 		bitmap
 	INTERFACE
 		SDL3::SDL3-shared
+)
+target_include_directories( ${PROJECT_NAME}
+	PRIVATE
+		"${SRC_DIR}/utils/common"
+)
+target_compile_definitions( ${PROJECT_NAME}
+	PRIVATE
+		MACRO_MATHLIB
+		PROTECTED_THINGS_DISABLE
 )

@@ -27,26 +27,11 @@ set( SOURCE_FILES
 	"${SRC_DIR}/public/stringregistry.h"
 )
 
-# Preprocessor defs
-set( DEFINES )
-
-# Platform-specific preprocessor defines
-set( WIN32_DEFINES   )
-set( POSIX32_DEFINES )
-set( WIN64_DEFINES   )
-set( POSIX64_DEFINES )
-set( WINDOWS_DEFINES )
-set( POSIX_DEFINES   )
-
-add_executable( captioncompiler )
+add_executable( ${PROJECT_NAME} )
 
 # Include this to handle all the defines
 include( "${CMAKESCRIPTS_DIR}/project-base.cmake" )
-target_include_directories( ${PROJECT_NAME}
-	PRIVATE
-		"${SRC_DIR}/utils/common"
-		"${SRC_DIR}/game/shared"
-)
+
 target_link_libraries( ${PROJECT_NAME}
 	PRIVATE
 		tier0
@@ -56,3 +41,11 @@ target_link_libraries( ${PROJECT_NAME}
 		tier2
 		tier3
 )
+target_include_directories( ${PROJECT_NAME}
+	PRIVATE
+		"${SRC_DIR}/utils/common"
+		"${SRC_DIR}/game/shared"
+)
+
+
+add_dependencies( ${PROJECT_NAME} filesystem_stdio )

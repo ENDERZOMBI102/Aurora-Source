@@ -18,23 +18,12 @@ set( SOURCE_FILES
 	"${SRC_DIR}/public/engine/launcher_api.hpp"
 )
 
-# Preprocessor defs
-set( DEFINES )
-
-# Platform-specific preprocessor defines
-set( WIN32_DEFINES   )
-set( POSIX32_DEFINES )
-set( WIN64_DEFINES   )
-set( POSIX64_DEFINES )
-set( WINDOWS_DEFINES )
-set( POSIX_DEFINES   )
-
-add_library( launcher MODULE )
+add_library( ${PROJECT_NAME} MODULE )
 
 # Include this to handle all the defines
 include( "${CMAKESCRIPTS_DIR}/project-base.cmake" )
 
-target_link_libraries( launcher
+target_link_libraries( ${PROJECT_NAME}
 	PRIVATE
 		tier0
 		tier1

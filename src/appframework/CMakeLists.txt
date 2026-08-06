@@ -21,18 +21,8 @@ set( SOURCE_FILES
 	"${SRC_DIR}/public/appframework/VguiMatSysApp.h"
 )
 
-# Preprocessor defs
-set( DEFINES )
-
-# Platform-specific preprocessor defines
-set( WIN32_DEFINES   )
-set( POSIX32_DEFINES )
-set( WIN64_DEFINES   )
-set( POSIX64_DEFINES )
-set( WINDOWS_DEFINES )
-set( POSIX_DEFINES   )
-
-add_library( appframework STATIC )
+# Target type
+add_library( ${PROJECT_NAME} STATIC )
 
 # What this library reimplements
 set( REIMPLEMENTS "${LIBPUBLIC_DIR}/appframework" )
@@ -40,7 +30,7 @@ set( REIMPLEMENTS "${LIBPUBLIC_DIR}/appframework" )
 # Include this to handle all the defines
 include( "${CMAKESCRIPTS_DIR}/project-base.cmake" )
 
-target_link_libraries( appframework
+target_link_libraries( ${PROJECT_NAME}
 	PRIVATE
 		tier0
 		tier1

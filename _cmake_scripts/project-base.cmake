@@ -1,9 +1,7 @@
 #================================================#
 #
 # Base for all projects
-# Separated from library-base, etc. because it's easier
 # NOTE: Please add ALL of the base stuff into this
-# NOTE AGAIN: I might merge this with source-base.cmake
 #================================================#
 #
 # This is the place where all link libs are located, yes
@@ -94,17 +92,16 @@ if ( ${IS_POSIX} )
 	# Warnings
 	target_compile_options( ${PROJECT_NAME}
 		PRIVATE
-#			"-fpermissive"
 			# convert a few warnings to errors
 			"-Werror=return-type"
 #			"-Werror=conversion"
 			# silence others
-			"-Wno-invalid-offsetof"
+			$<$<COMPILE_LANGUAGE:CXX>:-Wno-invalid-offsetof>
 			"-Wno-enum-compare"
 #			"-Wno-format-security"
 			"-Wno-multichar"
 			"-Wno-ignored-attributes"
-			"-Wno-conversion-null"
+			$<$<COMPILE_LANGUAGE:CXX>:-Wno-conversion-null>
 #			"-Wno-write-strings"
 	)
 	if ( CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 5.0 )
@@ -157,29 +154,15 @@ list( APPEND DEFINES
     USE_SDL # We use SDL instead of whatever windows provides
     _DLL_EXT=${CMAKE_SHARED_LIBRARY_SUFFIX}
     FRAME_POINTER_OMISSION_DISABLED
-)
-append_if( NOT ${ASOURCE_OVERRIDE_MALLOC} VALUES "NO_MALLOC_OVERRIDE" TO DEFINES )
-
-list( APPEND WINDOWS_DEFINES
-    "_WIN32"
-    "WIN32"
-    "WINDOWS"
-    "_ALLOW_MSC_VER_MISMATCH"
-    "PLATFORM_WINDOWS"
-)
-list( APPEND WIN32_DEFINES
-    "PLATFORM_WINDOWS_PC32"
-)
-list( APPEND WIN64_DEFINES
-    "PLATFORM_WINDOWS_PC64"
+	$<$<BOOL:${ASOURCE_OVERRIDE_MALLOC}>:NO_MALLOC_OVERRIDE>
 )
 
-#list( APPEND DEFINES         "_CRT_SECURE_NO_DEPRECATE" "_CRT_NONSTDC_NO_DEPRECATE" "_ALLOW_RUNTIME_LIBRARY_MISMATCH" "_ALLOW_ITERATOR_DEBUG_LEVEL_MISMATCH" "-U_HAS_ITERATOR_DEBUGGING" "_HAS_ITERATOR_DEBUGGING=0" )
-list( APPEND POSIX_DEFINES
-    "DX_TO_GL_ABSTRACTION"
-    "PLATFORM_POSIX"
-    $<${IS_LINUX}:PLATFORM_LINUX>
-)
+list( APPEND WIN_DEFINES "_WIN32" "WIN32" "WINDOWS" "_ALLOW_MSC_VER_MISMATCH" "PLATFORM_WINDOWS" )
+#list( APPEND WIN_DEFINES "_CRT_SECURE_NO_DEPRECATE" "_CRT_NONSTDC_NO_DEPRECATE" "_ALLOW_RUNTIME_LIBRARY_MISMATCH" "_ALLOW_ITERATOR_DEBUG_LEVEL_MISMATCH" "-U_HAS_ITERATOR_DEBUGGING" "_HAS_ITERATOR_DEBUGGING=0" )
+list( APPEND WIN32_DEFINES "PLATFORM_WINDOWS_PC32" )
+list( APPEND WIN64_DEFINES "PLATFORM_WINDOWS_PC64" )
+
+list( APPEND POSIX_DEFINES "DX_TO_GL_ABSTRACTION" "PLATFORM_POSIX" $<${IS_LINUX}:PLATFORM_LINUX> )
 list( APPEND POSIX32_DEFINES )
 list( APPEND POSIX64_DEFINES )
 
@@ -191,7 +174,7 @@ else()
 endif()
 
 if ( ${IS_WINDOWS} )
-	list( APPEND DEFINES ${WINDOWS_DEFINES} )
+	list( APPEND DEFINES ${WIN_DEFINES} )
 	# WIN32 defines
 	if ( NOT ${IS_64BIT} )
 		list( APPEND DEFINES ${WIN32_DEFINES} )
@@ -218,31 +201,18 @@ if ( ${IS_POSIX} )
 endif()
 
 #================================================#
-# Now handle the sources
-#================================================#
-if ( ${IS_WINDOWS} )
-	list( APPEND SOURCE_FILES ${WINDOWS_SOURCE_FILES} )
-endif()
-
-if ( ${IS_POSIX} )
-	list( APPEND SOURCE_FILES ${POSIX_SOURCE_FILES} )
-endif()
-
-#================================================#
 # Now handle the link libraries
 # (at least the user defined ones)
 #================================================#
 
 # needed for dlls and exes on windows
 if ( "${THIS_IS_A_EXE}" OR "${THIS_IS_A_SHARED_LIB}" )
-	list( APPEND WINDOWS_LINK_LIBS "shell32.lib" "user32.lib" "advapi32.lib" "gdi32.lib" "comdlg32.lib" "ole32.lib" )
+	list( APPEND WIN_LINK_LIBS "shell32.lib" "user32.lib" "advapi32.lib" "gdi32.lib" "comdlg32.lib" "ole32.lib" )
 endif ()
 list( APPEND POSIX_LINK_LIBS tcmalloc_minimal )
 
 if ( ${IS_WINDOWS} )
-	# Generic windows libs
-	list( APPEND LINK_LIBS ${WINDOWS_LINK_LIBS} )
-
+	list( APPEND LINK_LIBS ${WIN_LINK_LIBS} )
 	# WIN32 libs
 	if ( NOT ${IS_64BIT} )
 		list( APPEND LINK_LIBS ${WIN32_LINK_LIBS} )
@@ -255,7 +225,6 @@ if ( ${IS_WINDOWS} )
 endif()
 
 if( ${IS_POSIX} )
-	# Generic posix libs
 	list( APPEND LINK_LIBS ${POSIX_LINK_LIBS} )
 
 	# POSIX32 libs
@@ -278,9 +247,7 @@ list( APPEND INCLUDE_DIRS
 	"${SRC_DIR}/public/tier0"
 	"${SRC_DIR}/public/tier1"
 )
-list( APPEND POSIX32_INCLUDE_DIRS ${POSIX32_INCLUDE_DIRS} )
-# For windows only
-list( APPEND WINDOWS_INCLUDE_DIRS "${DX9SDK}/Include/" )
+list( APPEND WIN_INCLUDE_DIRS "${DX9SDK}/Include/" )
 
 if ( ${IS_WINDOWS} )
 	list( APPEND INCLUDE_DIRS ${WINDOWS_INCLUDE_DIRS} )

@@ -130,20 +130,13 @@ endif()
 # Preprocessor defs
 set( DEFINES "TIER1_STATIC_LIB" )
 
-# Platform-specific preprocessor defines
-set( WIN32_DEFINES   )
-set( POSIX32_DEFINES )
-set( WIN64_DEFINES   )
-set( POSIX64_DEFINES )
-set( WINDOWS_DEFINES )
-set( POSIX_DEFINES   )
-
 set_source_files_properties( "$<${IS_WINDOWS}:${TIER1_DIR}/processor_detect.cpp>" PROPERTIES COMPILE_FLAGS /EHsc )
 
-add_library( tier1 STATIC )
+add_library( ${PROJECT_NAME} STATIC )
 
 # Include this to handle all the defines
 include( ${CMAKESCRIPTS_DIR}/project-base.cmake )
+
 target_link_libraries( ${PROJECT_NAME}
 	PRIVATE
 		tier0

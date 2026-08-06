@@ -22,18 +22,7 @@ set( SOURCE_FILES
 	"${SRC_DIR}/public/filesystem.h"
 )
 
-# Preprocessor defs
-set( DEFINES )
-
-# Platform-specific preprocessor defines
-set( WIN32_DEFINES   )
-set( POSIX32_DEFINES )
-set( WIN64_DEFINES   )
-set( POSIX64_DEFINES )
-set( WINDOWS_DEFINES )
-set( POSIX_DEFINES   )
-
-add_library( bitmap STATIC )
+add_library( ${PROJECT_NAME} STATIC )
 
 # What this library reimplements
 set( REIMPLEMENTS "${LIBPUBLIC_DIR}/bitmap" )
@@ -41,13 +30,13 @@ set( REIMPLEMENTS "${LIBPUBLIC_DIR}/bitmap" )
 # Include this to handle all the defines
 include( "${CMAKESCRIPTS_DIR}/project-base.cmake" )
 
-target_link_libraries( bitmap
+target_link_libraries( ${PROJECT_NAME}
 	PRIVATE
 		tier0
 		tier1
 		vstdlib
 )
-target_compile_definitions( bitmap
+target_compile_definitions( ${PROJECT_NAME}
 	PRIVATE
 		"-DIMAGE_LOADER_NO_DXTC"
 )

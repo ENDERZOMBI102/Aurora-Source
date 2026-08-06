@@ -62,31 +62,12 @@ set( SOURCE_FILES
 	"${SRC_DIR}/public/wadtypes.h"
 )
 
-# Preprocessor defs
-set( DEFINES )
-
-# Platform-specific preprocessor defines
-set( WIN32_DEFINES   )
-set( POSIX32_DEFINES )
-set( WIN64_DEFINES   )
-set( POSIX64_DEFINES )
-set( WINDOWS_DEFINES )
-set( POSIX_DEFINES   )
-
-add_library( vvis_dll MODULE )
+add_library( ${PROJECT_NAME} MODULE )
 
 # Include this to handle all the defines
 include( "${CMAKESCRIPTS_DIR}/project-base.cmake" )
 
-target_include_directories( vvis_dll
-	PRIVATE
-		"${SRC_DIR}/utils/common"
-)
-target_compile_definitions( vvis_dll
-	PRIVATE
-		PROTECTED_THINGS_DISABLE
-)
-target_link_libraries( vvis_dll
+target_link_libraries( ${PROJECT_NAME}
 	PRIVATE
 		$<${IS_WINDOWS}:odbc32>
 		$<${IS_WINDOWS}:odbccp32>
@@ -98,4 +79,12 @@ target_link_libraries( vvis_dll
 		mathlib
 		vstdlib
 		tier2
+)
+target_include_directories( ${PROJECT_NAME}
+	PRIVATE
+		"${SRC_DIR}/utils/common"
+)
+target_compile_definitions( ${PROJECT_NAME}
+	PRIVATE
+		PROTECTED_THINGS_DISABLE
 )

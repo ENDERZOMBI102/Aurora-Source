@@ -33,21 +33,7 @@ set( SOURCE_FILES
 	"${SRC_DIR}/public/vstdlib/pcgengine.hpp"
 )
 
-# Preprocessor defs
-set( DEFINES )
-
-# Platform-specific preprocessor defines
-set( WIN32_DEFINES )
-set( POSIX32_DEFINES )
-set( WIN64_DEFINES   )
-set( POSIX64_DEFINES )
-set( WINDOWS_DEFINES )
-set( POSIX_DEFINES   )
-
-set( PLATFORM_64BIT_DEFINES )
-set( PLATFORM_32BIT_DEFINES )
-
-add_library( vstdlib SHARED )
+add_library( ${PROJECT_NAME} SHARED )
 
 # What this library reimplements
 set( REIMPLEMENTS "${LIBPUBLIC_DIR}/vstdlib" )
@@ -60,7 +46,7 @@ target_link_libraries( ${PROJECT_NAME}
 		tier0
 		tier1
 )
-target_compile_definitions( vstdlib
+target_compile_definitions( ${PROJECT_NAME}
 	PRIVATE
 		"VSTDLIB_DLL_EXPORT"
 )

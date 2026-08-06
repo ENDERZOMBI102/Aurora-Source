@@ -18,19 +18,12 @@ set( SOURCE_FILES
 	"${SRC_DIR}/common/lzma/lzma.h"
 )
 
-# Preprocessor defs
-set( DEFINES )
-
-# Platform-specific preprocessor defines
-set( WIN32_DEFINES   )
-set( POSIX32_DEFINES )
-set( WIN64_DEFINES   )
-set( POSIX64_DEFINES )
-set( WINDOWS_DEFINES )
-set( POSIX_DEFINES   )
-
-add_library( lzma STATIC )
+add_library( ${PROJECT_NAME} STATIC )
 
 # Include this to handle all the defines
 include( ${CMAKESCRIPTS_DIR}/project-base.cmake )
-target_compile_definitions( lzma PRIVATE _7ZIP_ST )
+
+target_compile_definitions( ${PROJECT_NAME}
+	PRIVATE
+		_7ZIP_ST
+)

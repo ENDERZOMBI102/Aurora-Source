@@ -57,18 +57,7 @@ set( SOURCE_FILES
 	"${SRC_DIR}/public/tier0/wchartypes.h"
 )
 
-# Preprocessor defs
-set( DEFINES )
-
-# Platform-specific preprocessor defines
-set( WIN32_DEFINES   )
-set( POSIX32_DEFINES )
-set( WIN64_DEFINES   )
-set( POSIX64_DEFINES )
-set( WINDOWS_DEFINES )
-set( POSIX_DEFINES   )
-
-add_library( tier0 SHARED )
+add_library( ${PROJECT_NAME} SHARED )
 
 # What this library reimplements
 set( REIMPLEMENTS "${LIBPUBLIC_DIR}/tier0" )
@@ -76,13 +65,13 @@ set( REIMPLEMENTS "${LIBPUBLIC_DIR}/tier0" )
 # Include this to handle all the defines
 include( "${CMAKESCRIPTS_DIR}/project-base.cmake" )
 
-target_link_libraries( tier0
+target_link_libraries( ${PROJECT_NAME}
 	PRIVATE
 		mimalloc
 	PUBLIC
 		SDL3::SDL3-shared
 )
-target_compile_definitions( tier0
+target_compile_definitions( ${PROJECT_NAME}
 	PRIVATE
 		"TIER0_DLL_EXPORT"
 )

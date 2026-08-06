@@ -19,27 +19,17 @@ set( SOURCE_FILES
 	"${SRC_DIR}/public/fgdlib/wckeyvalues.h"
 )
 
-# Preprocessor defs
-set( DEFINES )
-
-# Platform-specific preprocessor defines
-set( WIN32_DEFINES   )
-set( POSIX32_DEFINES )
-set( WIN64_DEFINES   )
-set( POSIX64_DEFINES )
-set( WINDOWS_DEFINES )
-set( POSIX_DEFINES   )
-
-add_library( fgdlib STATIC )
+add_library( ${PROJECT_NAME} STATIC )
 
 # Include this to handle all the defines
 include( "${CMAKESCRIPTS_DIR}/project-base.cmake" )
 
-target_link_libraries( fgdlib
+target_link_libraries( ${PROJECT_NAME}
 	PRIVATE
 		tier0
 		tier1
 )
-target_include_directories( fgdlib
-	PRIVATE "${SRC_DIR}/utils/common"
+target_include_directories( ${PROJECT_NAME}
+	PRIVATE
+		"${SRC_DIR}/utils/common"
 )

@@ -26,23 +26,12 @@ set( SOURCE_FILES
     "${SRC_DIR}/public/wildcard/wildcard.hpp"
 )
 
-# Preprocessor defs
-set( DEFINES )
-
-# Platform-specific preprocessor defines
-set( WIN32_DEFINES   )
-set( POSIX32_DEFINES )
-set( WIN64_DEFINES   )
-set( POSIX64_DEFINES )
-set( WINDOWS_DEFINES )
-set( POSIX_DEFINES   )
-
-add_library( filesystem_stdio MODULE )
+add_library( ${PROJECT_NAME} MODULE )
 
 # Include this to handle all the defines
 include( "${CMAKESCRIPTS_DIR}/project-base.cmake" )
 
-target_link_libraries( filesystem_stdio
+target_link_libraries( ${PROJECT_NAME}
     PUBLIC
         tier1
         appframework
