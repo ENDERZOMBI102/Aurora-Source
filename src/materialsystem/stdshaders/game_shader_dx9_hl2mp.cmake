@@ -1,13 +1,20 @@
 # game_shader_dx9_hl2mp.cmake
+set( PROJECT game_shader_dx9_hl2mp )
 
-include( "${CMAKE_CURRENT_LIST_DIR}/game_shader_dx9_base.cmake" )
+list( APPEND SOURCE_FILES
+	# Private Source files
 
-add_library( game_shader_dx9_hl2mp MODULE )
+	# Private Header files
 
-set_target_properties( game_shader_dx9_hl2mp
-	PROPERTIES
-		PREFIX ""
-		LIBRARY_OUTPUT_DIRECTORY "${GAMEDIR}/mod_hl2mp/bin"
+	# Public Source files
+
+	# Public Header files
 )
 
-target_use_game_shader_dx9_base( game_shader_dx9_hl2mp )
+# Set the output file location
+set( OUTPUT_FILE_DIR "${GAME_DIR}/mod_sdk/bin" )
+
+add_library( ${PROJECT} MODULE )
+
+# Include this to handle all the defines
+include( "${CMAKESCRIPTS_DIR}/project-base.cmake" )

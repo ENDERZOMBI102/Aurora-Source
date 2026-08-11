@@ -580,7 +580,7 @@ void CBaseVSShader::LoadBumpLightmapCoordinateAxes_PixelShader( int pixelReg )
 	Vector4D basis[3];
 	for (int i = 0; i < 3; ++i)
 	{
-		memcpy( &basis[i], &g_localBumpBasis[i], 3 * sizeof(float) );
+		memcpy( static_cast<void*>( &basis[i] ), &g_localBumpBasis[i], 3 * sizeof(float) );
 		basis[i][3] = 0.0f;
 	}
 	s_pShaderAPI->SetPixelShaderConstant( pixelReg, (float*)basis, 3 );
@@ -606,7 +606,7 @@ void CBaseVSShader::LoadBumpLightmapCoordinateAxes_VertexShader( int vertexReg )
 	s_pShaderAPI->SetVertexShaderConstant( vertexReg, (float*)basis, 3 );
 	for (i = 0; i < 3; ++i)
 	{
-		memcpy( &basis[i], &g_localBumpBasis[i], 3 * sizeof(float) );
+		memcpy( static_cast<void*>( &basis[i] ), &g_localBumpBasis[i], 3 * sizeof(float) );
 		basis[i][3] = 0.0f;
 	}
 	s_pShaderAPI->SetVertexShaderConstant( vertexReg + 3, (float*)basis, 3 );

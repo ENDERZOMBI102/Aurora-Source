@@ -1,4 +1,4 @@
-//===================== Copyright (c) Valve Corporation. All Rights Reserved. ======================
+//===================== Copyright Valve Corporation. All Rights Reserved. ======================
 //
 // Example shader that can be applied to models
 //
