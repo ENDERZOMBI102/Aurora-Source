@@ -19,11 +19,14 @@
 #================================================#
 
 # === Handle project type & name
-if ( NOT TARGET ${PROJECT_NAME} )
-	message( FATAL_ERROR "Project `${PROJECT_NAME}` does not define a target named after itself, this is invalid for a Source target!" )
+if ( "${PROJECT}" STREQUAL "" )
+	set( PROJECT "${PROJECT_NAME}" )
+endif ()
+if ( NOT TARGET ${PROJECT} )
+	message( FATAL_ERROR "Project `${PROJECT}` does not define a target named after itself, this is invalid for a Source target!" )
 endif ()
 
-get_target_property( TRGT_TYPE ${PROJECT_NAME} TYPE )
+get_target_property( TRGT_TYPE ${PROJECT} TYPE )
 if ( TRGT_TYPE STREQUAL "SHARED_LIBRARY" )
 	set( THIS_IS_A_LIBRARY 1 )
 	set( THIS_IS_A_SHARED_LIB 1 )
@@ -47,7 +50,7 @@ elseif ( TRGT_TYPE STREQUAL "EXECUTABLE" )
     set( FOLDER "Executable" )
 	set( EXTENSION ${CMAKE_EXECUTABLE_SUFFIX} )
 endif ()
-get_target_property( TRGT_IMPORTED ${PROJECT_NAME} IMPORTED )
+get_target_property( TRGT_IMPORTED ${PROJECT} IMPORTED )
 if ( "${IDE_FOLDER}" STREQUAL "" )
 	set( IDE_FOLDER ${FOLDER} )
 endif ()
@@ -67,12 +70,12 @@ endmacro()
 #================================================#
 if ( ${IS_POSIX} )
 	if ( CMAKE_BUILD_TYPE STREQUAL "Debug" )
-		target_compile_options( ${PROJECT_NAME} PRIVATE "-g" "-Og" )
+		target_compile_options( ${PROJECT} PRIVATE "-g" "-Og" )
 	elseif ( CMAKE_BUILD_TYPE STREQUAL "Release" )
-		target_compile_options( ${PROJECT_NAME} PRIVATE "-g" "-O3" )
+		target_compile_options( ${PROJECT} PRIVATE "-g" "-O3" )
 	endif ()
 
-	target_compile_options( ${PROJECT_NAME}
+	target_compile_options( ${PROJECT}
 		PRIVATE
 			"-fdiagnostics-color"
 			"-ffast-math"
@@ -83,14 +86,14 @@ if ( ${IS_POSIX} )
 
 	# NO undefined in shared libs
 	if ( ${THIS_IS_A_SHARED_LIB} )
-		target_link_options( ${PROJECT_NAME}
+		target_link_options( ${PROJECT}
 			PRIVATE
 				"LINKER:--no-undefined"
 		)
 	endif ()
 
 	# Warnings
-	target_compile_options( ${PROJECT_NAME}
+	target_compile_options( ${PROJECT}
 		PRIVATE
 			# convert a few warnings to errors
 			"-Werror=return-type"
@@ -105,7 +108,7 @@ if ( ${IS_POSIX} )
 #			"-Wno-write-strings"
 	)
 	if ( CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 5.0 )
-		target_compile_options( ${PROJECT_NAME}
+		target_compile_options( ${PROJECT}
 			PRIVATE
 				"-Wno-narrowing"
 				$<$<COMPILE_LANGUAGE:CXX>:-fabi-compat-version=2>
@@ -113,13 +116,13 @@ if ( ${IS_POSIX} )
 	endif ()
 
 	if ( ${IS_LINUX} )
-		target_compile_options( ${PROJECT_NAME} PRIVATE "-U_FORTIFY_SOURCE" )
-		target_link_options( ${PROJECT_NAME} PRIVATE "LINKER:-rpath,\$ORIGIN" )
+		target_compile_options( ${PROJECT} PRIVATE "-U_FORTIFY_SOURCE" )
+		target_link_options( ${PROJECT} PRIVATE "LINKER:-rpath,\$ORIGIN" )
 		if ( ${IS_64BIT} )
-			target_link_options( ${PROJECT_NAME} PRIVATE "-l:ld-linux-x86_64.so.2" )
+			target_link_options( ${PROJECT} PRIVATE "-l:ld-linux-x86_64.so.2" )
 			set( CMAKE_LIBRARY_PATH "/usr/lib/x86_64-linux-gnu/" )
 		else ()
-			target_link_options( ${PROJECT_NAME} PRIVATE "-l:ld-linux.so.2" )
+			target_link_options( ${PROJECT} PRIVATE "-l:ld-linux.so.2" )
 			set( CMAKE_LIBRARY_PATH "/usr/lib/i386-linux-gnu/ /usr/lib32" )
 		endif ()
 	endif ()
@@ -331,7 +334,7 @@ endforeach()
 # Add the target
 #================================================#
 if ( NOT ${TRGT_IMPORTED} )
-	target_link_directories( ${PROJECT_NAME}
+	target_link_directories( ${PROJECT}
 		PRIVATE
 			${LIBPUBLIC_DIR}
 			${LIBCOMMON_DIR}
@@ -373,30 +376,29 @@ endforeach()
 
 # finally, declare the target
 if ( ${TRGT_IMPORTED} )
-	set_target_properties( ${PROJECT_NAME} PROPERTIES IMPORTED_LOCATION "${REIMPLEMENTS}.${EXTENSION}" )
+	set_target_properties( ${PROJECT} PROPERTIES IMPORTED_LOCATION "${REIMPLEMENTS}.${EXTENSION}" )
 
-	target_link_libraries( ${PROJECT_NAME} PUBLIC ${DEPENDENCIES} )
+	target_link_libraries( ${PROJECT} PUBLIC ${DEPENDENCIES} )
 
 	if ( ${IS_WINDOWS} )
-		target_link_libraries( ${PROJECT_NAME} PRIVATE ${LINK_LIBS} )
+		target_link_libraries( ${PROJECT} PRIVATE ${LINK_LIBS} )
 	endif ()
-
 
 else ()
-	target_sources( ${PROJECT_NAME} PRIVATE ${SOURCE_FILES} )
+	target_sources( ${PROJECT} PRIVATE ${SOURCE_FILES} )
 
-	target_include_directories( ${PROJECT_NAME} PUBLIC ${INCLUDE_DIRS} )
+	target_include_directories( ${PROJECT} PUBLIC ${INCLUDE_DIRS} )
 
-	target_link_libraries( ${PROJECT_NAME} PUBLIC ${DEPENDENCIES} )
+	target_link_libraries( ${PROJECT} PUBLIC ${DEPENDENCIES} )
 
 	if ( ${IS_WINDOWS} )
-		target_link_libraries( ${PROJECT_NAME} PRIVATE ${LINK_LIBS} )
+		target_link_libraries( ${PROJECT} PRIVATE ${LINK_LIBS} )
 	endif ()
 
-	target_compile_definitions( ${PROJECT_NAME} PUBLIC ${DEFINES} )
+	target_compile_definitions( ${PROJECT} PUBLIC ${DEFINES} )
 
 	if ( DEFINED OUTPUT_FILE_DIR )
-		set_target_properties( ${PROJECT_NAME}
+		set_target_properties( ${PROJECT}
 			PROPERTIES
 				RUNTIME_OUTPUT_DIRECTORY "${OUTPUT_FILE_DIR}"
 				LIBRARY_OUTPUT_DIRECTORY "${OUTPUT_FILE_DIR}"
@@ -404,26 +406,31 @@ else ()
 	endif ()
 
 	if ( DEFINED OUTPUT_FILE_NAME )
-		set_target_properties( ${PROJECT_NAME} PROPERTIES OUTPUT_NAME "${OUTPUT_FILE_NAME}" )
+		set_target_properties( ${PROJECT} PROPERTIES OUTPUT_NAME "${OUTPUT_FILE_NAME}" )
 	endif ()
 
 	if ( ${PRECOMPILED_HEADERS} )
-		target_precompile_headers( ${PROJECT_NAME} PUBLIC ${PRECOMPILED_HEADERS} )
+		target_precompile_headers( ${PROJECT} PUBLIC ${PRECOMPILED_HEADERS} )
 	endif()
 
 	if ( "${THIS_IS_A_STATIC_LIB}" )
-		set_target_properties( ${PROJECT_NAME} PROPERTIES POSITION_INDEPENDENT_CODE ON )
+		set_target_properties( ${PROJECT} PROPERTIES POSITION_INDEPENDENT_CODE ON )
 	endif ()
 endif ()
 
-set_target_properties( ${PROJECT_NAME}
+set_target_properties( ${PROJECT}
 	PROPERTIES
 		FOLDER "${IDE_FOLDER}"
 		LINKER_LANGUAGE CXX
 )
 
-set_property( DIRECTORY ${ROOT_DIR} APPEND PROPERTY ASOURCE_${IDE_FOLDER} "${PROJECT_NAME}" )
+block()
+	if ( ${TRGT_IMPORTED} )
+		set( PROJECT "${PROJECT}*" )
+	endif ()
+	set_property( DIRECTORY ${ROOT_DIR} APPEND PROPERTY ASOURCE_${IDE_FOLDER} "${PROJECT}" )
+endblock()
 
 if ( "${THIS_IS_A_MODULE_LIB}" )
-	set_target_properties( ${PROJECT_NAME} PROPERTIES PREFIX "" )
+	set_target_properties( ${PROJECT} PROPERTIES PREFIX "" )
 endif ()

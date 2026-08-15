@@ -10,7 +10,7 @@ set_property( CACHE BUILD_GROUP PROPERTY STRINGS
 )
 
 # Which game are we building?
-set( BUILD_GAME "hl2mp" CACHE STRING "Build Game" )
+set( BUILD_GAME "hl2mp" CACHE STRING "Which game to build" )
 set_property( CACHE BUILD_GAME PROPERTY STRINGS
     "hl2mp"
     "sdk"
@@ -23,6 +23,7 @@ option( BUILD_REPLAY "Build replay support" OFF )
 option( ASOURCE_OVERRIDE_MALLOC "Enable the tier0 global allocator override (memalloc.cpp)" OFF )
 option( ASOURCE_3RD_PARTY_LOGS "Toggles 3rd party libraries cmake output" OFF )
 set( ASOURCE_SKIP_x86_CHECK ${ASOURCE_SKIP_x86_CHECK} CACHE STRING "Skip the 64bit build checks" )
+set( ASOURCE_REIMPL ${ASOURCE_REIMPL} CACHE STRING "Either a ,-separated list of targets for which enable building or 1 for enable all" )
 
 # Technically options, but hardcoded (for now at least)
 set( IS_SOURCESDK 1 )
