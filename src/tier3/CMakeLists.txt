@@ -24,12 +24,15 @@ set( SOURCE_FILES
 # What this library reimplements
 set( REIMPLEMENTS "${LIBPUBLIC_DIR}/tier3" )
 
-add_library( ${PROJECT_NAME} STATIC )
+# Target type
+set( KIND "STATIC" )
 
-# Include this to handle all the defines
+# Include this to handle all the defines and actually create the target
 include( ${CMAKESCRIPTS_DIR}/project-base.cmake )
 
-target_link_libraries( ${PROJECT_NAME}
-	PRIVATE
-		tier0
-)
+if ( NOT ${TRGT_IMPORTED} )
+	target_link_libraries( ${PROJECT_NAME}
+		PRIVATE
+			tier0
+	)
+endif ()

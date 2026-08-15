@@ -132,9 +132,10 @@ set( DEFINES "TIER1_STATIC_LIB" )
 
 set_source_files_properties( "$<${IS_WINDOWS}:${TIER1_DIR}/processor_detect.cpp>" PROPERTIES COMPILE_FLAGS /EHsc )
 
-add_library( ${PROJECT_NAME} STATIC )
+# Target type
+set( KIND "STATIC" )
 
-# Include this to handle all the defines
+# Include this to handle all the defines and actually create the target
 include( ${CMAKESCRIPTS_DIR}/project-base.cmake )
 
 target_link_libraries( ${PROJECT_NAME}

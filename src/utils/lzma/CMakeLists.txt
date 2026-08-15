@@ -18,9 +18,10 @@ set( SOURCE_FILES
 	"${SRC_DIR}/common/lzma/lzma.h"
 )
 
-add_library( ${PROJECT_NAME} STATIC )
+# Target type
+set( KIND "STATIC" )
 
-# Include this to handle all the defines
+# Include this to handle all the defines and actually create the target
 include( ${CMAKESCRIPTS_DIR}/project-base.cmake )
 
 target_compile_definitions( ${PROJECT_NAME}

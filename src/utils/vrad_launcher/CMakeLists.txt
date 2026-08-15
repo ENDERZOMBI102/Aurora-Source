@@ -13,9 +13,10 @@ set( SOURCE_FILES
 # Set the output file name
 set( OUTPUT_FILE_NAME "vrad" )
 
-add_executable( ${PROJECT_NAME} )
+# Target type
+set( KIND "EXEC" )
 
-# Include this to handle all the defines
+# Include this to handle all the defines and actually create the target
 include( "${CMAKESCRIPTS_DIR}/project-base.cmake" )
 
 if ( ${IS_WINDOWS} AND NOT ${IS_64BIT} )

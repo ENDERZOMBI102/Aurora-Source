@@ -33,20 +33,23 @@ set( SOURCE_FILES
 	"${SRC_DIR}/public/vstdlib/pcgengine.hpp"
 )
 
-add_library( ${PROJECT_NAME} SHARED )
+# Target type
+set( KIND "SHARED" )
 
 # What this library reimplements
 set( REIMPLEMENTS "${LIBPUBLIC_DIR}/vstdlib" )
 
-# Include this to handle all the defines
+# Include this to handle all the defines and actually create the target
 include( ${CMAKESCRIPTS_DIR}/project-base.cmake )
 
-target_link_libraries( ${PROJECT_NAME}
-	PRIVATE
-		tier0
-		tier1
-)
-target_compile_definitions( ${PROJECT_NAME}
-	PRIVATE
-		"VSTDLIB_DLL_EXPORT"
-)
+if ( NOT ${TRGT_IMPORTED} )
+	target_link_libraries( ${PROJECT_NAME}
+		PRIVATE
+			tier0
+			tier1
+	)
+	target_compile_definitions( ${PROJECT_NAME}
+		PRIVATE
+			"VSTDLIB_DLL_EXPORT"
+	)
+endif ()

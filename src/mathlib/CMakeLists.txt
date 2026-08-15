@@ -56,9 +56,10 @@ set( SOURCE_FILES
 	"$<$<OR:${IS_WINDOWS},${IS_LINUX}>:${MATHLIB_DIR}/3dnow.h>"
 )
 
-add_library( ${PROJECT_NAME} STATIC )
+# Target type
+set( KIND "STATIC" )
 
-# Include this to handle all the defines
+# Include this to handle all the defines and actually create the target
 include( "${CMAKESCRIPTS_DIR}/project-base.cmake" )
 
 target_link_libraries( ${PROJECT_NAME}

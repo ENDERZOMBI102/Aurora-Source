@@ -19,17 +19,23 @@ set( SOURCE_FILES
 	"${SRC_DIR}/public/shaderlib/ShaderDLL.h"
 )
 
-add_library( ${PROJECT_NAME} STATIC )
+# Set the output file name
+set( OUTPUT_FILE_NAME "shaderlib" )
+
+# Target type
+set( KIND "STATIC" )
 
 # What this library reimplements
 set( REIMPLEMENTS "${LIBPUBLIC_DIR}/shaderlib" )
 
-# Include this to handle all the defines
+# Include this to handle all the defines and actually create the target
 include( ${CMAKESCRIPTS_DIR}/project-base.cmake )
 
-target_link_libraries( ${PROJECT_NAME}
-	PRIVATE
-		tier0
-		tier1
-		mathlib
-)
+if ( NOT ${TRGT_IMPORTED} )
+	target_link_libraries( ${PROJECT_NAME}
+		PRIVATE
+			tier0
+			tier1
+			mathlib
+	)
+endif ()

@@ -14,26 +14,28 @@ set( SOURCE_FILES
 	"${SRC_DIR}/public/appframework/AppFramework.h"
 	"${SRC_DIR}/public/appframework/IAppSystem.h"
 	"${SRC_DIR}/public/appframework/IAppSystemGroup.h"
-	"${SRC_DIR}/public/appframework/AppFramework.h"
 	"${SRC_DIR}/public/appframework/ilaunchermgr.h"
 	"${SRC_DIR}/public/appframework/tier2app.h"
 	"${SRC_DIR}/public/appframework/tier3app.h"
-	"${SRC_DIR}/public/appframework/VguiMatSysApp.h"
+	"${SRC_DIR}/public/appframework/vguimatsysapp.h"
 )
 
 # Target type
-add_library( ${PROJECT_NAME} STATIC )
+# Target type
+set( KIND "STATIC" )
 
 # What this library reimplements
 set( REIMPLEMENTS "${LIBPUBLIC_DIR}/appframework" )
 
-# Include this to handle all the defines
+# Include this to handle all the defines and actually create the target
 include( "${CMAKESCRIPTS_DIR}/project-base.cmake" )
 
-target_link_libraries( ${PROJECT_NAME}
-	PRIVATE
-		tier0
-		tier1
-		vstdlib
-		SDL3-shared
-)
+if ( NOT ${TRGT_IMPORTED} )
+	target_link_libraries( ${PROJECT_NAME}
+		PRIVATE
+			tier0
+			tier1
+			vstdlib
+			SDL3-shared
+	)
+endif ()

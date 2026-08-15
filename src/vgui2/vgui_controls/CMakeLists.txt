@@ -178,7 +178,8 @@ set( SOURCE_FILES
 	"${SRC_DIR}/public/vgui_controls/WizardSubPanel.h"
 )
 
-add_library( ${PROJECT_NAME} STATIC )
+# Target type
+set( KIND "STATIC" )
 
-# Include this to handle all the defines
+# Include this to handle all the defines and actually create the target
 include( ${CMAKESCRIPTS_DIR}/project-base.cmake )

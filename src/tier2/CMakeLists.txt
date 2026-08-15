@@ -27,17 +27,20 @@ set( SOURCE_FILES
 	"${SRC_DIR}/public/tier2/vconfig.h"
 )
 
-add_library( ${PROJECT_NAME} STATIC )
+# Target type
+set( KIND "STATIC" )
 
 # What this library reimplements
 set( REIMPLEMENTS "${LIBPUBLIC_DIR}/tier2" )
 
-# Include this to handle all the defines
+# Include this to handle all the defines and actually create the target
 include( ${CMAKESCRIPTS_DIR}/project-base.cmake )
 
-target_link_libraries( ${PROJECT_NAME}
-	PRIVATE
-		tier0
-	PUBLIC
-		mathlib
-)
+if ( NOT ${TRGT_IMPORTED} )
+	target_link_libraries( ${PROJECT_NAME}
+		PRIVATE
+			tier0
+		PUBLIC
+			mathlib
+	)
+endif ()

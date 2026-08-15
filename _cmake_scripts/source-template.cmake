@@ -1,4 +1,4 @@
-project( tier0 C CXX )
+project( <invalid> C CXX )
 
 set( PROJECT_SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR} )
 set( SOURCE_FILES
@@ -53,13 +53,14 @@ set( OUTPUT_FILE_DIR "${GAME_DIR}/${BUILD_GAME}/bin/" )
 set( IDE_FOLDER )
 
 # Target type
-add_library( ${PROJECT_NAME} )
-add_executable( ${PROJECT_NAME} )
+set( KIND "SHARED|STATIC|MODULE|EXEC" )
+# If should always be imported
+set( VENDORED 1 )
 
 # What this library reimplements
-set( REIMPLEMENTS )
+set( REIMPLEMENTS "${LIBPUBLIC_DIR}/<invalid>" )
 
-# Include this to handle all the defines
+# Include this to handle all the defines and actually create the target
 include( "${CMAKESCRIPTS_DIR}/project-base.cmake" )
 
 target_link_libraries( ${PROJECT_NAME} )

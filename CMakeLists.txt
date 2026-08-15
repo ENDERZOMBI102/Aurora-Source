@@ -125,7 +125,7 @@ add_group_subdir( "${SRC_DIR}/utils/serverplugin_sample"   )
 #add_group_subdir( "${SRC_DIR}/game/server"                 IN "game" )
 
 # -- Executables
-add_group_subdir( "${SRC_DIR}/bootstrap"             )
+add_group_subdir( "${SRC_DIR}/bootstrap"             IN "game" )
 add_group_subdir( "${SRC_DIR}/utils/captioncompiler" IN "compilers" )
 add_group_subdir( "${SRC_DIR}/utils/vbsp"            IN "compilers" )
 add_group_subdir( "${SRC_DIR}/utils/vvis"            IN "compilers" )

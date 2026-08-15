@@ -22,53 +22,78 @@
 if ( "${PROJECT}" STREQUAL "" )
 	set( PROJECT "${PROJECT_NAME}" )
 endif ()
-if ( NOT TARGET ${PROJECT} )
-	message( FATAL_ERROR "Project `${PROJECT}` does not define a target named after itself, this is invalid for a Source target!" )
+if ( TARGET ${PROJECT} )
+	message( SEND_ERROR "Project `${PROJECT}` pre-defines a target named after itself, this is invalid for a Source target!" )
 endif ()
 
-get_target_property( TRGT_TYPE ${PROJECT} TYPE )
-if ( TRGT_TYPE STREQUAL "SHARED_LIBRARY" )
+if ( KIND STREQUAL "SHARED" )
 	set( THIS_IS_A_LIBRARY 1 )
 	set( THIS_IS_A_SHARED_LIB 1 )
 	list( APPEND DEFINES -D_USRDLL -D_SHAREDLIB -D_DLL_ -D_DLL )
 	set( FOLDER "Library" )
 	set( EXTENSION ${CMAKE_SHARED_LIBRARY_SUFFIX} )
-elseif ( TRGT_TYPE STREQUAL "STATIC_LIBRARY" )
+elseif ( KIND STREQUAL "STATIC" )
 	set( THIS_IS_A_LIBRARY 1 )
 	set( THIS_IS_A_STATIC_LIB 1 )
 	list( APPEND DEFINES -D_LIB -DLIB )
 	set( FOLDER "Library" )
 	set( EXTENSION ${CMAKE_STATIC_LIBRARY_SUFFIX} )
-elseif ( TRGT_TYPE STREQUAL "MODULE_LIBRARY" )
+elseif ( KIND STREQUAL "MODULE" )
 	set( THIS_IS_A_LIBRARY 1 )
 	set( THIS_IS_A_MODULE_LIB 1 )
 	list( APPEND DEFINES -D_LIB -DLIB )
 	set( FOLDER "Module" )
 	set( EXTENSION ${CMAKE_SHARED_MODULE_SUFFIX} )
-elseif ( TRGT_TYPE STREQUAL "EXECUTABLE" )
+elseif ( KIND STREQUAL "EXEC" )
     set( THIS_IS_A_EXE 1 )
     set( FOLDER "Executable" )
 	set( EXTENSION ${CMAKE_EXECUTABLE_SUFFIX} )
 endif ()
-get_target_property( TRGT_IMPORTED ${PROJECT} IMPORTED )
+
+# Imported project?
+if ( "${VENDORED}" STREQUAL "1" )
+	set( TRGT_IMPORTED 1 )
+elseif ( NOT "${REIMPLEMENTS}" STREQUAL "" )
+	if ( ("${ASOURCE_REIMPL}" STREQUAL "1") OR ("${ASOURCE_REIMPL}" MATCHES "${PROJECT},?") )
+		set( TRGT_IMPORTED 0 )
+	else ()
+		set( TRGT_IMPORTED 1 )
+	endif ()
+else ()
+	set( TRGT_IMPORTED 0 )
+endif ()
+if ( ${TRGT_IMPORTED} )
+	if ( "${THIS_IS_A_SHARED_LIB}" )
+		add_library( ${PROJECT} SHARED IMPORTED )
+	elseif ( "${THIS_IS_A_STATIC_LIB}" )
+		add_library( ${PROJECT} STATIC IMPORTED )
+	else ()
+		message( SEND_ERROR "Project ${PROJECT} declared an invalid imported target type!" )
+	endif ()
+else ()
+	if ( "${THIS_IS_A_SHARED_LIB}" )
+		add_library( ${PROJECT} SHARED )
+	elseif ( "${THIS_IS_A_STATIC_LIB}" )
+		add_library( ${PROJECT} STATIC )
+	elseif ( "${THIS_IS_A_MODULE_LIB}" )
+		add_library( ${PROJECT} MODULE )
+	elseif ( "${THIS_IS_A_EXE}" )
+		add_executable( ${PROJECT} )
+	else ()
+		message( SEND_ERROR "Project ${PROJECT} declared an invalid target type!" )
+	endif ()
+endif ()
+
+# Virtual folders
 if ( "${IDE_FOLDER}" STREQUAL "" )
 	set( IDE_FOLDER ${FOLDER} )
 endif ()
 unset( FOLDER )
 
-# Helper macros & functions
-macro( append_if )
-	cmake_parse_arguments( aif "" "TO" "VALUES" ${ARGN} )
-	if ( ${aif_UNPARSED_ARGUMENTS} )
-		list( APPEND ${aif_TO} ${aif_VALUES} )
-	endif ()
-endmacro()
-
-
 #================================================#
 # Handle compile options
 #================================================#
-if ( ${IS_POSIX} )
+if ( ${IS_POSIX} AND NOT ${TRGT_IMPORTED} )
 	if ( CMAKE_BUILD_TYPE STREQUAL "Debug" )
 		target_compile_options( ${PROJECT} PRIVATE "-g" "-Og" )
 	elseif ( CMAKE_BUILD_TYPE STREQUAL "Release" )
@@ -212,7 +237,7 @@ endif()
 if ( "${THIS_IS_A_EXE}" OR "${THIS_IS_A_SHARED_LIB}" )
 	list( APPEND WIN_LINK_LIBS "shell32.lib" "user32.lib" "advapi32.lib" "gdi32.lib" "comdlg32.lib" "ole32.lib" )
 endif ()
-list( APPEND POSIX_LINK_LIBS tcmalloc_minimal )
+list( APPEND POSIX_LINK_LIBS tcmalloc_minimal )  # TODO: Remove
 
 if ( ${IS_WINDOWS} )
 	list( APPEND LINK_LIBS ${WIN_LINK_LIBS} )
@@ -283,7 +308,6 @@ endif()
 #================================================#
 list( APPEND POSIX32_LINK_DIRS ${POSIX32_LINK_DIRS} )
 list( APPEND POSIX64_LINK_DIRS ${POSIX64_LINK_DIRS} )
-# For windows only
 list( APPEND WINDOWS_LINK_DIRS "${DX9SDK}/Lib/" )
 
 if ( ${IS_WINDOWS} )
@@ -315,22 +339,6 @@ if ( ${IS_POSIX} )
 endif()
 
 #================================================#
-# Handle special cases
-#================================================#
-set( ACTUAL_LIBS )
-
-# For needed packages
-foreach ( package IN LISTS PACKAGES )
-	find_package( ${package} REQUIRED )
-	if ( NOT ${package}_FOUND )
-		message( FATAL_ERROR "Unable to find package ${package}!" )
-	else()
-		list( APPEND ACTUAL_LIBS ${${package}_LIBRARIES} )
-		list( APPEND INCLUDE_DIRS ${${package}_INCLUDE_DIRS} )
-	endif()
-endforeach()
-
-#================================================#
 # Add the target
 #================================================#
 if ( NOT ${TRGT_IMPORTED} )
@@ -359,41 +367,17 @@ endif ()
 # 	-	tier1
 #
 
-# We can loop through all the libs and use find library to find everything the user specified
-foreach( link_lib IN LISTS LINK_LIBS )
-	if ( NOT ${IS_WINDOWS} )
-		set( LIB_${link_lib} "lib_path-NOTFOUND" )
-		find_library( LIB_${link_lib} NAMES ${link_lib} PATHS ${LINK_DIRS} )
-		
-		# If libs are not found...
-		if ( LIB_${link_lib} EQUAL "LIB_${link_lib}-NOTFOUND" )
-			message( WARNING "Unable to find library ${link_lib}!" )
-		else()
-			list( APPEND ACTUAL_LIBS ${LIB_${link_lib}} )
-		endif()
-	endif()
-endforeach()
-
 # finally, declare the target
 if ( ${TRGT_IMPORTED} )
-	set_target_properties( ${PROJECT} PROPERTIES IMPORTED_LOCATION "${REIMPLEMENTS}.${EXTENSION}" )
+	set_target_properties( ${PROJECT} PROPERTIES IMPORTED_LOCATION "${REIMPLEMENTS}${EXTENSION}" )
 
-	target_link_libraries( ${PROJECT} PUBLIC ${DEPENDENCIES} )
-
-	if ( ${IS_WINDOWS} )
-		target_link_libraries( ${PROJECT} PRIVATE ${LINK_LIBS} )
-	endif ()
-
+	target_link_libraries( ${PROJECT} INTERFACE ${LINK_LIBS} )
 else ()
 	target_sources( ${PROJECT} PRIVATE ${SOURCE_FILES} )
 
 	target_include_directories( ${PROJECT} PUBLIC ${INCLUDE_DIRS} )
 
-	target_link_libraries( ${PROJECT} PUBLIC ${DEPENDENCIES} )
-
-	if ( ${IS_WINDOWS} )
-		target_link_libraries( ${PROJECT} PRIVATE ${LINK_LIBS} )
-	endif ()
+	target_link_libraries( ${PROJECT} PUBLIC ${LINK_LIBS} )
 
 	target_compile_definitions( ${PROJECT} PUBLIC ${DEFINES} )
 

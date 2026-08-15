@@ -8,9 +8,10 @@ set( SOURCE_FILES
 # Set the output file name
 set( OUTPUT_FILE_NAME "aurosrc" )
 
-add_executable( ${PROJECT_NAME} )
+# Target type
+set( KIND "EXEC" )
 
-# Include this to handle all the defines
+# Include this to handle all the defines and actually create the target
 include( "${CMAKESCRIPTS_DIR}/project-base.cmake" )
 
 target_link_libraries( ${PROJECT_NAME}

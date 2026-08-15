@@ -57,21 +57,24 @@ set( SOURCE_FILES
 	"${SRC_DIR}/public/tier0/wchartypes.h"
 )
 
-add_library( ${PROJECT_NAME} SHARED )
+# Target type
+set( KIND "SHARED" )
 
 # What this library reimplements
 set( REIMPLEMENTS "${LIBPUBLIC_DIR}/tier0" )
 
-# Include this to handle all the defines
+# Include this to handle all the defines and actually create the target
 include( "${CMAKESCRIPTS_DIR}/project-base.cmake" )
 
-target_link_libraries( ${PROJECT_NAME}
-	PRIVATE
-		mimalloc
-	PUBLIC
-		SDL3::SDL3-shared
-)
-target_compile_definitions( ${PROJECT_NAME}
-	PRIVATE
-		"TIER0_DLL_EXPORT"
-)
+if ( NOT ${TRGT_IMPORTED} )
+	target_link_libraries( ${PROJECT_NAME}
+		PRIVATE
+			mimalloc
+		PUBLIC
+			SDL3::SDL3-shared
+	)
+	target_compile_definitions( ${PROJECT_NAME}
+		PRIVATE
+			"TIER0_DLL_EXPORT"
+	)
+endif ()

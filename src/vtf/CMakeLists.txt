@@ -3,6 +3,7 @@ project( vtf C CXX )
 set( VTF_DIR ${CMAKE_CURRENT_LIST_DIR} )
 set( SOURCE_FILES
 	# Private Source files
+	"${VTF_DIR}/vtf.cpp"
 	"${VTF_DIR}/cvtf.cpp"
 
 	# Private Header files
@@ -17,15 +18,18 @@ set( SOURCE_FILES
 # What this library reimplements
 set( REIMPLEMENTS "${LIBPUBLIC_DIR}/vtf" )
 
-add_library( vtf STATIC )
+# Target type
+set( KIND "STATIC" )
 
-# Include this to handle all the defines
+# Include this to handle all the defines and actually create the target
 include( ${CMAKESCRIPTS_DIR}/project-base.cmake )
 
-target_link_libraries( ${PROJECT_NAME}
-	PRIVATE
-		tier0
-		mathlib
-		bitmap
-		sourcepp::vtfpp
-)
+if ( NOT ${TRGT_IMPORTED} )
+	target_link_libraries( ${PROJECT_NAME}
+		PRIVATE
+			tier0
+			mathlib
+			bitmap
+			sourcepp::vtfpp
+	)
+endif ()

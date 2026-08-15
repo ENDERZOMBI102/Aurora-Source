@@ -43,9 +43,10 @@ set( SOURCE_FILES
     "${SRC_DIR}/public/togl/linuxwin/cglmquery.h"
 )
 
-add_library( ${PROJECT_NAME} MODULE )
+# Target type
+set( KIND "MODULE" )
 
-# Include this to handle all the defines
+# Include this to handle all the defines and actually create the target
 include( "${CMAKESCRIPTS_DIR}/project-base.cmake" )
 
 target_link_libraries( ${PROJECT_NAME}
