@@ -66,15 +66,13 @@ set( REIMPLEMENTS "${LIBPUBLIC_DIR}/tier0" )
 # Include this to handle all the defines and actually create the target
 include( "${CMAKESCRIPTS_DIR}/project-base.cmake" )
 
-if ( NOT ${TRGT_IMPORTED} )
-	target_link_libraries( ${PROJECT_NAME}
-		PRIVATE
-			mimalloc
-		PUBLIC
-			SDL3::SDL3-shared
-	)
-	target_compile_definitions( ${PROJECT_NAME}
-		PRIVATE
-			"TIER0_DLL_EXPORT"
-	)
-endif ()
+asource_link_libraries(
+    PRIVATE
+        mimalloc
+    PUBLIC
+        SDL3::SDL3-shared
+)
+asource_compile_definitions(
+    PRIVATE
+        "TIER0_DLL_EXPORT"
+)

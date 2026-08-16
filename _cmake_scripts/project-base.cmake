@@ -1,24 +1,15 @@
 #================================================#
-#
 # Base for all projects
 # NOTE: Please add ALL of the base stuff into this
 #================================================#
-#
 # This is the place where all link libs are located, yes
-#
 #================================================#
 # Vars that should be defined in including files
 # TARGET: the name of the target
-# 
-#================================================#
-# CMake vars defined by source base:
-#	-	LIBCOMMON_DIR
-#	-	LIBPUBLIC_DIR
-#	-	PUBLIC_INCLUDE
-#	-	COMMON_INCLUDE
 #================================================#
 
-# === Handle project type & name
+
+# Ensure we have a free target name
 if ( "${PROJECT}" STREQUAL "" )
 	set( PROJECT "${PROJECT_NAME}" )
 endif ()
@@ -26,6 +17,7 @@ if ( TARGET ${PROJECT} )
 	message( SEND_ERROR "Project `${PROJECT}` pre-defines a target named after itself, this is invalid for a Source target!" )
 endif ()
 
+# Evaluate base target properties
 if ( KIND STREQUAL "SHARED" )
 	set( THIS_IS_A_LIBRARY 1 )
 	set( THIS_IS_A_SHARED_LIB 1 )
@@ -62,6 +54,8 @@ elseif ( NOT "${REIMPLEMENTS}" STREQUAL "" )
 else ()
 	set( TRGT_IMPORTED 0 )
 endif ()
+
+# Create the target
 if ( ${TRGT_IMPORTED} )
 	if ( "${THIS_IS_A_SHARED_LIB}" )
 		add_library( ${PROJECT} SHARED IMPORTED )
@@ -89,6 +83,7 @@ if ( "${IDE_FOLDER}" STREQUAL "" )
 	set( IDE_FOLDER ${FOLDER} )
 endif ()
 unset( FOLDER )
+
 
 #================================================#
 # Handle compile options
@@ -153,10 +148,10 @@ if ( ${IS_POSIX} AND NOT ${TRGT_IMPORTED} )
 	endif ()
 endif()
 
+
 #================================================#
 # First we should handle the preprocessor defs
 #================================================#
-#
 # For All debug:
 #	-	_DEBUG, _CRT_SECURE_NO_DEPRECATE, _CRT_NONSTDC_NO_DEPRECATE
 #	-	_HAS_ITERATOR_DEBUGGING, DEBUG, _ALLOW_RUNTIME_LIBRARY_MISMATCH
@@ -182,8 +177,14 @@ list( APPEND DEFINES
     USE_SDL # We use SDL instead of whatever windows provides
     _DLL_EXT=${CMAKE_SHARED_LIBRARY_SUFFIX}
     FRAME_POINTER_OMISSION_DISABLED
-	$<$<BOOL:${ASOURCE_OVERRIDE_MALLOC}>:NO_MALLOC_OVERRIDE>
+	$<$<NOT:$<BOOL:${ASOURCE_OVERRIDE_MALLOC}>>:NO_MALLOC_OVERRIDE>
 )
+# For debug/release builds
+if ( CMAKE_BUILD_TYPE EQUAL "Release" )
+	list( APPEND DEFINES "NDEBUG" "_NDEBUG" "RELEASEASSERTS" "PLATFORM_RELEASE" )
+else()
+	list( APPEND DEFINES "DEBUG" "_DEBUG" "PLATFORM_DEBUG" )
+endif()
 
 list( APPEND WIN_DEFINES "_WIN32" "WIN32" "WINDOWS" "_ALLOW_MSC_VER_MISMATCH" "PLATFORM_WINDOWS" )
 #list( APPEND WIN_DEFINES "_CRT_SECURE_NO_DEPRECATE" "_CRT_NONSTDC_NO_DEPRECATE" "_ALLOW_RUNTIME_LIBRARY_MISMATCH" "_ALLOW_ITERATOR_DEBUG_LEVEL_MISMATCH" "-U_HAS_ITERATOR_DEBUGGING" "_HAS_ITERATOR_DEBUGGING=0" )
@@ -193,13 +194,6 @@ list( APPEND WIN64_DEFINES "PLATFORM_WINDOWS_PC64" )
 list( APPEND POSIX_DEFINES "DX_TO_GL_ABSTRACTION" "PLATFORM_POSIX" $<${IS_LINUX}:PLATFORM_LINUX> )
 list( APPEND POSIX32_DEFINES )
 list( APPEND POSIX64_DEFINES )
-
-# For debug/release builds
-if ( CMAKE_BUILD_TYPE EQUAL "Release" )
-	list( APPEND DEFINES "NDEBUG" "_NDEBUG" "RELEASEASSERTS" "PLATFORM_RELEASE" )
-else()
-	list( APPEND DEFINES "DEBUG" "_DEBUG" "PLATFORM_DEBUG" )
-endif()
 
 if ( ${IS_WINDOWS} )
 	list( APPEND DEFINES ${WIN_DEFINES} )
@@ -213,8 +207,6 @@ if ( ${IS_WINDOWS} )
 		list( APPEND DEFINES ${WIN32_DEFINES} )
 	endif ()
 endif()
-
-set( CMAKE_CXX_VISIBILITY_PRESET hidden )
 if ( ${IS_POSIX} )
 	list( APPEND DEFINES ${POSIX_DEFINES} )
 	# POSIX32 defines
@@ -228,131 +220,10 @@ if ( ${IS_POSIX} )
 	endif ()
 endif()
 
-#================================================#
-# Now handle the link libraries
-# (at least the user defined ones)
-#================================================#
-
-# needed for dlls and exes on windows
-if ( "${THIS_IS_A_EXE}" OR "${THIS_IS_A_SHARED_LIB}" )
-	list( APPEND WIN_LINK_LIBS "shell32.lib" "user32.lib" "advapi32.lib" "gdi32.lib" "comdlg32.lib" "ole32.lib" )
-endif ()
-list( APPEND POSIX_LINK_LIBS tcmalloc_minimal )  # TODO: Remove
-
-if ( ${IS_WINDOWS} )
-	list( APPEND LINK_LIBS ${WIN_LINK_LIBS} )
-	# WIN32 libs
-	if ( NOT ${IS_64BIT} )
-		list( APPEND LINK_LIBS ${WIN32_LINK_LIBS} )
-	endif()
-
-	# WIN64 libs
-	if ( ${IS_64BIT} )
-		list( APPEND LINK_LIBS ${WIN64_LINK_LIBS} )
-	endif()
-endif()
-
-if( ${IS_POSIX} )
-	list( APPEND LINK_LIBS ${POSIX_LINK_LIBS} )
-
-	# POSIX32 libs
-	if ( NOT ${IS_64BIT} )
-		list( APPEND LINK_LIBS ${POSIX32_LINK_LIBS} )
-	endif()
-
-	# POSIX64 libs
-	if ( ${IS_64BIT} )
-		list( APPEND LINK_LIBS ${POSIX64_LINK_LIBS} )
-	endif()
-endif()
 
 #================================================#
-# Handle the include dirs
+# Finish setting up the target
 #================================================#
-list( APPEND INCLUDE_DIRS
-	"${SRC_DIR}/common"
-	"${SRC_DIR}/public"
-	"${SRC_DIR}/public/tier0"
-	"${SRC_DIR}/public/tier1"
-)
-list( APPEND WIN_INCLUDE_DIRS "${DX9SDK}/Include/" )
-
-if ( ${IS_WINDOWS} )
-	list( APPEND INCLUDE_DIRS ${WINDOWS_INCLUDE_DIRS} )
-	# WIN32 includes
-	if ( NOT ${IS_64BIT} )
-		list( APPEND INCLUDE_DIRS ${WIN32_INCLUDE_DIRS} )
-	endif ()
-
-	# WIN64 includes
-	if ( ${IS_64BIT} )
-		list( APPEND INCLUDE_DIRS ${WIN64_INCLUDE_DIRS} )
-	endif ()
-endif ()
-if ( ${IS_POSIX} )
-	list( APPEND INCLUDE_DIRS ${POSIX_INCLUDE_DIRS} )
-	# POSIX32 includes
-	if ( NOT ${IS_64BIT} )
-		list( APPEND INCLUDE_DIRS ${POSIX32_INCLUDE_DIRS} )
-	endif ()
-
-	# POSIX64 includes
-	if ( ${IS_64BIT} )
-		list( APPEND INCLUDE_DIRS ${POSIX64_INCLUDE_DIRS} )
-	endif ()
-endif()
-
-
-#================================================#
-# Handle the link directories
-#================================================#
-list( APPEND POSIX32_LINK_DIRS ${POSIX32_LINK_DIRS} )
-list( APPEND POSIX64_LINK_DIRS ${POSIX64_LINK_DIRS} )
-list( APPEND WINDOWS_LINK_DIRS "${DX9SDK}/Lib/" )
-
-if ( ${IS_WINDOWS} )
-	list( APPEND LINK_DIRS ${WINDOWS_LINK_DIRS} )
-	# WIN32 includlinkes
-	if ( NOT ${IS_64BIT} )
-		list( APPEND LINK_DIRS ${WIN32_LINK_DIRS} )
-	endif ()
-
-	# WIN64 link
-	if ( ${IS_64BIT} )
-		list( APPEND LINK_DIRS ${WIN64_LINK_DIRS} )
-	endif ()
-endif()
-
-if ( ${IS_POSIX} )
-	list( APPEND LINK_DIRS ${POSIX_LINK_DIRS} )
-	# POSIX32 link
-	if ( NOT ${IS_64BIT} )
-		list( APPEND LINK_DIRS ${POSIX32_LINK_DIRS} )
-		set( CMAKE_IGNORE_PATH "${CMAKE_IGNORE_PATH} ${POSIX64_LINK_DIRS}" )
-	endif ()
-
-	# POSIX64 link
-	if ( ${IS_64BIT} )
-		list( APPEND LINK_DIRS ${POSIX64_LINK_DIRS} )
-		set( CMAKE_IGNORE_PATH "${CMAKE_IGNORE_PATH} ${POSIX32_LINK_DIRS}" )
-	endif ()
-endif()
-
-#================================================#
-# Add the target
-#================================================#
-if ( NOT ${TRGT_IMPORTED} )
-	target_link_directories( ${PROJECT}
-		PRIVATE
-			${LIBPUBLIC_DIR}
-			${LIBCOMMON_DIR}
-	)
-endif ()
-
-#================================================#
-# Handle all the link libraries
-#================================================#
-#
 # For Win32, we need to link against these by default:
 #	-	shell32.lib
 #	-	user32.lib
@@ -360,24 +231,39 @@ endif ()
 #	-	gdi32.lib
 #	-	comdlg32.lib
 #	-	ole32.lib
-#
 # For all projects, we need to link against these:
 # 	-	vstdlib
 # 	-	tier0
 # 	-	tier1
-#
-
-# finally, declare the target
 if ( ${TRGT_IMPORTED} )
 	set_target_properties( ${PROJECT} PROPERTIES IMPORTED_LOCATION "${REIMPLEMENTS}${EXTENSION}" )
 
 	target_link_libraries( ${PROJECT} INTERFACE ${LINK_LIBS} )
+
+	target_compile_definitions( ${PROJECT} INTERFACE ${DEFINES} )
 else ()
 	target_sources( ${PROJECT} PRIVATE ${SOURCE_FILES} )
 
-	target_include_directories( ${PROJECT} PUBLIC ${INCLUDE_DIRS} )
+	target_include_directories( ${PROJECT} PRIVATE
+		"${SRC_DIR}/common"
+		"${SRC_DIR}/public"
+		"${SRC_DIR}/public/tier0"
+		"${SRC_DIR}/public/tier1"
+	)
+
+	target_link_directories( ${PROJECT}
+		PRIVATE
+			${LIBPUBLIC_DIR}
+			${LIBCOMMON_DIR}
+	)
 
 	target_link_libraries( ${PROJECT} PUBLIC ${LINK_LIBS} )
+	if ( ${IS_WINDOWS} )
+		target_link_libraries( ${PROJECT} PRIVATE "shell32.lib" "user32.lib" "advapi32.lib" "gdi32.lib" "comdlg32.lib" "ole32.lib" )
+	endif()
+	if( ${IS_POSIX} )
+		#	target_link_libraries( ${PROJECT} PRIVATE "tcmalloc_minimal" )
+	endif()
 
 	target_compile_definitions( ${PROJECT} PUBLIC ${DEFINES} )
 
@@ -418,3 +304,47 @@ endblock()
 if ( "${THIS_IS_A_MODULE_LIB}" )
 	set_target_properties( ${PROJECT} PROPERTIES PREFIX "" )
 endif ()
+
+
+#================================================#
+# Declare dependency functions
+#================================================#
+function( asource_link_directories )
+	cmake_parse_arguments( TSLL "" "" "PRIVATE;PUBLIC" ${ARGN} )
+
+	if ( ${TRGT_IMPORTED} )
+		target_link_directories( ${PROJECT} INTERFACE ${TSLL_PUBLIC} )
+	else ()
+		target_link_directories( ${PROJECT} PUBLIC ${TSLL_PUBLIC} PRIVATE ${TSLL_PRIVATE} )
+	endif ()
+endfunction()
+
+function( asource_link_libraries )
+	cmake_parse_arguments( TSLL "" "" "PRIVATE;PUBLIC" ${ARGN} )
+
+	if ( ${TRGT_IMPORTED} )
+		target_link_libraries( ${PROJECT} INTERFACE ${TSLL_PUBLIC} )
+	else ()
+		target_link_libraries( ${PROJECT} PUBLIC ${TSLL_PUBLIC} PRIVATE ${TSLL_PRIVATE} )
+	endif ()
+endfunction()
+
+function( asource_include_directories )
+	cmake_parse_arguments( TSLL "" "" "PRIVATE;PUBLIC" ${ARGN} )
+
+	if ( ${TRGT_IMPORTED} )
+		target_include_directories( ${PROJECT} INTERFACE ${TSLL_PUBLIC} )
+	else ()
+		target_include_directories( ${PROJECT} PUBLIC ${TSLL_PUBLIC} PRIVATE ${TSLL_PRIVATE} )
+	endif ()
+endfunction()
+
+function( asource_compile_definitions )
+	cmake_parse_arguments( TSLL "" "" "PRIVATE;PUBLIC" ${ARGN} )
+
+	if ( ${TRGT_IMPORTED} )
+		target_compile_definitions( ${PROJECT} INTERFACE ${TSLL_PUBLIC} )
+	else ()
+		target_compile_definitions( ${PROJECT} PUBLIC ${TSLL_PUBLIC} PRIVATE ${TSLL_PRIVATE} )
+	endif ()
+endfunction()

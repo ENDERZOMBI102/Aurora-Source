@@ -166,7 +166,7 @@ set( KIND "MODULE" )
 # Include this to handle all the defines and actually create the target
 include( "${CMAKESCRIPTS_DIR}/project-base.cmake" )
 
-target_link_libraries( ${PROJECT_NAME}
+asource_link_libraries(
 	PRIVATE
 		$<${IS_WINDOWS}:ws2_32>
 
@@ -176,14 +176,15 @@ target_link_libraries( ${PROJECT_NAME}
 		mathlib
 		raytrace
 		bitmap
+		vtf
 		tier2
 		lzma
 )
-target_include_directories( ${PROJECT_NAME}
+asource_include_directories(
 	PRIVATE
 		"${SRC_DIR}/utils/common"
 )
-target_compile_definitions( ${PROJECT_NAME}
+asource_compile_definitions(
 	PRIVATE
 		PROTECTED_THINGS_DISABLE
 		VRAD

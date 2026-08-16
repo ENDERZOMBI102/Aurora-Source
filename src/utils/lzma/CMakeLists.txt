@@ -24,7 +24,7 @@ set( KIND "STATIC" )
 # Include this to handle all the defines and actually create the target
 include( ${CMAKESCRIPTS_DIR}/project-base.cmake )
 
-target_compile_definitions( ${PROJECT_NAME}
+asource_compile_definitions(
 	PRIVATE
 		_7ZIP_ST
 )

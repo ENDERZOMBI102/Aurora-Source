@@ -36,7 +36,7 @@ set( KIND "MODULE" )
 # Include this to handle all the defines and actually create the target
 include( "${CMAKESCRIPTS_DIR}/project-base.cmake" )
 
-target_link_libraries( ${PROJECT_NAME}
+asource_link_libraries(
     PRIVATE
         tier0
         tier1
@@ -44,7 +44,7 @@ target_link_libraries( ${PROJECT_NAME}
         tier2
         mathlib
 )
-target_compile_definitions( ${PROJECT_NAME}
+asource_compile_definitions(
     PRIVATE
         serverplugin_emptyONLY
         _MBCS

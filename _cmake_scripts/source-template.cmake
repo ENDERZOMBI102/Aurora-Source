@@ -20,29 +20,6 @@ set( POSIX_DEFINES   )
 set( POSIX32_DEFINES )
 set( POSIX64_DEFINES )
 
-# Links dirs to search for link libs in
-set( LINK_DIRS         )
-set( WIN_LINK_DIRS     )
-set( WIN32_LINK_DIRS   )
-set( WIN64_LINK_DIRS   )
-set( POSIX_LINK_DIRS   )
-set( POSIX32_LINK_DIRS )
-set( POSIX64_LINK_DIRS )
-
-# Generic libs to link against
-set( LINK_LIBS         )
-set( WIN32_LINK_LIBS   )
-set( WIN64_LINK_LIBS   )
-set( POSIX32_LINK_LIBS )
-set( POSIX64_LINK_LIBS )
-
-# Generic include dirs
-set( INCLUDE_DIRS )
-set( WIN32_INCLUDE_DIRS   )
-set( WIN64_INCLUDE_DIRS   )
-set( POSIX32_INCLUDE_DIRS )
-set( POSIX64_INCLUDE_DIRS )
-
 # Set the output file name
 set( OUTPUT_FILE_NAME "name" )
 # Set the output file location
@@ -63,8 +40,9 @@ set( REIMPLEMENTS "${LIBPUBLIC_DIR}/<invalid>" )
 # Include this to handle all the defines and actually create the target
 include( "${CMAKESCRIPTS_DIR}/project-base.cmake" )
 
-target_link_libraries( ${PROJECT_NAME} )
-target_include_directories( ${PROJECT_NAME} )
-target_compile_definitions( ${PROJECT_NAME} )
+asource_link_directories( PUBLIC ... PRIVATE ... )
+asource_link_libraries( PUBLIC ... PRIVATE ... )
+asource_include_directories( PUBLIC ... PRIVATE ... )
+asource_compile_definitions( PUBLIC ... PRIVATE ... )
 
 add_dependencies( ${PROJECT_NAME} )

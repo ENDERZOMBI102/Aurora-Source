@@ -25,7 +25,7 @@ if ( ${IS_WINDOWS} AND NOT ${IS_64BIT} )
 			"/LARGEADDRESSAWARE"
 	)
 endif ()
-target_link_libraries( ${PROJECT_NAME}
+asource_link_libraries( ${PROJECT_NAME}
 	PRIVATE
 		tier0
 		tier1

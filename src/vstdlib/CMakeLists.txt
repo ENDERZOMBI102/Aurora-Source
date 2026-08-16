@@ -42,14 +42,12 @@ set( REIMPLEMENTS "${LIBPUBLIC_DIR}/vstdlib" )
 # Include this to handle all the defines and actually create the target
 include( ${CMAKESCRIPTS_DIR}/project-base.cmake )
 
-if ( NOT ${TRGT_IMPORTED} )
-	target_link_libraries( ${PROJECT_NAME}
-		PRIVATE
-			tier0
-			tier1
-	)
-	target_compile_definitions( ${PROJECT_NAME}
-		PRIVATE
-			"VSTDLIB_DLL_EXPORT"
-	)
-endif ()
+asource_link_libraries(
+    PRIVATE
+        tier0
+        tier1
+)
+asource_compile_definitions(
+    PRIVATE
+        "VSTDLIB_DLL_EXPORT"
+)

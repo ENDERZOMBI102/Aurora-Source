@@ -14,13 +14,13 @@ set( KIND "STATIC" )
 # Include this to handle all the defines and actually create the target
 include( ${CMAKESCRIPTS_DIR}/project-base.cmake )
 
-target_link_libraries( ${PROJECT_NAME}
+asource_link_libraries(
 	PRIVATE
 		tier0
 		tier1
 		mathlib
 )
-target_include_directories( ${PROJECT_NAME}
+asource_include_directories(
 	PRIVATE
 		"${SRC_DIR}/utils/common"
 )

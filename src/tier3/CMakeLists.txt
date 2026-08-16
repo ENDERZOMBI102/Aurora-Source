@@ -30,9 +30,7 @@ set( KIND "STATIC" )
 # Include this to handle all the defines and actually create the target
 include( ${CMAKESCRIPTS_DIR}/project-base.cmake )
 
-if ( NOT ${TRGT_IMPORTED} )
-	target_link_libraries( ${PROJECT_NAME}
-		PRIVATE
-			tier0
-	)
-endif ()
+asource_link_libraries(
+	PRIVATE
+		tier0
+)

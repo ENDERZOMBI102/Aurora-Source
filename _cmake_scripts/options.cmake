@@ -24,6 +24,7 @@ option( ASOURCE_OVERRIDE_MALLOC "Enable the tier0 global allocator override (mem
 option( ASOURCE_3RD_PARTY_LOGS "Toggles 3rd party libraries cmake output" OFF )
 set( ASOURCE_SKIP_x86_CHECK ${ASOURCE_SKIP_x86_CHECK} CACHE STRING "Skip the 64bit build checks" )
 set( ASOURCE_REIMPL ${ASOURCE_REIMPL} CACHE STRING "Either a ,-separated list of targets for which enable building or 1 for enable all" )
+set( ASOURCE_DX9SDK_PATH CACHE STRING "Absolute path to the dx9 sdk" )
 
 # Technically options, but hardcoded (for now at least)
 set( IS_SOURCESDK 1 )

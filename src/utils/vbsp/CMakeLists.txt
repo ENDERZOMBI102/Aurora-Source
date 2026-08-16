@@ -144,7 +144,7 @@ set( KIND "EXEC" )
 # Include this to handle all the defines and actually create the target
 include( "${CMAKESCRIPTS_DIR}/project-base.cmake" )
 
-target_link_libraries( ${PROJECT_NAME}
+asource_link_libraries(
 	PRIVATE
 		$<${IS_WINDOWS}:ws2_32>
 		$<${IS_WINDOWS}:odbc32>
@@ -163,11 +163,11 @@ target_link_libraries( ${PROJECT_NAME}
 	INTERFACE
 		SDL3::SDL3-shared
 )
-target_include_directories( ${PROJECT_NAME}
+asource_include_directories(
 	PRIVATE
 		"${SRC_DIR}/utils/common"
 )
-target_compile_definitions( ${PROJECT_NAME}
+asource_compile_definitions(
 	PRIVATE
 		MACRO_MATHLIB
 		PROTECTED_THINGS_DISABLE

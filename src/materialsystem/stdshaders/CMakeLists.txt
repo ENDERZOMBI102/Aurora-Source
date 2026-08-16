@@ -29,25 +29,23 @@ set( SOURCE_FILES
     "${SHADERS_DIR}/stdshader_dx9_30.txt"
 )
 
-# Generic libs to link against
-list( APPEND LINK_LIBS
-    "$<${IS_WINDOWS}:version;winmm>"
-    tier0
-    tier1
-    mathlib
-    vstdlib
-    shaderlib
-)
-
-# Generic include dirs
-list( APPEND INCLUDE_DIRS
-    "${SHADERS_DIR}/fxctmp9"
-    "${SHADERS_DIR}/vshtmp9"
-)
-
 include( "game_shader_dx9_${BUILD_GAME}.cmake" )
 
-target_compile_definitions( ${PROJECT}
+asource_link_libraries(
+    PRIVATE
+        "$<${IS_WINDOWS}:version;winmm>"
+        tier0
+        tier1
+        vstdlib
+        mathlib
+        shaderlib
+)
+asource_include_directories(
+    PRIVATE
+        "${SHADERS_DIR}/fxctmp9"
+        "${SHADERS_DIR}/vshtmp9"
+)
+asource_compile_definitions(
     PRIVATE
         STDSHADER_DX9_DLL_EXPORT
         FAST_MATERIALVAR_ACCESS
