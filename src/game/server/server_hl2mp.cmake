@@ -1,5 +1,5 @@
 # server_hl2mp.cmake
-set( PROJECT server_hl2mp )
+set( PROJECT "server_hl2mp" )
 
 list( APPEND SOURCE_FILES
 	"${SERVER_DIR}/ai_relationship.cpp"
@@ -282,7 +282,6 @@ asource_include_directories(
 		"${SERVER_DIR}/hl2mp"
 		"${SRC_DIR}/game/shared/hl2mp"
 )
-
 asource_compile_definitions(
 	PRIVATE
 		HL2MP

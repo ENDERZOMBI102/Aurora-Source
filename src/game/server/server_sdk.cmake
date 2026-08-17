@@ -109,7 +109,6 @@ set( SOURCE_FILES
 	"${SRC_DIR}/game/shared/sdk/weapon_shotgun.cpp"
 )
 
-
 # Set the output file name
 set( OUTPUT_FILE_NAME "server" )
 # Set the output file location
@@ -126,7 +125,6 @@ asource_include_directories(
 		"${SERVER_DIR}/sdk"
 		"${SRC_DIR}/game/shared/sdk"
 )
-
 asource_compile_definitions(
 	PRIVATE
 		SDKDLL
