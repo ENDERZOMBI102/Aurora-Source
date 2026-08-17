@@ -121,7 +121,7 @@ add_group_subdir( "${SRC_DIR}/utils/togl"                  LINUX_ONLY )
 add_group_subdir( "${SRC_DIR}/materialsystem/stdshaders"   IN "game"             "shaders" )
 add_group_subdir( "${SRC_DIR}/launcher"                    )
 add_group_subdir( "${SRC_DIR}/utils/serverplugin_sample"   )
-#add_group_subdir( "${SRC_DIR}/game/client"                 IN "game" )
+add_group_subdir( "${SRC_DIR}/game/client"                 IN "game" )
 add_group_subdir( "${SRC_DIR}/game/server"                 IN "game" )
 
 # -- Executables
