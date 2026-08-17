@@ -126,6 +126,9 @@ if ( ${IS_POSIX} AND NOT ${TRGT_IMPORTED} )
 			"-Wno-ignored-attributes"
 			$<$<COMPILE_LANGUAGE:CXX>:-Wno-conversion-null>
 #			"-Wno-write-strings"
+			"-Usprintf"
+			"-Ustrncpy"
+			"-UPROTECTED_THINGS_ENABLE"
 	)
 	if ( CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 5.0 )
 		target_compile_options( ${PROJECT}

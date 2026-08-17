@@ -1,10 +1,10 @@
 # nav_mesh.cmake
+include_guard( GLOBAL )
 
-include_guard(GLOBAL)
+# TODO: Redo this better
 
-set(NAV_MESH_DIR ${CMAKE_CURRENT_LIST_DIR})
-set(
-	NAV_MESH_SOURCE_FILES
+set( NAV_MESH_DIR ${CMAKE_CURRENT_LIST_DIR} )
+set( NAV_MESH_SOURCE_FILES
 	"${NAV_MESH_DIR}/nav.h"
 	"${NAV_MESH_DIR}/nav_area.cpp"
 	"${NAV_MESH_DIR}/nav_area.h"
@@ -27,13 +27,7 @@ set(
 	"${NAV_MESH_DIR}/nav_simplify.cpp"
 )
 
-function(target_use_nav_mesh target)
-	target_sources(
-		${target} PRIVATE
-		${NAV_MESH_SOURCE_FILES}
-	)
-	target_compile_definitions(
-		${target} PRIVATE
-		USE_NAV_MESH
-	)
+function( target_use_nav_mesh target )
+	target_sources( ${target} PRIVATE ${NAV_MESH_SOURCE_FILES} )
+	target_compile_definitions( ${target} PRIVATE USE_NAV_MESH )
 endfunction()

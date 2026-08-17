@@ -122,7 +122,7 @@ add_group_subdir( "${SRC_DIR}/materialsystem/stdshaders"   IN "game"            
 add_group_subdir( "${SRC_DIR}/launcher"                    )
 add_group_subdir( "${SRC_DIR}/utils/serverplugin_sample"   )
 #add_group_subdir( "${SRC_DIR}/game/client"                 IN "game" )
-#add_group_subdir( "${SRC_DIR}/game/server"                 IN "game" )
+add_group_subdir( "${SRC_DIR}/game/server"                 IN "game" )
 
 # -- Executables
 add_group_subdir( "${SRC_DIR}/bootstrap"             IN "game" )
