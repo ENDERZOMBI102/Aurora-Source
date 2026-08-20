@@ -4,7 +4,7 @@ BasedOnStyle: LLVM
 AccessModifierOffset: -4
 AlignConsecutiveAssignments: false
 AlignConsecutiveDeclarations: false
-AlignOperands: true
+AlignOperands: Align
 AlignTrailingComments: false
 AllowAllArgumentsOnNextLine: false
 AllowAllConstructorInitializersOnNextLine: false
@@ -17,7 +17,7 @@ AlwaysBreakTemplateDeclarations: Yes
 BraceWrapping: 
   AfterCaseLabel: false
   AfterClass: false
-  AfterControlStatement: false
+  AfterControlStatement: Never
   AfterEnum: false
   AfterFunction: false
   AfterNamespace: false
@@ -32,8 +32,9 @@ BraceWrapping:
   SplitEmptyRecord: false
   SplitEmptyNamespace: false
 BreakBeforeBraces: Custom
+BreakBeforeBinaryOperators: NonAssignment
 ColumnLimit: 0
-Cpp11BracedListStyle: false
+Cpp11BracedListStyle: Block
 IncludeCategories: 
   - Regex: '^<.*'
     Priority: 1
@@ -52,7 +53,7 @@ PointerAlignment: Left
 ReflowComments: Never
 SpaceAfterCStyleCast: true
 SpaceAfterTemplateKeyword: false
-SpacesInAngles: false
+SpacesInAngles: Leave
 SpacesInContainerLiterals: false
 SpacesInParens: Custom
 SpacesInParensOptions: 
