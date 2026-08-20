@@ -31,6 +31,7 @@ public:
 	auto GetResourceData( uint32 eType, size_t* pDataSize ) const -> void*  override;
 
 	// Locates the resource entry info if it's present, easier than crawling array types
+	[[nodiscard]]
 	auto HasResourceEntry( uint32 eType ) const -> bool  override;
 
 	// Retrieve available resource types of this IVTFTextures
@@ -55,42 +56,62 @@ public:
 	// other data (measured from file start), and how many bytes to read....
 	void LowResFileInfo( int32* pStartLocation, int32* pSizeInBytes ) const override;
 	void ImageFileInfo( int32 nFrame, int32 nFace, int32 nMip, int32* pStartLocation, int32* pSizeInBytes ) const override;
+	[[nodiscard]]
 	auto FileSize( int32 nMipSkipCount = 0 ) const -> int32  override;
 
 	// Attributes...
+	[[nodiscard]]
 	auto Width() const -> int32  override;
+	[[nodiscard]]
 	auto Height() const -> int32  override;
+	[[nodiscard]]
 	auto Depth() const -> int32  override;
+	[[nodiscard]]
 	auto MipCount() const -> int32  override;
 
 	// returns the size of one row of a particular mip level
+	[[nodiscard]]
 	auto RowSizeInBytes( int32 nMipLevel ) const -> int32  override;
 
 	// returns the size of one face of a particular mip level
+	[[nodiscard]]
 	auto FaceSizeInBytes( int32 nMipLevel ) const -> int32  override;
 
+	[[nodiscard]]
 	auto Format() const -> ImageFormat  override;
+	[[nodiscard]]
 	auto FaceCount() const -> int32  override;
+	[[nodiscard]]
 	auto FrameCount() const -> int32  override;
+	[[nodiscard]]
 	auto Flags() const -> int32  override;
 
+	[[nodiscard]]
 	auto BumpScale() const -> float  override;
 
+	[[nodiscard]]
 	auto LowResWidth() const -> int32  override;
+	[[nodiscard]]
 	auto LowResHeight() const -> int32  override;
+	[[nodiscard]]
 	auto LowResFormat() const -> ImageFormat  override;
 
 	// NOTE: reflectivity[0] = blue, [1] = greem, [2] = red
+	[[nodiscard]]
 	auto Reflectivity() const -> const Vector& override;
 
+	[[nodiscard]]
 	auto IsCubeMap() const -> bool  override;
+	[[nodiscard]]
 	auto IsNormalMap() const -> bool  override;
+	[[nodiscard]]
 	auto IsVolumeTexture() const -> bool  override;
 
 	// Computes the dimensions of a particular mip level
 	void ComputeMipLevelDimensions( int32 iMipLevel, int32* pMipWidth, int32* pMipHeight, int32* pMipDepth ) const override;
 
 	// Computes the size (in bytes) of a single mipmap of a single face of a single frame
+	[[nodiscard]]
 	auto ComputeMipSize( int32 iMipLevel ) const -> int32  override;
 
 	// Computes the size of a subrect (specified at the top mip level) at a particular lower mip level
@@ -98,9 +119,11 @@ public:
 
 	// Computes the size (in bytes) of a single face of a single frame
 	// All mip levels starting at the specified mip level are included
+	[[nodiscard]]
 	auto ComputeFaceSize( int32 iStartingMipLevel = 0 ) const -> int32  override;
 
 	// Computes the total size (in bytes) of all faces, all frames
+	[[nodiscard]]
 	auto ComputeTotalSize() const -> int32  override;
 
 	// Returns the base address of the image data

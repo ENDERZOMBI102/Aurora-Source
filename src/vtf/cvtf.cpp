@@ -71,26 +71,3 @@ void CVTFTexture::PostProcess( bool bGenerateSpheremap, LookDir_t lookDir, bool 
 void CVTFTexture::MatchCubeMapBorders( int32 iStage, ImageFormat finalFormat, bool bSkybox ) { AssertMsg( false, "void CVTFTexture::MatchCubeMapBorders( %d, %d, %d )", iStage, finalFormat, bSkybox ); }
 void CVTFTexture::SetAlphaTestThreshholds( float flBase, float flHighFreq ) { AssertMsg( false, "void CVTFTexture::SetAlphaTestThreshholds( %f, %f )", flBase, flHighFreq ); }
 void CVTFTexture::SetPostProcessingSettings( VtfProcessingOptions const* pOptions ) { AssertMsg( false, "void CVTFTexture::SetPostProcessingSettings( %p )", pOptions ); }
-
-
-auto CreateVTFTexture() -> IVTFTexture* {
-	return new CVTFTexture{};
-}
-void DestroyVTFTexture( IVTFTexture* pTexture ) {
-	AssertMsg( false, "DestroyVTFTexture(%p)", pTexture );
-}
-
-auto VTFFileHeaderSize( int32 nMajorVersion, int32 nMinorVersion ) -> int32 {
-	AssertMsg( false, "VTFFileHeaderSize(%d, %d)", nMajorVersion, nMinorVersion );
-	return {};
-}
-
-auto ConvertVTFTo360Format( const char* pDebugName, CUtlBuffer& sourceBuf, CUtlBuffer& targetBuf, CompressFunc_t pCompressFunc ) -> bool {
-	AssertMsg( false, "ConvertVTFTo360Format(%s, %p, %p, %p)",pDebugName, &sourceBuf, &targetBuf, pCompressFunc );
-	return {};
-}
-
-auto GetVTFPreload360Data( const char* pDebugName, CUtlBuffer& fileBufferIn, CUtlBuffer& preloadBufferOut ) -> bool {
-	AssertMsg( false, "GetVTFPreload360Data(%s, %p, %p)", pDebugName, &fileBufferIn, &preloadBufferOut );
-	return {};
-}
