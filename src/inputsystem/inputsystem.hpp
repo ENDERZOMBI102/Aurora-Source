@@ -4,9 +4,9 @@
 #pragma once
 #include "inputsystem/iinputsystem.h"
 #include "tier1/tier1.h"
-#include "utlqueue.h"
+#include "tier1/utlqueue.h"
 
-#include <SDL_joystick.h>
+#include <SDL3/SDL_joystick.h>
 
 
 class CInputSystem : public CTier1AppSystem<IInputSystem> {

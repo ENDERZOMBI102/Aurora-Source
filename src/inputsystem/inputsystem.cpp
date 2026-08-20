@@ -2,11 +2,12 @@
 // Created by ENDERZOMBI102 on 06/09/2023.
 //
 #include "inputsystem.hpp"
-#include "SDL3/SDL.h"
-#include "icommandline.h"
+#include <chrono>
+#include <SDL3/SDL.h>
+#include <tier0/icommandline.h>
+
 #include "inputmaps.hpp"
 
-#include <chrono>
 
 ConVar joy_gamecontroller_config{ "joy_gamecontroller_config", "", FCVAR_ARCHIVE, "Game controller mapping (passed to SDL with SDL_HINT_GAMECONTROLLERCONFIG), can also be configured in Steam Big Picture mode." };
 
@@ -90,11 +91,11 @@ void CInputSystem::AttachToWindow( void* hWnd ) {
 	#if IsWindows()
 		SDL_SetNumberProperty( props, SDL_PROP_WINDOW_CREATE_WIN32_HWND_POINTER, reinterpret_cast<int>( hWnd ) );
 	#elif IsLinux()
-		// TODO: When we move to wayland, this should change!
-		SDL_SetNumberProperty( props, SDL_PROPERTY_WINDOW_X11_WINDOW_NUMBER, reinterpret_cast<int>( hWnd ) );
+		// TODO: When we begin to support wayland, this should change!
+		SDL_SetNumberProperty( props, SDL_PROP_WINDOW_X11_WINDOW_NUMBER, reinterpret_cast<int>( hWnd ) );
 	#endif
 
-		m_SdlWindow = SDL_CreateWindowWithProperties( props );
+	m_SdlWindow = SDL_CreateWindowWithProperties( props );
 	AssertMsg( m_SdlWindow != nullptr, "%s", SDL_GetError() );
 }
 

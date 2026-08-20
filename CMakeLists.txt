@@ -116,6 +116,7 @@ add_group_subdir( "${SRC_DIR}/raytrace"                 IN "game" "compilers" )
 add_group_subdir( "${SRC_DIR}/materialsystem/shaderlib" IN                    "shaders" )
 add_group_subdir( "${SRC_DIR}/vgui2/vgui_controls"      IN "game" )
 # -- Modules
+add_group_subdir( "${SRC_DIR}/inputsystem"                 )
 add_group_subdir( "${SRC_DIR}/filesystem_stdio"            IN        "compilers" )
 add_group_subdir( "${SRC_DIR}/utils/togl"                  LINUX_ONLY )
 add_group_subdir( "${SRC_DIR}/materialsystem/stdshaders"   IN "game"             "shaders" )
