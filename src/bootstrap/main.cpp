@@ -132,6 +132,10 @@ int main( const int argc, const char** argv ) {
 
 	// get hold of the main function
 	const auto launcherMain{ reinterpret_cast<LauncherMain_t>( Strap_GetProcAddress( lib, "LauncherMain" ) ) };
+	if ( not launcherMain ) {
+		Strap_ShowError();
+		return 1;
+	}
 
 	// call it
 	return launcherMain( newArgv.size(), newArgv.data() );

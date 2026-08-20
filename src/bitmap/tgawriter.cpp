@@ -11,7 +11,7 @@
 
 
 namespace TGAWriter {
-	bool WriteToBuffer( const uint8* pImageData, CUtlBuffer& buffer, const int32 width, const int32 height, const ImageFormat srcFormat, const ImageFormat dstFormat ) {
+	bool WriteToBuffer( uint8* pImageData, CUtlBuffer& buffer, const int32 width, const int32 height, const ImageFormat srcFormat, const ImageFormat dstFormat ) {
 		TGA::Header header;
 		int32 x;
 		int32 y;
@@ -97,7 +97,8 @@ namespace TGAWriter {
 	// write out a simple tga file from a memory buffer.
 	bool WriteTGAFile( const char* fileName, int32 width, int32 height, ImageFormat srcFormat, uint8 const* srcData, int32 nStride ) {
 		CUtlBuffer buffer{};
-		if ( not WriteToBuffer( srcData, buffer, width, height, srcFormat, srcFormat ) ) {
+		// TODO: Eww, bad cast!
+		if ( not WriteToBuffer( const_cast<uint8*>( srcData ), buffer, width, height, srcFormat, srcFormat ) ) {
 			return false;
 		}
 

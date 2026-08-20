@@ -12,7 +12,7 @@ class CUtlBuffer;
 
 
 namespace TGAWriter {
-	bool WriteToBuffer( const unsigned char* pImageData, CUtlBuffer& buffer, int width, int height, ImageFormat srcFormat, ImageFormat dstFormat );
+	bool WriteToBuffer( uint8* pImageData, CUtlBuffer& buffer, int32 width, int32 height, ImageFormat srcFormat, ImageFormat dstFormat );
 
 	// write out a simple tga file from a memory buffer.
 	bool WriteTGAFile( const char* fileName, int32 width, int32 height, ImageFormat srcFormat, uint8 const* srcData, int32 nStride );

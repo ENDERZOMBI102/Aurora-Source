@@ -18,5 +18,3 @@ asource_link_libraries(
 	PRIVATE
 		${CMAKE_DL_LIBS}
 )
-
-add_dependencies( ${PROJECT_NAME} launcher )
