@@ -2,11 +2,10 @@ project( vrad_launcher C CXX )
 
 set( VRAD_LAUNCHER_DIR ${CMAKE_CURRENT_LIST_DIR} )
 set( SOURCE_FILES
-	# Private Source files
+	# Private Source/Header files
 	"${VRAD_LAUNCHER_DIR}/vrad_launcher.cpp"
 
-	# Public Header files
-	"${SRC_DIR}/public/tier1/interface.h"
+	# Public Source/Header files
 	"${SRC_DIR}/public/ivraddll.h"
 )
 

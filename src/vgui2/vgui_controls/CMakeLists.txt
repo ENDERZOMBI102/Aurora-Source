@@ -2,7 +2,7 @@ project( vgui_controls C CXX )
 
 set( VGUI_CONTROLS_DIR ${CMAKE_CURRENT_LIST_DIR} )
 set( SOURCE_FILES
-	# Private Source files
+	# Private Source/Header files
 	"${VGUI_CONTROLS_DIR}/AnalogBar.cpp"
 	"${VGUI_CONTROLS_DIR}/AnimatingImagePanel.cpp"
 	"${VGUI_CONTROLS_DIR}/AnimationController.cpp"
@@ -80,12 +80,19 @@ set( SOURCE_FILES
 	"${VGUI_CONTROLS_DIR}/WizardSubPanel.cpp"
 	"${SRC_DIR}/vgui2/src/vgui_key_translation.cpp"
 
-	# Private Header files
-
-	# Public Source files
+	# Public Source/Header files
+	"${SRC_DIR}/public/Color.h"
+	"${SRC_DIR}/public/filesystem.h"
 	"${SRC_DIR}/public/filesystem_helpers.cpp"
-
-	# Public Header files
+	"${SRC_DIR}/public/filesystem_helpers.h"
+	"${SRC_DIR}/public/tier0/memdbgoff.h"
+	"${SRC_DIR}/public/tier0/memdbgon.h"
+	"${SRC_DIR}/public/tier1/interface.h"
+	"${SRC_DIR}/public/tier1/KeyValues.h"
+	"${SRC_DIR}/public/tier1/mempool.h"
+	"${SRC_DIR}/public/tier1/utlmemory.h"
+	"${SRC_DIR}/public/tier1/utlrbtree.h"
+	"${SRC_DIR}/public/tier1/utlvector.h"
 	"${SRC_DIR}/public/vgui_controls/AnalogBar.h"
 	"${SRC_DIR}/public/vgui_controls/AnimatingImagePanel.h"
 	"${SRC_DIR}/public/vgui_controls/AnimationController.h"
@@ -96,7 +103,6 @@ set( SOURCE_FILES
 	"${SRC_DIR}/public/vgui_controls/CheckButton.h"
 	"${SRC_DIR}/public/vgui_controls/CheckButtonList.h"
 	"${SRC_DIR}/public/vgui_controls/CircularProgressBar.h"
-	"${SRC_DIR}/public/Color.h"
 	"${SRC_DIR}/public/vgui_controls/ComboBox.h"
 	"${SRC_DIR}/public/vgui_controls/consoledialog.h"
 	"${SRC_DIR}/public/vgui_controls/ControllerMap.h"
@@ -109,8 +115,6 @@ set( SOURCE_FILES
 	"${SRC_DIR}/public/vgui_controls/ExpandButton.h"
 	"${SRC_DIR}/public/vgui_controls/FileOpenDialog.h"
 	"${SRC_DIR}/public/vgui_controls/FileOpenStateMachine.h"
-	"${SRC_DIR}/public/filesystem.h"
-	"${SRC_DIR}/public/filesystem_helpers.h"
 	"${SRC_DIR}/public/vgui_controls/FocusNavGroup.h"
 	"${SRC_DIR}/public/vgui_controls/Frame.h"
 	"${SRC_DIR}/public/vgui_controls/GraphPanel.h"
@@ -119,18 +123,13 @@ set( SOURCE_FILES
 	"${SRC_DIR}/public/vgui_controls/ImageList.h"
 	"${SRC_DIR}/public/vgui_controls/ImagePanel.h"
 	"${SRC_DIR}/public/vgui_controls/InputDialog.h"
-	"${SRC_DIR}/public/tier1/interface.h"
 	"${SRC_DIR}/public/vgui_controls/KeyBindingHelpDialog.h"
 	"${SRC_DIR}/public/vgui_controls/KeyBindingMap.h"
 	"${SRC_DIR}/public/vgui_controls/KeyBoardEditorDialog.h"
 	"${SRC_DIR}/public/vgui_controls/KeyRepeat.h"
-	"${SRC_DIR}/public/tier1/KeyValues.h"
 	"${SRC_DIR}/public/vgui_controls/Label.h"
 	"${SRC_DIR}/public/vgui_controls/ListPanel.h"
 	"${SRC_DIR}/public/vgui_controls/ListViewPanel.h"
-	"${SRC_DIR}/public/tier0/memdbgoff.h"
-	"${SRC_DIR}/public/tier0/memdbgon.h"
-	"${SRC_DIR}/public/tier1/mempool.h"
 	"${SRC_DIR}/public/vgui_controls/Menu.h"
 	"${SRC_DIR}/public/vgui_controls/MenuBar.h"
 	"${SRC_DIR}/public/vgui_controls/MenuButton.h"
@@ -171,9 +170,6 @@ set( SOURCE_FILES
 	"${SRC_DIR}/public/vgui_controls/TreeView.h"
 	"${SRC_DIR}/public/vgui_controls/TreeViewListControl.h"
 	"${SRC_DIR}/public/vgui_controls/URLLabel.h"
-	"${SRC_DIR}/public/tier1/utlmemory.h"
-	"${SRC_DIR}/public/tier1/utlrbtree.h"
-	"${SRC_DIR}/public/tier1/utlvector.h"
 	"${SRC_DIR}/public/vgui_controls/WizardPanel.h"
 	"${SRC_DIR}/public/vgui_controls/WizardSubPanel.h"
 )

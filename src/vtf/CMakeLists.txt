@@ -5,13 +5,9 @@ set( SOURCE_FILES
 	# Private Source files
 	"${VTF_DIR}/vtf.cpp"
 	"${VTF_DIR}/cvtf.cpp"
-
-	# Private Header files
 	"${VTF_DIR}/cvtf.hpp"
 
-	# Public Source files
-
-	# Public Header files
+	# Public Source/Header files
 	"${SRC_DIR}/public/vtf/vtf.h"
 )
 

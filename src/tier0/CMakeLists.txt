@@ -2,21 +2,19 @@ project( tier0 C CXX )
 
 set( TIER0_DIR ${CMAKE_CURRENT_LIST_DIR} )
 set( SOURCE_FILES
-	# Private Source files
+	# Private Source/Header files
 	"${TIER0_DIR}/dbg.cpp"
 	"${TIER0_DIR}/commandline.cpp"
+	"${TIER0_DIR}/commandline.hpp"
 	"${TIER0_DIR}/platform.cpp"
 	"${TIER0_DIR}/threadtools.cpp"
 	"${TIER0_DIR}/memalloc.cpp"
+	"${TIER0_DIR}/memalloc.hpp"
 	"${TIER0_DIR}/mem.cpp"
 	"${TIER0_DIR}/vprof.cpp"
 	"${TIER0_DIR}/fasttimer.cpp"
 
-	# Private Header files
-	"${TIER0_DIR}/memalloc.hpp"
-	"${TIER0_DIR}/commandline.hpp"
-
-	# Public Header files
+	# Public Source/Header files
 	"${SRC_DIR}/public/tier0/annotations.h"
 	"${SRC_DIR}/public/tier0/basetypes.h"
 	"${SRC_DIR}/public/tier0/commonmacros.h"

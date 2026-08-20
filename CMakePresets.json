@@ -42,6 +42,20 @@
             "cacheVariables": {
                 "BUILD_GROUP": "game"
             }
+        },
+        {
+            "name": "windows-msvc-shaders",
+            "inherits": [ "windows-msvc" ],
+            "cacheVariables": {
+                "BUILD_GROUP": "shaders"
+            }
+        },
+        {
+            "name": "windows-msvc-tools",
+            "inherits": [ "windows-msvc" ],
+            "cacheVariables": {
+                "BUILD_GROUP": "tools"
+            }
         }
     ]
 }

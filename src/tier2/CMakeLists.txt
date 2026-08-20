@@ -2,16 +2,12 @@ project( tier2 C CXX )
 
 set( TIER2_DIR ${CMAKE_CURRENT_LIST_DIR} )
 set( SOURCE_FILES
-	# Private Source files
+	# Private Source/Header files
 	"${TIER2_DIR}/vconfig.cpp"
 	"${TIER2_DIR}/tier2.cpp"
 	"${TIER2_DIR}/tier2dm.cpp"
 
-	# Private Header files
-
-	# Public Source files
-
-	# Public Header files
+	# Public Source/Header files
 	"${SRC_DIR}/public/tier2/beamsegdraw.h"
 	"${SRC_DIR}/public/tier2/camerautils.h"
 	"${SRC_DIR}/public/tier2/fileutils.h"

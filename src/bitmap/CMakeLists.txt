@@ -2,16 +2,14 @@ project( bitmap CXX )
 
 set( BITMAP_DIR ${CMAKE_CURRENT_LIST_DIR} )
 set( SOURCE_FILES
-	# Sources
+	# Private Source/Header files
 	"${BITMAP_DIR}/bitmap.cpp"
 	"${BITMAP_DIR}/imageformat.cpp"
 	"${BITMAP_DIR}/tgaloader.cpp"
 	"${BITMAP_DIR}/tgawriter.cpp"
 	"${BITMAP_DIR}/tgaspec.hpp"
 
-	# Public units
-
-	# Public headers
+	# Public Source/Header files
 	"${SRC_DIR}/public/bitmap/bitmap.h"
 	"${SRC_DIR}/public/bitmap/cubemap.h"
 	"${SRC_DIR}/public/bitmap/float_bm.h"

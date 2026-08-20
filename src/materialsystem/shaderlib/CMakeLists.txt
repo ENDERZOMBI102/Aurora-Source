@@ -2,7 +2,7 @@ project( shaderlib C CXX )
 
 set( SHADERLIB_DIR ${CMAKE_CURRENT_LIST_DIR} )
 set( SOURCE_FILES
-	# Sources
+	# Private Source/Header files
 	"${SHADERLIB_DIR}/baseshader.cpp"
 	"${SHADERLIB_DIR}/shaderdll.cpp"
 	"${SHADERLIB_DIR}/shaderdll.hpp"
@@ -11,9 +11,7 @@ set( SOURCE_FILES
 	"${SHADERLIB_DIR}/shaderlib_cvar.h"
 	"${SHADERLIB_DIR}/ishadersystem.h"
 
-	# Public units
-
-	# Public headers
+	# Public Source/Header files
 	"${SRC_DIR}/public/shaderlib/BaseShader.h"
 	"${SRC_DIR}/public/shaderlib/cshader.h"
 	"${SRC_DIR}/public/shaderlib/ShaderDLL.h"

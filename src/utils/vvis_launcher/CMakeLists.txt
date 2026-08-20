@@ -2,11 +2,8 @@ project( vvis_launcher C CXX )
 
 set( VVIS_LAUNCHER_DIR ${CMAKE_CURRENT_LIST_DIR} )
 set( SOURCE_FILES
-	# Private Source files
+	# Private Source/Header files
 	"${VVIS_LAUNCHER_DIR}/vvis_launcher.cpp"
-
-	# Public Header files
-	"${SRC_DIR}/public/tier1/interface.h"
 )
 
 # Set the output file name

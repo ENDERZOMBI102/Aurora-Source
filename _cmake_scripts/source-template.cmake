@@ -2,13 +2,9 @@ project( <invalid> C CXX )
 
 set( PROJECT_SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR} )
 set( SOURCE_FILES
-	# Private Source files
+	# Private Source/Header files
 
-	# Private Header files
-
-	# Public Source files
-
-	# Public Header files
+	# Public Source/Header files
 )
 
 # Preprocessor defs

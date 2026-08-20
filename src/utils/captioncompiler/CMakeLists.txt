@@ -2,16 +2,14 @@ project( captioncompiler C CXX )
 
 set( CAPTIONCOMPILER_DIR ${CMAKE_CURRENT_LIST_DIR} )
 set( SOURCE_FILES
-	# Private Source files
+	# Private Source/Header files
 	"${CAPTIONCOMPILER_DIR}/captioncompiler.cpp"
+	"${CAPTIONCOMPILER_DIR}/cbase.h"
+
+	# Public Source/Header files
 	"${SRC_DIR}/common/compiledcaptionswap.cpp"
 	"${SRC_DIR}/utils/common/filesystem_tools.cpp"
-
-	# Private Header files
-	"${CAPTIONCOMPILER_DIR}/cbase.h"
 	"${SRC_DIR}/utils/common/filesystem_tools.h"
-
-	# Public Source files
 	"${SRC_DIR}/utils/common/cmdlib.cpp"
 	"${SRC_DIR}/utils/common/cmdlib.h"
 	"${SRC_DIR}/public/filesystem_helpers.cpp"

@@ -8,9 +8,7 @@ set( SOURCE_FILES
     "${INPUTSYSTEM_DIR}/inputmaps.cpp"
     "${INPUTSYSTEM_DIR}/inputmaps.hpp"
 
-    # Public Source files
-
-    # Public Header files
+    # Public Source/Header files
     "${SRC_DIR}/public/inputsystem/analogcode.h"
     "${SRC_DIR}/public/inputsystem/buttoncode.h"
     "${SRC_DIR}/public/inputsystem/iinputsystem.h"

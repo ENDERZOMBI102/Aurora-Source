@@ -2,7 +2,7 @@ project( tier1 C CXX )
 
 set( TIER1_DIR ${CMAKE_CURRENT_LIST_DIR} )
 set( SOURCE_FILES
-	# Private Source files
+	# Private Source/Header files
 	"${TIER1_DIR}/bitbuf.cpp"
 	"${TIER1_DIR}/newbitbuf.cpp"
 	"${TIER1_DIR}/byteswap.cpp"
@@ -43,20 +43,16 @@ set( SOURCE_FILES
 	"${TIER1_DIR}/utlbinaryblock.cpp"
 	"$<${IS_LINUX}:${TIER1_DIR}/pathmatch.cpp>"
 	"${TIER1_DIR}/snappy.cpp"
+	"${TIER1_DIR}/snappy-internal.h"
 	"${TIER1_DIR}/snappy-sinksource.cpp"
 	"${TIER1_DIR}/snappy-stubs-internal.cpp"
+	"${TIER1_DIR}/snappy-stubs-internal.h"
 	"${TIER1_DIR}/uniqueid.cpp"
 
-	# Private Header files
-	"${TIER1_DIR}/snappy-internal.h"
-	"${TIER1_DIR}/snappy-stubs-internal.h"
-
-	# Public Source files
+	# Public Source/Header files
 	"${SRC_DIR}/utils/lzma/C/LzmaDec.h"
 	"${SRC_DIR}/utils/lzma/C/LzmaDec.c"
 	"${SRC_DIR}/utils/lzma/C/7zTypes.h"
-
-	# Public Header files
 	"${SRC_DIR}/public/tier1/bitbuf.h"
 	"${SRC_DIR}/public/tier1/byteswap.h"
 	"${SRC_DIR}/public/tier1/callqueue.h"

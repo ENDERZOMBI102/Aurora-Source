@@ -2,13 +2,14 @@ project( fgdlib CXX )
 
 set( FGDLIB_DIR ${CMAKE_CURRENT_LIST_DIR} )
 set( SOURCE_FILES
+	# Private Source/Header files
 	"${FGDLIB_DIR}/gamedata.cpp"
 	"${FGDLIB_DIR}/gdclass.cpp"
 	"${FGDLIB_DIR}/gdvar.cpp"
 	"${FGDLIB_DIR}/inputoutput.cpp"
 	"${FGDLIB_DIR}/wckeyvalues.cpp"
 
-	# Header Files
+	# Public Source/Header files
 	"${SRC_DIR}/public/fgdlib/fgdlib.h"
 	"${SRC_DIR}/public/fgdlib/gamedata.h"
 	"${SRC_DIR}/public/fgdlib/gdclass.h"

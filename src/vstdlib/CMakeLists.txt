@@ -2,25 +2,21 @@ project( vstdlib C CXX )
 
 set( VSTDLIB_DIR ${CMAKE_CURRENT_LIST_DIR} )
 set( SOURCE_FILES
-	# Private Source files
+	# Private Source/Header files
 	"${VSTDLIB_DIR}/cvarsystem.cpp"
+	"${VSTDLIB_DIR}/cvarsystem.hpp"
 	"${VSTDLIB_DIR}/random.cpp"
 	"${VSTDLIB_DIR}/keyvaluessystem.cpp"
+	"${VSTDLIB_DIR}/keyvaluessystem.hpp"
 	"${VSTDLIB_DIR}/pcgengine.cpp"
 	"${VSTDLIB_DIR}/jobthread.cpp"
+	"${VSTDLIB_DIR}/jobthread.hpp"
 	"${VSTDLIB_DIR}/osversion.cpp"
 	"${VSTDLIB_DIR}/processutils.cpp"
+	"${VSTDLIB_DIR}/processutils.hpp"
 	"${VSTDLIB_DIR}/cvar.cpp"
 
-	# Private Header files
-	"${VSTDLIB_DIR}/cvarsystem.hpp"
-	"${VSTDLIB_DIR}/jobthread.hpp"
-	"${VSTDLIB_DIR}/keyvaluessystem.hpp"
-	"${VSTDLIB_DIR}/processutils.hpp"
-
-	# Public Source files
-
-	# Public Header files
+	# Public Source/Header files
 	"${SRC_DIR}/public/vstdlib/vstdlib.h"
 	"${SRC_DIR}/public/vstdlib/vcover.h"
 	"${SRC_DIR}/public/vstdlib/random.h"

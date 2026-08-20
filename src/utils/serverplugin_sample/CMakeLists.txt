@@ -2,13 +2,11 @@ project( serverplugin_empty C CXX )
 
 set( SERVERPLUGIN_EMPTY_DIR ${CMAKE_CURRENT_LIST_DIR} )
 set( SOURCE_FILES
-    # Source Files
+    # Private Source/Header files
     "${SERVERPLUGIN_EMPTY_DIR}/serverplugin_bot.cpp"
     "${SERVERPLUGIN_EMPTY_DIR}/serverplugin_empty.cpp"
 
-    # Header Files
-
-    # Public Header Files
+    # Public Source/Header files
     "${SRC_DIR}/public/tier0/basetypes.h"
     "${SRC_DIR}/public/Color.h"
     "${SRC_DIR}/public/tier0/dbg.h"

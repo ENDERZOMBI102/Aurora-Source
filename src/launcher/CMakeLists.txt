@@ -2,7 +2,7 @@ project( launcher CXX )
 
 set( LAUNCHER_DIR ${CMAKE_CURRENT_LIST_DIR} )
 set( SOURCE_FILES
-	# Project files
+	# Private Source/Header files
 	"${LAUNCHER_DIR}/launcher.cpp"
 	"${LAUNCHER_DIR}/gameapploader.cpp"
 	"${LAUNCHER_DIR}/gameapploader.hpp"
@@ -11,8 +11,9 @@ set( SOURCE_FILES
 	"${LAUNCHER_DIR}/launchermgr.cpp"
 	"${LAUNCHER_DIR}/launchermgr.hpp"
 
-	# Common files
+	# Public Source/Header files
 	"${SRC_DIR}/public/filesystem_init.cpp"
+	"${SRC_DIR}/public/filesystem_init.h"
 	"${SRC_DIR}/public/idedicatedexports.h"
 	"${SRC_DIR}/public/engine/hlds_api.h"
 	"${SRC_DIR}/public/engine/launcher_api.hpp"

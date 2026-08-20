@@ -2,6 +2,7 @@ project( mathlib C CXX )
 
 set( MATHLIB_DIR ${CMAKE_CURRENT_LIST_DIR} )
 set( SOURCE_FILES
+	# Private Source/Header files
 	"${MATHLIB_DIR}/color_conversion.cpp"
 	"${MATHLIB_DIR}/halton.cpp"
 	"${MATHLIB_DIR}/lightdesc.cpp"
@@ -10,8 +11,10 @@ set( SOURCE_FILES
 	"${MATHLIB_DIR}/sparse_convolution_noise.cpp"
 	"${MATHLIB_DIR}/sseconst.cpp"
 	"${MATHLIB_DIR}/sse.cpp"
+	"${MATHLIB_DIR}/sse.h"
 	"${MATHLIB_DIR}/ssenoise.cpp"
 	"$<$<OR:${IS_WINDOWS},${IS_LINUX}>:${MATHLIB_DIR}/3dnow.cpp>"
+	"$<$<OR:${IS_WINDOWS},${IS_LINUX}>:${MATHLIB_DIR}/3dnow.h>"
 	"${MATHLIB_DIR}/anorms.cpp"
 	"${MATHLIB_DIR}/bumpvects.cpp"
 	"${MATHLIB_DIR}/IceKey.cpp"
@@ -24,8 +27,9 @@ set( SOURCE_FILES
 	"${MATHLIB_DIR}/vector.cpp"
 	"${MATHLIB_DIR}/vmatrix.cpp"
 	"${MATHLIB_DIR}/almostequal.cpp"
+	"${MATHLIB_DIR}/noisedata.h"
 
-	# Public Header Files
+	# Public Source/Header files
 	"$<$<OR:${IS_WINDOWS},${IS_LINUX}>:${SRC_DIR}/public/mathlib/amd3dx.h>"
 	"${SRC_DIR}/public/mathlib/anorms.h"
 	"${SRC_DIR}/public/mathlib/bumpvects.h"
@@ -49,11 +53,6 @@ set( SOURCE_FILES
 	"${SRC_DIR}/public/mathlib/vector4d.h"
 	"${SRC_DIR}/public/mathlib/vmatrix.h"
 	"${SRC_DIR}/public/mathlib/vplane.h"
-
-	# Header Files
-	"${MATHLIB_DIR}/noisedata.h"
-	"${MATHLIB_DIR}/sse.h"
-	"$<$<OR:${IS_WINDOWS},${IS_LINUX}>:${MATHLIB_DIR}/3dnow.h>"
 )
 
 # Target type

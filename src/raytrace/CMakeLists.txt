@@ -2,7 +2,7 @@ project( raytrace C CXX )
 
 set( RAYTRACE_DIR ${CMAKE_CURRENT_LIST_DIR} )
 set( SOURCE_FILES
-	# Sources
+	# Private Source/Header files
 	"${RAYTRACE_DIR}/raytrace.cpp"
 	"${RAYTRACE_DIR}/trace2.cpp"
 	"${RAYTRACE_DIR}/trace3.cpp"

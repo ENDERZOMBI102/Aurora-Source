@@ -2,6 +2,7 @@ project( bootstrap C CXX )
 
 set( BOOTSTRAP_DIR ${CMAKE_CURRENT_LIST_DIR} )
 set( SOURCE_FILES
+	# Private Source/Header files
 	"${BOOTSTRAP_DIR}/main.cpp"
 )
 

@@ -2,18 +2,14 @@ project( tier3 C CXX )
 
 set( TIER3_DIR ${CMAKE_CURRENT_LIST_DIR} )
 set( SOURCE_FILES
-	# Private Source files
+	# Private Source/Header files
 	"${TIER3_DIR}/tier3.cpp"
 	"${TIER3_DIR}/scenetokenprocessor.cpp"
+	"${TIER3_DIR}/scenetokenprocessor.hpp"
 	"${TIER3_DIR}/mdlutils.cpp"
 	"${TIER3_DIR}/choreoutils.cpp"
 
-	# Private Header files
-	"${TIER3_DIR}/scenetokenprocessor.hpp"
-
-	# Public Source files
-
-	# Public Header files
+	# Public Source/Header files
 	"${SRC_DIR}/public/tier3/choreoutils.h"
 	"${SRC_DIR}/public/tier3/mdlutils.h"
 	"${SRC_DIR}/public/tier3/scenetokenprocessor.h"

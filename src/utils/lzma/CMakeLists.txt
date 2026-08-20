@@ -2,7 +2,7 @@ project( lzma C CXX )
 
 set( LZMA_DIR ${CMAKE_CURRENT_LIST_DIR} )
 set( SOURCE_FILES
-	# Private Source files
+	# Private Source/Header files
 	"${LZMA_DIR}/C/Alloc.c"
 	"${LZMA_DIR}/C/LzFind.c"
 	"${LZMA_DIR}/C/LzmaDec.c"
@@ -10,11 +10,7 @@ set( SOURCE_FILES
 	"${LZMA_DIR}/C/LzmaLib.c"
 	"${LZMA_DIR}/Lzma.cpp"
 
-	# Private Header files
-
-	# Public Source files
-
-	# Public Header files
+	# Public Source/Header files
 	"${SRC_DIR}/common/lzma/lzma.h"
 )
 

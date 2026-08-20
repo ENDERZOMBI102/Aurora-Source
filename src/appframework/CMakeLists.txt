@@ -2,14 +2,12 @@ project( appframework CXX )
 
 set( APPFRAMEWORK_DIR ${CMAKE_CURRENT_LIST_DIR} )
 set( SOURCE_FILES
-	# Sources
+	# Private Source/Header files
 	"${APPFRAMEWORK_DIR}/appsystemgroup.cpp"
 	"${APPFRAMEWORK_DIR}/appframework.cpp"
 
-	# Public units
+	# Public Source/Header files
 	"${SRC_DIR}/public/filesystem_init.cpp"
-
-	# Public headers
 	"${SRC_DIR}/public/filesystem_init.h"
 	"${SRC_DIR}/public/appframework/AppFramework.h"
 	"${SRC_DIR}/public/appframework/IAppSystem.h"
