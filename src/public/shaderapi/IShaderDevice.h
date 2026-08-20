@@ -129,6 +129,8 @@ using ShaderModeChangeCallbackFunc_t = void ( * )();
 #define SHADER_DEVICE_MGR_INTERFACE_VERSION "ShaderDeviceMgr001"
 abstract_class IShaderDeviceMgr : public IAppSystem {
 public:
+	static constexpr auto INTERFACE_VERSION{ SHADER_DEVICE_MGR_INTERFACE_VERSION };
+public:
 	// Gets the number of adapters...
 	virtual int GetAdapterCount() const = 0;
 

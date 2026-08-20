@@ -14,6 +14,8 @@ struct ShaderColorCorrectionInfo_t;
 
 abstract_class IColorCorrectionSystem {
 public:
+	static constexpr auto INTERFACE_VERSION{ COLORCORRECTION_INTERFACE_VERSION };
+public:
 	virtual void Init() = 0;
 	virtual void Shutdown() = 0;
 

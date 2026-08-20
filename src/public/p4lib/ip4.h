@@ -73,6 +73,8 @@ struct P4Client_t {
 
 abstract_class IP4 : public IAppSystem {
 public:
+	static constexpr auto INTERFACE_VERSION{ P4_INTERFACE_VERSION };
+public:
 	// name of the current clientspec
 	virtual P4Client_t& GetActiveClient() = 0;
 

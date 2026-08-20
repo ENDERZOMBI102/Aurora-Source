@@ -17,6 +17,8 @@
 #define INPUTSYSTEM_INTERFACE_VERSION "InputSystemVersion001"
 abstract_class IInputSystem : public IAppSystem {
 public:
+	static constexpr auto INTERFACE_VERSION{ INPUTSYSTEM_INTERFACE_VERSION };
+public:
 	// Attach, detach input system from a particular window
 	// This window should be the root window for the application
 	// Only 1 window should be attached at any given time.

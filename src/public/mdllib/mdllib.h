@@ -21,6 +21,8 @@ abstract_class IMdlStripInfo;
 #define MDLLIB_INTERFACE_VERSION "VMDLLIB001"
 
 abstract_class IMdlLib : public IAppSystem {
+public:
+	static constexpr auto INTERFACE_VERSION{ MDLLIB_INTERFACE_VERSION };
 	//
 	// Stripping routines
 	//
