@@ -4,7 +4,7 @@ vpc_linux binary
 vpc_osx binary
 
 *.sh text
-*.bat text
+*.bat text eol=crlf
 *.txt text
 *.c text
 *.h text
