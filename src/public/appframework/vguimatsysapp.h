@@ -18,42 +18,42 @@
 // The application object
 //-----------------------------------------------------------------------------
 class CVguiMatSysApp : public CVguiSteamApp {
-	typedef CVguiSteamApp BaseClass;
-
+	using BaseClass = CVguiSteamApp;
 public:
 	CVguiMatSysApp();
-
-	// Methods of IApplication
-	virtual bool Create();
-	virtual bool PreInit();
-	virtual void PostShutdown();
-	virtual void Destroy();
-
+public:	// Methods of IAppSystemGroup
+	virtual auto Create() -> bool;
+	virtual auto PreInit() -> bool;
+	virtual auto PostShutdown() -> void;
+	virtual auto Destroy() -> void;
+public:
 	// Returns the window handle (HWND in Win32)
-	void* GetAppWindow();
+	auto GetAppWindow() -> void*;
 
 	// Gets the window size
-	int GetWindowWidth() const;
-	int GetWindowHeight() const;
+	[[nodiscard]]
+	auto GetWindowWidth() const -> int;
+	[[nodiscard]]
+	auto GetWindowHeight() const -> int;
 
 protected:
-	void AppPumpMessages();
+	auto AppPumpMessages() -> void;
 
 	// Sets the video mode
-	bool SetVideoMode();
+	auto SetVideoMode() -> bool;
 
 	// Sets up the game path
-	bool SetupSearchPaths( const char* pStartingDir, bool bOnlyUseStartingDir, bool bIsTool );
+	auto SetupSearchPaths( const char* pStartingDir, bool bOnlyUseStartingDir, bool bIsTool ) -> bool;
 
 private:
 	// Returns the app name
-	virtual const char* GetAppName() = 0;
-	virtual bool AppUsesReadPixels() { return false; }
+	virtual auto GetAppName() -> const char* = 0;
+	virtual auto AppUsesReadPixels() -> bool { return false; }
 
 	// Creates the app window
-	virtual void* CreateAppWindow( char const* pTitle, bool bWindowed, int w, int h );
+	virtual auto CreateAppWindow( char const* pTitle, bool pWindowed, int pWidth, int pHeight ) -> void*;
 
-	void* m_HWnd;
-	int m_nWidth;
-	int m_nHeight;
+	void* m_HWnd{};
+	int m_nWidth{};
+	int m_nHeight{};
 };

@@ -39,22 +39,22 @@ public:
 	// An installed application creation function, you should tell the group
 	// the DLLs and the singleton interfaces you want to instantiate.
 	// Return false if there are any problems and the app will abort
-	virtual bool Create() = 0;
+	virtual auto Create() -> bool = 0;
 
 	// Allow the application to do some work after AppSystems are connected but
 	// before they are all Initialized.
 	// Return false if there are any problems and the app will abort
-	virtual bool PreInit() = 0;
+	virtual auto PreInit() -> bool = 0;
 
 	// Main loop implemented by the application
-	virtual int Main() = 0;
+	virtual auto Main() -> int = 0;
 
 	// Allow the application to do some work after all AppSystems are shut down
-	virtual void PostShutdown() = 0;
+	virtual auto PostShutdown() -> void = 0;
 
 	// Call an installed application destroy function, occurring after all modules
 	// are unloaded
-	virtual void Destroy() = 0;
+	virtual auto Destroy() -> void = 0;
 };
 
 
@@ -62,8 +62,8 @@ public:
 // Specifies a module + interface name for initialization
 //-----------------------------------------------------------------------------
 struct AppSystemInfo_t {
-	const char* m_pModuleName;
-	const char* m_pInterfaceName;
+	const char* m_pModuleName{};
+	const char* m_pInterfaceName{};
 };
 
 
@@ -115,7 +115,15 @@ protected:
 
 	// Method to add various global singleton systems
 	IAppSystem* AddSystem( AppModule_t pModule, const char* pInterfaceName );
+	template<typename T>
+	T* AddSystem( const AppModule_t pModule ) {
+		return static_cast<T*>( this->AddSystem( pModule, T::INTERFACE_VERSION ) );
+	}
 	void AddSystem( IAppSystem* pAppSystem, const char* pInterfaceName );
+	template<typename T>
+	void AddSystem( T* pAppSystem ) {
+		this->AddSystem( static_cast<IAppSystem*>( pAppSystem ), T::INTERFACE_VERSION );
+	}
 
 	// Simpler method of doing the LoadModule/AddSystem thing.
 	// Make sure the last AppSystemInfo has a NULL module name
@@ -174,6 +182,7 @@ private:
 	CAppSystemGroup* m_pParentAppSystem{ nullptr };
 	AppSystemGroupStage_t m_nErrorStage{ AppSystemGroupStage_t::NONE };
 
+	friend auto AppSystemCreateInterfaceFn( const char* pInterfaceName, int* pReturnCode ) -> void*;
 	friend class CSteamAppSystemGroup;
 };
 

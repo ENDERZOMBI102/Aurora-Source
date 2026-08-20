@@ -59,15 +59,17 @@ auto CSteamApplication::Shutdown() -> void {
 // CSteamApplication - IAppSystem
 auto CSteamApplication::Create() -> bool {
 	// load ICVar/cvar
-	if ( not AddSystem( LoadModule( VStdLib_GetICVarFactory() ), CVAR_INTERFACE_VERSION ) ) {
+	const CreateInterfaceFn icvarFactory{ VStdLib_GetICVarFactory() };
+	const AppModule_t icvarModule{ LoadModule( icvarFactory ) };
+	if ( not AddSystem( icvarModule, ICvar::INTERFACE_VERSION ) ) {
 		return false;
 	}
 
 	// load the fs module
 	char fsDllName[1024];
-	FileSystem_SetErrorMode( FSErrorMode_t::FS_ERRORMODE_AUTO );
-	const auto res{ FileSystem_GetFileSystemDLLName( fsDllName, std::size( fsDllName ), m_bSteam ) };
-	if ( res != FSReturnCode_t::FS_OK ) {
+	FileSystem_SetErrorMode( FS_ERRORMODE_AUTO );
+	FSReturnCode_t fsRetCode{};
+	if ( (fsRetCode = FileSystem_GetFileSystemDLLName( fsDllName, std::size( fsDllName ), m_bSteam )) != FS_OK ) {
 		const char* error;
 		switch ( fsRetCode ) {
 			case FS_INVALID_PARAMETERS: error = "invalid parameters."; break;
@@ -77,7 +79,7 @@ auto CSteamApplication::Create() -> bool {
 		Warning( "Failed to find filesystem module: %s\n", error );
 		return false;
 	}
-	m_pFileSystem = dynamic_cast<IFileSystem*>( AddSystem( LoadModule( fsDllName ), FILESYSTEM_INTERFACE_VERSION ) );
+	m_pFileSystem = AddSystem<IFileSystem>( LoadModule( fsDllName ) );
 	if ( not m_pFileSystem ) {
 		return false;
 	}
@@ -92,7 +94,7 @@ auto CSteamApplication::PreInit() -> bool {
 	return m_pChildAppSystemGroup->PreInit();
 }
 auto CSteamApplication::Main() -> int {
-	return m_pChildAppSystemGroup->Main();
+	return m_pChildAppSystemGroup->Run();
 }
 auto CSteamApplication::PostShutdown() -> void {
 	return m_pChildAppSystemGroup->PostShutdown();

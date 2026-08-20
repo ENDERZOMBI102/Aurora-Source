@@ -14,6 +14,14 @@ namespace {
 	int s_FailedSystemIndex{ -1 };
 }
 
+auto AppSystemCreateInterfaceFn( const char* pInterfaceName, int* pReturnCode ) -> void* {
+	void* const res{ g_RootAppSystem->FindSystem( pInterfaceName ) };
+	if ( pReturnCode ) {
+		*pReturnCode = res == nullptr;
+	}
+	return res;
+}
+
 // ----------------------
 // CAppSystemGroup
 // ----------------------
@@ -23,19 +31,30 @@ CAppSystemGroup::CAppSystemGroup( CAppSystemGroup* pParentAppSystem )
 int CAppSystemGroup::Run() {
 	int res{1};
 
+	g_RootAppSystem = this;
 	if ( not Create() ) {
 		Error( "AppSystemGroup::Create() returned `false`, this is usually because modules are missing or corrupt, check log for possibly more info.\n" );
-		return 1;
+		m_nErrorStage = AppSystemGroupStage_t::CREATION;
+		return -1;
 	}
 	if ( ConnectSystems() ) {
 		if ( PreInit() ) {
-			if ( InitSystems() != InitReturnVal_t::INIT_FAILED ) {
+			if ( InitSystems() != INIT_FAILED ) {
 				res = Main();
 				ShutdownSystems();  // TODO: Figure out if this can be pulled out of the if
+			} else {
+				m_nErrorStage = AppSystemGroupStage_t::INITIALIZATION;
+				res = -1;
 			}
 			PostShutdown();
+		} else {
+			m_nErrorStage = AppSystemGroupStage_t::PREINITIALIZATION;
+			res = -1;
 		}
 		DisconnectSystems();
+	} else {
+		m_nErrorStage = AppSystemGroupStage_t::CONNECTION;
+		res = -1;
 	}
 	UnloadAllModules();
 
@@ -49,7 +68,7 @@ int CAppSystemGroup::Startup() {
 	if ( not PreInit() ) {
 		return 2;
 	}
-	if ( InitSystems() == InitReturnVal_t::INIT_FAILED ) {
+	if ( InitSystems() == INIT_FAILED ) {
 		return 3;
 	}
 	return 0;
@@ -67,7 +86,7 @@ CAppSystemGroup::AppSystemGroupStage_t CAppSystemGroup::GetErrorStage() const {
 
 // protected
 AppModule_t CAppSystemGroup::LoadModule( const char* pDLLName ) {
-	for (  auto i{0}; i < m_Modules.Count(); i += 1 ) {
+	for ( auto i{0}; i < m_Modules.Count(); i += 1 ) {
 		if ( m_Modules[i].m_pModuleName and V_strcmp( m_Modules[i].m_pModuleName, pDLLName ) == 0 ) {
 			return i;
 		}
@@ -139,7 +158,8 @@ void CAppSystemGroup::AddSystem( IAppSystem* pAppSystem, const char* pInterfaceN
 }
 
 bool CAppSystemGroup::AddSystems( AppSystemInfo_t* const pSystems ) {
-	for ( int i{0}; pSystems[i].m_pModuleName; i += 1 ) {
+	// TODO: When we have full control, make this require a nullptr to end instead of nullptr|emptystring
+	for ( int i{0}; pSystems[i].m_pModuleName and pSystems[i].m_pModuleName[0]; i += 1 ) {
 		const auto info{ pSystems[i] };
 		const auto module{ LoadModule( info.m_pModuleName ) };
 		if ( module == CUtlVector<Module_t>::InvalidIndex() ) {
@@ -209,10 +229,11 @@ void CAppSystemGroup::UnloadAllModules() {
 void CAppSystemGroup::RemoveAllSystems() { AssertUnreachable(); }
 
 bool CAppSystemGroup::ConnectSystems() {
-	const auto factory{ GetFactory() };
+	constexpr CreateInterfaceFn factory{ AppSystemCreateInterfaceFn };
 
 	for ( int i{0}; i < m_Systems.Count(); i += 1 ) {
 		{
+			// debug printf - ignore
 			bool found{};
 			for ( const auto& x : m_SystemDict ) {
 				if ( x.elem == i ) {
@@ -224,7 +245,7 @@ bool CAppSystemGroup::ConnectSystems() {
 			if ( not found ) {
 				Log( "Connecting system `<unknown>`\n" );
 			}
-		} // debug printf - ignore
+		}
 		if ( not m_Systems[i]->Connect( factory ) ) {
 			s_FailedSystemIndex = i;
 			m_nErrorStage = AppSystemGroupStage_t::CONNECTION;
@@ -243,14 +264,14 @@ void CAppSystemGroup::DisconnectSystems() {
 
 InitReturnVal_t CAppSystemGroup::InitSystems() {
 	for ( int i{0}; i < m_Systems.Count(); i += 1 ) {
-		if ( m_Systems[i]->Init() != InitReturnVal_t::INIT_OK ) {
+		if ( m_Systems[i]->Init() != INIT_OK ) {
 			s_FailedSystemIndex = i;
 			m_nErrorStage = AppSystemGroupStage_t::INITIALIZATION;
-			return InitReturnVal_t::INIT_FAILED;
+			return INIT_FAILED;
 		}
 	}
 
-	return InitReturnVal_t::INIT_OK;
+	return INIT_OK;
 }
 void CAppSystemGroup::ShutdownSystems() {
 	for ( int i{0}; i < m_Systems.Count(); i += 1 ) {
