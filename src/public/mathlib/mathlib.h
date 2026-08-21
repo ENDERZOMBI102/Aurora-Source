@@ -1028,7 +1028,7 @@ void VectorYawRotate( const Vector& in, float flYaw, Vector& out );
 //
 // With a biasAmt of 0.5, Bias returns X.
 //
-[[deprecated("Not thread safe")]]
+// [[deprecated("Not thread safe")]]
 float Bias( float x, float biasAmt );
 
 
