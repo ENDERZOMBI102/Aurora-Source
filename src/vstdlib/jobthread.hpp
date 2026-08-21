@@ -66,7 +66,7 @@ public:
 private:
 	static auto PoolThreadFunc( void* pParam ) -> uint32;
 private:
-	enum State : int32 {
+	enum State : intp {
 		EXECUTING = 0,
 		SUSPENDED
 	};

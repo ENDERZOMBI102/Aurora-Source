@@ -16,7 +16,7 @@
 	}
 	auto CLauncherMgr::Disconnect() -> void { }
 	auto CLauncherMgr::QueryInterface( const char* pInterfaceName ) -> void* {
-		if ( V_strcmp( pInterfaceName, SDLMGR_INTERFACE_VERSION ) == 0 ) {
+		if ( V_strcmp( pInterfaceName, INTERFACE_VERSION ) == 0 ) {
 			return this;
 		}
 		return nullptr;
@@ -24,9 +24,9 @@
 	auto CLauncherMgr::Init() -> InitReturnVal_t {
 		if ( not SDL_InitSubSystem( SDL_INIT_VIDEO ) ) {
 			Warning( "[LauncherMgr] Failed to initialize SDL video subsystem (%s)\n", SDL_GetError() );
-			return InitReturnVal_t::INIT_FAILED;
+			return INIT_FAILED;
 		}
-		return InitReturnVal_t::INIT_OK;
+		return INIT_OK;
 	}
 	auto CLauncherMgr::Shutdown() -> void {
 		SDL_QuitSubSystem( SDL_INIT_VIDEO );
@@ -97,6 +97,7 @@
 		}
 	}
 	auto CLauncherMgr::PumpWindowsMessageLoop() -> void {
+		SDL_PumpEvents();
 	}
 
 	auto CLauncherMgr::DestroyGameWindow() -> void {

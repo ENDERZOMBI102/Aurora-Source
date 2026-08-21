@@ -18,7 +18,7 @@ auto CThreadPool::Start( const ThreadPoolStartParams_t& startParams ) -> bool {
 	for ( auto i{0}; i < startParams.nThreads; i += 1 ) {
 		m_Threads.AddToTail();
 		m_Threads[i] = CreateSimpleThread( PoolThreadFunc, this, startParams.nStackSize );
-		while ( m_IdleCount == i ) { }  // wait for thread to start
+		while ( m_IdleCount.GetRaw() == i ) { }  // wait for thread to start
 	}
 
 	if ( startParams.fDistribute == ThreeState_t::TRS_TRUE ) {
