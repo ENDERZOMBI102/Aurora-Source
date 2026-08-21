@@ -4,11 +4,14 @@
 #include "tier2/tier2.h"
 
 #include "filesystem.h"
-#include "tier0/icommandline.h"
 #include "filesystem/IQueuedLoader.h"
 #include "inputsystem/iinputsystem.h"
+#include "materialsystem/idebugtextureinfo.h"
 #include "materialsystem/imaterialsystem.h"
+#include "materialsystem/ivballoctracker.h"
+#include "mdllib/mdllib.h"
 #include "p4lib/ip4.h"
+#include "tier0/icommandline.h"
 #include "vgui_controls/RichText.h"
 
 
@@ -37,14 +40,27 @@ void ConnectTier2Libraries( const CreateInterfaceFn* pFactoryList, const int pFa
 		if ( g_pInputSystem == nullptr ) {
 			g_pInputSystem = static_cast<IInputSystem*>( (*pFactoryList[i])( INPUTSYSTEM_INTERFACE_VERSION, nullptr ) );
 		}
+		if ( g_pNetworkSystem == nullptr ) {
+			// whats the string?
+			// g_pNetworkSystem = static_cast<INetworkSystem*>( (*pFactoryList[i])( NETWORKSYSTEM_INTERFACE_VERSION, nullptr ) );
+		}
 		if ( g_pMaterialSystemHardwareConfig == nullptr ) {
-			g_pMaterialSystemHardwareConfig = static_cast<IMaterialSystemHardwareConfig*>( (*pFactoryList[i])( MATERIALSYSTEM_HARDWARECONFIG_INTERFACE_VERSION, nullptr ) );
+			g_pMaterialSystemHardwareConfig = static_cast<IMaterialSystemHardwareConfig*>( ( *pFactoryList[ i ] )( MATERIALSYSTEM_HARDWARECONFIG_INTERFACE_VERSION, nullptr ) );
+		}
+		if ( g_pMaterialSystemDebugTextureInfo == nullptr ) {
+			g_pMaterialSystemDebugTextureInfo = static_cast<IDebugTextureInfo*>( (*pFactoryList[i])( DEBUG_TEXTURE_INFO_VERSION, nullptr ) );
+		}
+		if ( g_VBAllocTracker == nullptr ) {
+			g_VBAllocTracker = static_cast<IVBAllocTracker*>( (*pFactoryList[i])( VB_ALLOC_TRACKER_INTERFACE_VERSION, nullptr ) );
 		}
 		if ( colorcorrection == nullptr ) {
 			colorcorrection = static_cast<IColorCorrectionSystem*>( (*pFactoryList[i])( COLORCORRECTION_INTERFACE_VERSION, nullptr ) );
 		}
 		if ( p4 == nullptr ) {
 			p4 = static_cast<IP4*>( (*pFactoryList[i])( P4_INTERFACE_VERSION, nullptr ) );
+		}
+		if ( mdllib == nullptr ) {
+			mdllib = static_cast<IMdlLib*>( (*pFactoryList[i])( MDLLIB_INTERFACE_VERSION, nullptr ) );
 		}
 		if ( g_pQueuedLoader == nullptr ) {
 			g_pQueuedLoader = static_cast<IQueuedLoader*>( (*pFactoryList[i])( QUEUEDLOADER_INTERFACE_VERSION, nullptr ) );
@@ -78,5 +94,3 @@ void InitCommandLineProgram( int argc, char** argv ) {
 		SpewOutputFunc( DefaultSpewFuncAbortOnAsserts );
 	}
 }
-
-

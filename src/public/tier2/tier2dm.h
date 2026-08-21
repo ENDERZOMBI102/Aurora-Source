@@ -6,53 +6,52 @@
 #pragma once
 #include "tier2/tier2.h"
 
-
 //-----------------------------------------------------------------------------
 // Set up methods related to datamodel interfaces
 //-----------------------------------------------------------------------------
-bool ConnectDataModel( CreateInterfaceFn factory );
-InitReturnVal_t InitDataModel();
+auto ConnectDataModel( CreateInterfaceFn factory ) -> bool;
+auto InitDataModel() -> InitReturnVal_t;
 void ShutdownDataModel();
 void DisconnectDataModel();
 
-//-----------------------------------------------------------------------------
 // Helper empty implementation of an IAppSystem for tier2 libraries
-//-----------------------------------------------------------------------------
 template<class IInterface, int ConVarFlag = 0>
 class CTier2DmAppSystem : public CTier2AppSystem<IInterface, ConVarFlag> {
-	typedef CTier2AppSystem<IInterface, ConVarFlag> BaseClass;
-
+	using BaseClass = CTier2AppSystem<IInterface, ConVarFlag>;
 public:
-	CTier2DmAppSystem( bool bIsPrimaryAppSystem = true ) : BaseClass( bIsPrimaryAppSystem ) {
-	}
+	explicit CTier2DmAppSystem( bool bIsPrimaryAppSystem = true )
+		: BaseClass( bIsPrimaryAppSystem ) { }
 
-	virtual bool Connect( CreateInterfaceFn factory ) {
-		if ( !BaseClass::Connect( factory ) )
+	auto Connect( CreateInterfaceFn factory ) -> bool override {
+		if ( not BaseClass::Connect( factory ) ) {
 			return false;
+		}
 
 		ConnectDataModel( factory );
 
 		return true;
 	}
 
-	virtual InitReturnVal_t Init() {
+	auto Init() -> InitReturnVal_t  override {
 		InitReturnVal_t nRetVal = BaseClass::Init();
-		if ( nRetVal != INIT_OK )
+		if ( nRetVal != INIT_OK ) {
 			return nRetVal;
+		}
 
 		nRetVal = InitDataModel();
-		if ( nRetVal != INIT_OK )
+		if ( nRetVal != INIT_OK ) {
 			return nRetVal;
+		}
 
 		return INIT_OK;
 	}
 
-	virtual void Shutdown() {
+	void Shutdown() override {
 		ShutdownDataModel();
 		BaseClass::Shutdown();
 	}
 
-	virtual void Disconnect() {
+	void Disconnect() override {
 		DisconnectDataModel();
 		BaseClass::Disconnect();
 	}
