@@ -46,7 +46,7 @@
 		#undef CurrentTime
 
 		#if defined( USE_SDL )
-			#include "SDL3/SDL.h"
+			#include <SDL3/SDL.h>
 		#endif
 	#endif
 
