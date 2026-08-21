@@ -27,15 +27,15 @@
 		#if defined( PLATFORM_WINDOWS )
 			#include <tchar.h>
 		#else
-			#include <wchar.h>
+			#include <cwchar>
 		#endif
-		#include <string.h>
+		#include <cstring>
 		#include <malloc.h>
 		#include "commonmacros.h"
 		#include "memalloc.h"
 
 		#if defined(USE_MEM_DEBUG)
-			#if defined( PPLATFORM_POSIX )
+			#if defined( PLATFORM_POSIX )
 				#define _NORMAL_BLOCK 1
 
 				#include <cstddef>

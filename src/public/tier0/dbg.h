@@ -245,13 +245,13 @@ DBG_INTERFACE bool HushAsserts();
 #else
 	#define _AssertMsg( _exp, _msg, _executeExp, _bFatal )                                                \
 		do {                                                                                              \
-			if ( !( _exp ) ) {                                                                            \
+			if ( not ( _exp ) ) {                                                                         \
 				_SpewInfo( SPEW_ASSERT, __FILE__, __LINE__ );                                             \
 				SpewRetval_t ret{ _SpewMessage( "%s", static_cast<const char*>( _msg ) ) };               \
 				CallAssertFailedNotifyFunc( __FILE__, __LINE__, _msg );                                   \
-				_executeExp;                                                                              \
+				(void) _executeExp;                                                                       \
 				if ( ret == SPEW_DEBUGGER ) {                                                             \
-					if ( !ShouldUseNewAssertDialog() || DoNewAssertDialog( __FILE__, __LINE__, _msg ) ) { \
+					if ( not ShouldUseNewAssertDialog() or DoNewAssertDialog( __FILE__, __LINE__, _msg ) ) { \
 						DebuggerBreak();                                                                  \
 					}                                                                                     \
 					if ( _bFatal ) {                                                                      \
@@ -264,7 +264,7 @@ DBG_INTERFACE bool HushAsserts();
 	#define _AssertMsgOnce( _exp, _msg, _bFatal )                        \
 		do {                                                             \
 			static bool fAsserted;                                       \
-			if ( !fAsserted ) {                                          \
+			if ( not fAsserted ) {                                       \
 				_AssertMsg( _exp, _msg, ( fAsserted = true ), _bFatal ); \
 			}                                                            \
 		} while ( 0 )
@@ -417,8 +417,10 @@ DBG_INTERFACE void LogV( PRINTF_FORMAT_STRING const tchar* pMsg, va_list arglist
 	// be consistent with the Warning prototype.
 	DBG_INTERFACE_NORET void Error( PRINTF_FORMAT_STRING const tchar* pMsg, ... ) FMTFUNCTION( 1, 2 );
 #else
-	DBG_INTERFACE void Error( PRINTF_FORMAT_STRING const tchar* pMsg, ... ) FMTFUNCTION( 1, 2 );
-	DBG_INTERFACE void ErrorV( PRINTF_FORMAT_STRING const tchar* pMsg, va_list arglist );
+	DBG_INTERFACE [[noreturn]]
+	void Error( PRINTF_FORMAT_STRING const tchar* pMsg, ... ) FMTFUNCTION( 1, 2 );
+	DBG_INTERFACE [[noreturn]]
+	void ErrorV( PRINTF_FORMAT_STRING const tchar* pMsg, va_list arglist );
 #endif
 
 // You can use this macro like a runtime assert macro.

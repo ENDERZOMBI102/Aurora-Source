@@ -14,7 +14,7 @@ static bool g_bAssertionsDisabled{ false };
 static SDL_Window* g_pDialogParent{ nullptr };
 static std::unordered_map<const char*, int> g_GroupsData{};
 static struct {
-	SpewType_t m_eType{ SpewType_t::SPEW_MESSAGE };
+	SpewType_t m_eType{ SPEW_MESSAGE };
 	const tchar* m_sFile{ nullptr };
 	int m_iLine{ 0 };
 } g_sSpewInfo;
@@ -42,7 +42,7 @@ SpewRetval_t DefaultSpewFunc( SpewType_t pSpewType, const tchar* pMsg ) {
 			break;
 		case SPEW_ASSERT:
 			printf( "[A] %s", pMsg );
-			return SpewRetval_t::SPEW_DEBUGGER;
+			return SPEW_DEBUGGER;
 		case SPEW_ERROR:
 			printf( "[E] %s", pMsg );
 			break;
@@ -51,15 +51,15 @@ SpewRetval_t DefaultSpewFunc( SpewType_t pSpewType, const tchar* pMsg ) {
 			break;
 		default:
 			printf( "Invalid spew type: %d (msg=`%s`)", pSpewType, pMsg );
-			return SpewRetval_t::SPEW_DEBUGGER;
+			return SPEW_DEBUGGER;
 	}
-	return SpewRetval_t::SPEW_CONTINUE;
+	return SPEW_CONTINUE;
 }
 
 SpewRetval_t DefaultSpewFuncAbortOnAsserts( SpewType_t pSpewType, const tchar* pMsg ) {
 	auto res{ DefaultSpewFunc( pSpewType, pMsg ) };
-	if ( pSpewType == SpewType_t::SPEW_ASSERT ) {
-		return SpewRetval_t::SPEW_ABORT;
+	if ( pSpewType == SPEW_ASSERT ) {
+		return SPEW_ABORT;
 	}
 
 	return res;
@@ -69,7 +69,7 @@ SpewRetval_t DefaultSpewFuncAbortOnAsserts( SpewType_t pSpewType, const tchar* p
 const tchar* GetSpewOutputGroup() { AssertUnreachable(); return nullptr; }
 int GetSpewOutputLevel() { AssertUnreachable(); return 0; }
 const Color* GetSpewOutputColor() {
-	static Color spewColors[SpewType_t::SPEW_TYPE_COUNT] {
+	static Color spewColors[SPEW_TYPE_COUNT] {
 		{ 0xB5, 0xB6, 0xE3, 0 },  // SPEW_MESSAGE
 		{ 0xC6, 0xAF, 0x35, 0 },  // SPEW_WARNING
 		{ 0xE6, 0xA0, 0x29, 0 },  // SPEW_ASSERT
@@ -154,11 +154,11 @@ static void SpewInternal( SpewType_t pType, const tchar* pMsg, const va_list& ar
 	vsnprintf( buffer, sizeof( buffer ), pMsg, args );
 	auto res{ g_pSpewOutFunction( pType, buffer ) };
 
-	if ( res == SpewRetval_t::SPEW_CONTINUE ) {
+	if ( res == SPEW_CONTINUE ) {
 		return;
 	}
 
-	if ( res == SpewRetval_t::SPEW_ABORT ) {
+	if ( res == SPEW_ABORT ) {
 		puts( "Fatal spew! Aborting execution." );
 		exit( 1 );
 	}
@@ -169,31 +169,31 @@ static void SpewInternal( SpewType_t pType, const tchar* pMsg, const va_list& ar
 void Msg( const tchar* pMsg, ... ) {
 	va_list args;
 	va_start( args, pMsg );
-	SpewInternal( SpewType_t::SPEW_MESSAGE, pMsg, args );
+	SpewInternal( SPEW_MESSAGE, pMsg, args );
 	va_end( args );
 }
 
 void Warning( const tchar* pMsg, ... ) {
 	va_list args;
 	va_start( args, pMsg );
-	SpewInternal( SpewType_t::SPEW_WARNING, pMsg, args );
+	SpewInternal( SPEW_WARNING, pMsg, args );
 	va_end( args );
 }
 
 void Log( const tchar* pMsg, ... ) {
 	va_list args;
 	va_start( args, pMsg );
-	SpewInternal( SpewType_t::SPEW_LOG, pMsg, args );
+	SpewInternal( SPEW_LOG, pMsg, args );
 	va_end( args );
 }
 
 void Error( const tchar* pMsg, ... ) {
 	va_list args;
 	va_start( args, pMsg );
-	SpewInternal( SpewType_t::SPEW_ERROR, pMsg, args );
+	SpewInternal( SPEW_ERROR, pMsg, args );
 	va_end( args );
 	// for some reason, all errors are fatal...
-	exit(1);
+	exit( 1 );
 }
 
 // ---- Dev*
@@ -348,6 +348,7 @@ void COM_TimestampedLog( const char* fmt, ... ) {
 void _AssertValidReadPtr( void* ptr, int count ) { }
 void _AssertValidWritePtr( void* ptr, int count ) { }
 void _AssertValidReadWritePtr( void* ptr, int count ) { }
-void AssertValidStringPtr( const tchar* ptr, int maxchar ) { }
-
-
+void AssertValidStringPtr( const tchar* ptr, int maxchar ) {
+	AssertFatalMsg( ptr, "String is nullptr" );
+	// TODO: maxchar thingy
+}
