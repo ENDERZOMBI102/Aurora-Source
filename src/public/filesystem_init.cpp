@@ -610,10 +610,10 @@ FSReturnCode_t FileSystem_LoadSearchPaths( CFSSearchPathsInit& initInfo ) {
 bool DoesFileExistIn( const char* pDirectoryName, const char* pFilename ) {
 	char filename[ MAX_PATH ];
 
-	Q_strncpy( filename, pDirectoryName, sizeof( filename ) );
-	Q_AppendSlash( filename, sizeof( filename ) );
-	Q_strncat( filename, pFilename, sizeof( filename ), COPY_ALL_CHARACTERS );
-	Q_FixSlashes( filename );
+	V_strncpy( filename, pDirectoryName, sizeof( filename ) );
+	V_AppendSlash( filename, sizeof( filename ) );
+	V_strncat( filename, pFilename, sizeof( filename ), COPY_ALL_CHARACTERS );
+	V_FixSlashes( filename );
 
 	return _access( filename, 0 ) == 0;
 }
@@ -887,6 +887,17 @@ FSReturnCode_t FileSystem_SetBasePaths( IFileSystem* pFileSystem ) {
 	return FS_OK;
 }
 
+namespace {
+	auto fileExists( const char* const pPath ) -> bool {
+		#if IsLinux()
+			struct stat statBuf{};
+			return stat( pPath, &statBuf ) == 0;
+		#else
+			return _access( pPath, 0 ) == 0;
+		#endif
+	}
+}
+
 //-----------------------------------------------------------------------------
 // Returns the name of the file system DLL to use
 //-----------------------------------------------------------------------------
@@ -901,16 +912,17 @@ FSReturnCode_t FileSystem_GetFileSystemDLLName( char* pFileSystemDLL, int nMaxLe
 	}
 
 	// Assume we'll use local files
-	Q_snprintf( pFileSystemDLL, nMaxLen, "%s%cfilesystem_stdio" DLL_EXT_STRING, executablePath, CORRECT_PATH_SEPARATOR );
+	V_snprintf( pFileSystemDLL, nMaxLen, "%s%cfilesystem_stdio" DLL_EXT_STRING, executablePath, CORRECT_PATH_SEPARATOR );
 
-	// Use filsystem_steam if it exists?
-	#if IsLinux()
-		struct stat statBuf{};
-		if ( stat( pFileSystemDLL, &statBuf ) != 0 ) {
-	#else
-		if ( _access( pFileSystemDLL, 0 ) != 0 ) {
-	#endif
-		Q_snprintf( pFileSystemDLL, nMaxLen, "%s%cfilesystem_steam" DLL_EXT_STRING, executablePath, CORRECT_PATH_SEPARATOR );
+	// Use filsystem_steam if it stdio doesn't exists
+	if ( not fileExists( pFileSystemDLL ) ) {
+		V_snprintf( pFileSystemDLL, nMaxLen, "%s%cfilesystem_steam" DLL_EXT_STRING, executablePath, CORRECT_PATH_SEPARATOR );
+
+		// if we can't find this as well, error out
+		if ( not fileExists( pFileSystemDLL ) ) {
+			return FS_UNABLE_TO_INIT;
+		}
+
 		bSteam = true;
 	}
 

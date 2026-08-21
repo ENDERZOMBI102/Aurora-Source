@@ -494,14 +494,14 @@ DECLARE_POINTER_HANDLE( MaterialLock_t );
 abstract_class IMaterialSystem : public IAppSystem {
 public:
 	static constexpr auto INTERFACE_VERSION{ MATERIAL_SYSTEM_INTERFACE_VERSION };
-public:
+public: // IAppSystem
 	// Placeholder for API revision
-	virtual bool Connect( CreateInterfaceFn factory ) = 0;
-	virtual void Disconnect() = 0;
-	virtual void* QueryInterface( const char* pInterfaceName ) = 0;
-	virtual InitReturnVal_t Init() = 0;
-	virtual void Shutdown() = 0;
-
+	auto Connect( CreateInterfaceFn factory ) -> bool override = 0;
+	auto Disconnect() -> void override = 0;
+	auto QueryInterface( const char* pInterfaceName ) -> void* override = 0;
+	auto Init() -> InitReturnVal_t override = 0;
+	auto Shutdown() -> void override = 0;
+public:
 	//---------------------------------------------------------
 	// Initialization and shutdown
 	//---------------------------------------------------------

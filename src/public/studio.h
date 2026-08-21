@@ -1632,7 +1632,7 @@ struct virtualgeneric_t {
 	int index;
 };
 
-
+/// All the data we know about the model (comprehensive of the "included" ones).
 struct virtualmodel_t {
 	void AppendSequences( int group, const studiohdr_t* pStudioHdr );
 	void AppendAnimations( int group, const studiohdr_t* pStudioHdr );
