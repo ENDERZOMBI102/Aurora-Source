@@ -43,3 +43,9 @@ private:
 	std::vector<std::string> m_Params{};
 };
 
+
+/// Builds up a command line string from parts, appending `-steam` if requested
+/// @param pArgc How many strings are in the given array.
+/// @param pArgv Array of elements to copy into the buffer.
+/// @param pSteam If `true`, appends `-steam` to the built string.
+extern "C" auto BuildCmdLine( int pArgc, const char** pArgv, bool pSteam ) -> void*;

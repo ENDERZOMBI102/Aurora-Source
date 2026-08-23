@@ -3,11 +3,15 @@
 //
 #include "commandline.hpp"
 
+#include "dbg.h"
+
 #include <bits/streambuf_iterator.h>
 
 
 namespace {
-	CCommandLine* s_pCommandLine{ nullptr };
+	CCommandLine s_pCommandLine{};
+	constexpr size_t MAX_ARGSBUFFER_LEN{ 256 };
+	char s_ArgsBuffer[MAX_ARGSBUFFER_LEN] { };
 
 	auto tokenize( const char* line, std::string& buffer ) -> const char* {
 		// if we're already at the end, do nothing
@@ -216,11 +220,34 @@ auto CCommandLine::Reset() -> void {
 	m_Params.clear();
 }
 
+auto BuildCmdLine( const int pArgc, const char** pArgv, const bool pSteam ) -> void* {
+	size_t used{};
+	char* buffer{ s_ArgsBuffer };
+	for ( int i{}; i < pArgc; i += 1 ) {
+		const char* string{ pArgv[i] };
 
-auto CommandLine_Tier0() -> ICommandLine* {
-	if ( not s_pCommandLine ) {
-		s_pCommandLine = new CCommandLine();
+		const size_t len{ strlen( string ) };
+		if ( used + len + 1 >= MAX_ARGSBUFFER_LEN ) {
+			printf( "[BuildCmdLine] Given more than storage! max is %d\n", MAX_ARGSBUFFER_LEN );
+			break;
+		}
+
+		memcpy( buffer + used, string, len );
+		used += len;
+		buffer[used] = ' ';
+		used += 1;
 	}
 
-	return s_pCommandLine;
+	if ( pSteam ) {
+		strcpy( buffer + used, "-steam" );
+		used += 6;
+	}
+	buffer[used] = '\0';
+
+	return s_ArgsBuffer;
+}
+
+
+auto CommandLine_Tier0() -> ICommandLine* {
+	return &s_pCommandLine;
 }
