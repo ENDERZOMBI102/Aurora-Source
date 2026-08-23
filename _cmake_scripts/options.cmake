@@ -18,12 +18,12 @@ set_property( CACHE BUILD_GAME PROPERTY STRINGS
 )
 
 option( RETAIL "Build in retail mode" OFF )
-option( STAGING_ONLY "Staging only" OFF )
+option( STAGING_ONLY "Build with staging asserts and code enabled" OFF )
 option( USE_TOGL "Use the `togl` translation layer" ${IS_LINUX} )
 option( BUILD_REPLAY "Build replay support" OFF )
 option( ASOURCE_OVERRIDE_MALLOC "Enable the tier0 global allocator override (memalloc.cpp)" OFF )
 option( ASOURCE_3RD_PARTY_LOGS "Toggles 3rd party libraries cmake output" OFF )
-set( ASOURCE_SKIP_x86_CHECK ${ASOURCE_SKIP_x86_CHECK} CACHE STRING "Skip the 64bit build checks" )
+set( ASOURCE_SKIP_x86_CHECK ${ASOURCE_SKIP_x86_CHECK} CACHE STRING "Skip the configure checks to ensure we're building for i686" )
 set( ASOURCE_REIMPL ${ASOURCE_REIMPL} CACHE STRING "Either a comma-separated list of targets for which enable building or 1 for enable all" )
 set( ASOURCE_DX9SDK_PATH CACHE STRING "Absolute path to the dx9 sdk" )
 
