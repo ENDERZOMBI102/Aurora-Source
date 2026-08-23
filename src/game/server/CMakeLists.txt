@@ -942,6 +942,9 @@ set_source_files_properties(
     PROPERTIES SKIP_PRECOMPILE_HEADERS ON
 )
 
+# Where to put the project in IDEs.
+set( IDE_FOLDER "Game" )
+
 include( "${SERVER_DIR}/server_${BUILD_GAME}.cmake" )
 
 asource_link_libraries(
