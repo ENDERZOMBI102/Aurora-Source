@@ -42,7 +42,7 @@ set( SOURCE_FILES
 )
 
 # Target type
-set( KIND "MODULE" )
+set( KIND "SHARED" )
 
 # Include this to handle all the defines and actually create the target
 include( "${CMAKESCRIPTS_DIR}/project-base.cmake" )
