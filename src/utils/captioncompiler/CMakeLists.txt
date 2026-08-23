@@ -45,6 +45,3 @@ asource_include_directories(
 		"${SRC_DIR}/utils/common"
 		"${SRC_DIR}/game/shared"
 )
-
-
-add_dependencies( ${PROJECT_NAME} filesystem_stdio )
