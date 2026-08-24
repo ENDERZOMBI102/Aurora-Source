@@ -11,7 +11,9 @@ set( SOURCE_FILES
 	"${TIER0_DIR}/memalloc.cpp"
 	"${TIER0_DIR}/memalloc.hpp"
 	"${TIER0_DIR}/mem.cpp"
+	"${TIER0_DIR}/vcrmode.cpp"
 	"${TIER0_DIR}/vprof.cpp"
+	"${TIER0_DIR}/vprof_telemetry.cpp"
 	"${TIER0_DIR}/fasttimer.cpp"
 
 	# Public Source/Header files
@@ -50,6 +52,8 @@ set( SOURCE_FILES
 	"${SRC_DIR}/public/tier0/valobject.h"
 	"${SRC_DIR}/public/tier0/valve_off.h"
 	"${SRC_DIR}/public/tier0/valve_on.h"
+	"${SRC_DIR}/public/tier0/vcr_shared.h"
+	"${SRC_DIR}/public/tier0/vcrmode.h"
 	"${SRC_DIR}/public/tier0/vprof.h"
 	"${SRC_DIR}/public/tier0/vprof_telemetry.h"
 	"${SRC_DIR}/public/tier0/wchartypes.h"
