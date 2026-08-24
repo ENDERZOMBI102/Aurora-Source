@@ -36,7 +36,6 @@ Checks: '-*,
         cppcoreguidelines-pro-type-static-cast-downcast,
         cppcoreguidelines-missing-std-forward,
         
-        google-default-arguments,
         google-runtime-operator,
         google-explicit-constructor,
         
@@ -51,7 +50,6 @@ Checks: '-*,
         misc-new-delete-overloads,
         misc-non-copyable-objects,
         misc-no-recursion,
-        misc-throw-by-value-catch-by-reference,
         misc-uniqueptr-reset-release,
         
         modernize-*,
