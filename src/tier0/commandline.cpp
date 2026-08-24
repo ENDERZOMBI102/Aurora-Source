@@ -2,7 +2,6 @@
 // Created by ENDERZOMBI102 on 09/02/2024.
 //
 #include "commandline.hpp"
-
 #include "dbg.h"
 
 #include <bits/streambuf_iterator.h>
@@ -228,7 +227,7 @@ auto BuildCmdLine( const int pArgc, const char** pArgv, const bool pSteam ) -> v
 
 		const size_t len{ strlen( string ) };
 		if ( used + len + 1 >= MAX_ARGSBUFFER_LEN ) {
-			printf( "[BuildCmdLine] Given more than storage! max is %d\n", MAX_ARGSBUFFER_LEN );
+			printf( "[BuildCmdLine] Given more than storage! max is %u", MAX_ARGSBUFFER_LEN ); // NOLINT(*-use-std-print)
 			break;
 		}
 
