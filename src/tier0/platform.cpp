@@ -198,10 +198,15 @@ const char* Plat_GetCommandLineA() {
 
 bool Plat_VerifyHardwareKeyDriver();
 
-// FIXME: Implement this
-bool Plat_VerifyHardwareKey() { return true; }
+bool Plat_VerifyHardwareKey() {
+	// TODO: Actually impl this
+	return true;
+}
 
-bool Plat_VerifyHardwareKeyPrompt();
+bool Plat_VerifyHardwareKeyPrompt() {
+	// TODO: Actually impl this
+	return true;
+}
 
 bool Plat_FastVerifyHardwareKey();
 

@@ -8,56 +8,68 @@
 #include "icommandline.h"
 #include "Color.h"
 
-static SpewOutputFunc_t g_pSpewOutFunction{ DefaultSpewFunc };
-static AssertFailedNotifyFunc_t g_pAssertFailedListener{ nullptr };
-static bool g_bAssertionsDisabled{ false };
-static SDL_Window* g_pDialogParent{ nullptr };
-static std::unordered_map<const char*, int> g_GroupsData{};
-static struct {
-	SpewType_t m_eType{ SPEW_MESSAGE };
-	const tchar* m_sFile{ nullptr };
-	int m_iLine{ 0 };
-} g_sSpewInfo;
+namespace {
+	 SpewOutputFunc_t g_SpewOutFunction{ DefaultSpewFunc };
+	 AssertFailedNotifyFunc_t g_AssertFailedListener{ nullptr };
+	 bool g_AssertionsDisabled{ false };
+	 SDL_Window* g_DialogParent{ nullptr };
+
+	struct {
+		SpewType_t type{ SPEW_MESSAGE };
+		const tchar* file{};
+		int line{};
+		const char* group{};
+		int level{};
+	} s_SpewInfo;
+
+	Color s_SpewColors[SPEW_TYPE_COUNT] { // NOLINT(*-throwing-static-initialization) cant change the sig yet
+		{ 0xB5, 0xB6, 0xE3, 0 },  // SPEW_MESSAGE
+		{ 0xC6, 0xAF, 0x35, 0 },  // SPEW_WARNING
+		{ 0xE6, 0xA0, 0x29, 0 },  // SPEW_ASSERT
+		{ 0xC6, 0x4D, 0x3F, 0 },  // SPEW_ERROR
+		{ 0x71, 0x58, 0x3E, 0 },  // SPEW_LOG
+	};
+}
 
 
-void SpewOutputFunc( SpewOutputFunc_t func ) {
-	if ( func ) {
-		g_pSpewOutFunction = func;
+void SpewOutputFunc( SpewOutputFunc_t const pFunc ) {
+	if ( pFunc ) {
+		g_SpewOutFunction = pFunc;
 	} else {
-		g_pSpewOutFunction = DefaultSpewFunc;
+		g_SpewOutFunction = DefaultSpewFunc;
 	}
 }
 
 SpewOutputFunc_t GetSpewOutputFunc() {
-	return g_pSpewOutFunction;
+	return g_SpewOutFunction;
 }
 
-SpewRetval_t DefaultSpewFunc( SpewType_t pSpewType, const tchar* pMsg ) {
+SpewRetval_t DefaultSpewFunc( const SpewType_t pSpewType, const tchar* const pMsg ) {
+	char sym{};
+	SpewRetval_t res{ SPEW_CONTINUE };
 	switch ( pSpewType ) {
 		case SPEW_MESSAGE:
-			printf( "[I] %s", pMsg );
 			break;
 		case SPEW_WARNING:
-			printf( "[W] %s", pMsg );
+			sym = 'W';
 			break;
 		case SPEW_ASSERT:
-			printf( "[A] %s", pMsg );
-			return SPEW_DEBUGGER;
+			sym = 'A';
+			res = SPEW_DEBUGGER;
 		case SPEW_ERROR:
-			printf( "[E] %s", pMsg );
+			sym = 'E';
 			break;
 		case SPEW_LOG:
-			printf( "[D] %s", pMsg );
+			sym = 'D';
 			break;
-		default:
-			printf( "Invalid spew type: %d (msg=`%s`)", pSpewType, pMsg );
-			return SPEW_DEBUGGER;
+		default: std::unreachable();
 	}
-	return SPEW_CONTINUE;
+	printf( "[%c] %s", sym, pMsg ); // NOLINT(*-use-std-print)
+	return res;
 }
 
-SpewRetval_t DefaultSpewFuncAbortOnAsserts( SpewType_t pSpewType, const tchar* pMsg ) {
-	auto res{ DefaultSpewFunc( pSpewType, pMsg ) };
+SpewRetval_t DefaultSpewFuncAbortOnAsserts( const SpewType_t pSpewType, const tchar* const pMsg ) {
+	const auto res{ DefaultSpewFunc( pSpewType, pMsg ) };
 	if ( pSpewType == SPEW_ASSERT ) {
 		return SPEW_ABORT;
 	}
@@ -65,47 +77,48 @@ SpewRetval_t DefaultSpewFuncAbortOnAsserts( SpewType_t pSpewType, const tchar* p
 	return res;
 }
 
-// TODO: Implement these
-const tchar* GetSpewOutputGroup() { AssertUnreachable(); return nullptr; }
-int GetSpewOutputLevel() { AssertUnreachable(); return 0; }
+const tchar* GetSpewOutputGroup() {
+	return s_SpewInfo.file;
+}
+int GetSpewOutputLevel() {
+	return s_SpewInfo.level;
+}
 const Color* GetSpewOutputColor() {
-	static Color spewColors[SPEW_TYPE_COUNT] {
-		{ 0xB5, 0xB6, 0xE3, 0 },  // SPEW_MESSAGE
-		{ 0xC6, 0xAF, 0x35, 0 },  // SPEW_WARNING
-		{ 0xE6, 0xA0, 0x29, 0 },  // SPEW_ASSERT
-		{ 0xC6, 0x4D, 0x3F, 0 },  // SPEW_ERROR
-		{ 0x71, 0x58, 0x3E, 0 }   // SPEW_LOG
-	};
-	return &spewColors[g_sSpewInfo.m_eType];
+	return &s_SpewColors[s_SpewInfo.type];
 }
 
-// TODO: Implement these
-void SpewActivate( const tchar* pGroupName, int level ) {
-	g_GroupsData[pGroupName] = level;
+void SpewActivate( const tchar* pGroupName, const int level ) {
+	s_SpewInfo.group = pGroupName;
+	s_SpewInfo.level = level;
 }
-bool IsSpewActive( const tchar* pGroupName, int level ) {
-	return g_GroupsData[pGroupName] >= level;
+bool IsSpewActive( const tchar* pGroupName, const int level ) {
+	return strcmp( s_SpewInfo.group, pGroupName ) == 0 and s_SpewInfo.level == level;
 }
 
-// TODO: Implement these
-void _SpewInfo( SpewType_t pType, const tchar* pFile, int pLine ) {
-	g_sSpewInfo.m_eType = pType;
-	g_sSpewInfo.m_sFile = pFile;
-	g_sSpewInfo.m_iLine = pLine;
+void _SpewInfo( const SpewType_t pType, const tchar* pFile, const int pLine ) {
+	s_SpewInfo.type = pType;
+	s_SpewInfo.file = pFile;
+	s_SpewInfo.line = pLine;
 }
 SpewRetval_t _SpewMessage( const tchar* pMsg, ... ) {
-	char buffer[MAX_PATH] { 0 };
+	char buffer[MAX_PATH] { };
 
 	va_list args;
 	va_start( args, pMsg );
 	vsnprintf( buffer, sizeof( buffer ), pMsg, args );
 	va_end( args );
 
-	return g_pSpewOutFunction( g_sSpewInfo.m_eType, buffer );
+	return g_SpewOutFunction( s_SpewInfo.type, buffer );
 }
-SpewRetval_t _DSpewMessage( const tchar* pGroupName, int level, const tchar* pMsg, ... ) { assert( false ); return {}; }
-SpewRetval_t ColorSpewMessage( SpewType_t type, const Color* pColor, const tchar* pMsg, ... ) { assert( false ); return {}; }
-void _ExitOnFatalAssert( const tchar* pFile, int line ) { exit( 1 ); }
+SpewRetval_t _DSpewMessage( const tchar* pGroupName, int level, const tchar* pMsg, ... ) {
+	AssertUnreachable();
+}
+SpewRetval_t ColorSpewMessage( SpewType_t type, const Color* pColor, const tchar* pMsg, ... ) {
+	AssertUnreachable();
+}
+void _ExitOnFatalAssert( const tchar* pFile, int line ) {
+	exit( 1 );
+}
 bool ShouldUseNewAssertDialog() { return true; }
 
 bool DoNewAssertDialog( const tchar* pFile, int line, const tchar* pExpression ) {
@@ -122,7 +135,7 @@ bool DoNewAssertDialog( const tchar* pFile, int line, const tchar* pExpression )
 
 // TODO: Implement these
 bool AreAllAssertsDisabled() {
-	return g_bAssertionsDisabled;
+	return g_AssertionsDisabled;
 }
 void SetAllAssertsDisabled( bool bAssertsEnabled ) {
 	g_bAssertionsDisabled = bAssertsEnabled;
@@ -131,9 +144,9 @@ void SetAllAssertsDisabled( bool bAssertsEnabled ) {
 void SetAssertFailedNotifyFunc( AssertFailedNotifyFunc_t pFunc ) {
 	g_pAssertFailedListener = pFunc;
 }
-void CallAssertFailedNotifyFunc( const char* pchFile, int nLine, const char* pchMessage ) {
-	if ( g_pAssertFailedListener ) {
-		g_pAssertFailedListener( pchFile, nLine, pchMessage );
+void CallAssertFailedNotifyFunc( const char* pchFile, const int nLine, const char* pchMessage ) {
+	if ( g_AssertFailedListener ) {
+		g_AssertFailedListener( pchFile, nLine, pchMessage );
 	}
 }
 
@@ -152,7 +165,7 @@ struct SDL_Window* GetAssertDialogParent() {
 static void SpewInternal( SpewType_t pType, const tchar* pMsg, const va_list& args ) {
 	char buffer[MAX_PATH] { 0 };
 	vsnprintf( buffer, sizeof( buffer ), pMsg, args );
-	auto res{ g_pSpewOutFunction( pType, buffer ) };
+	auto res{ g_SpewOutFunction( pType, buffer ) };
 
 	if ( res == SPEW_CONTINUE ) {
 		return;

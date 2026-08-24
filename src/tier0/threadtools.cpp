@@ -220,6 +220,42 @@ bool ThreadInterlockedAssignIf64( volatile int64* pDest, int64 pValue, int64 com
     #endif
 }
 
+
+#if !defined( __AFXTLS_H__ )
+	#if !defined( NO_THREAD_LOCAL )
+		CThreadLocalBase::CThreadLocalBase() {
+			#if IsWindows()
+				m_index = TlsAlloc();
+			#elif IsPosix()
+				pthread_key_create( &m_index, nullptr );
+			#endif
+		}
+		CThreadLocalBase::~CThreadLocalBase() {
+			#if IsWindows()
+				TlsFree( m_index );
+			#elif IsPosix()
+				pthread_key_delete( m_index );
+			#endif
+		}
+
+		void* CThreadLocalBase::Get() const {
+			#if IsWindows()
+				return TlsGetValue2( m_index );
+			#elif IsPosix()
+				return pthread_getspecific( m_index );
+			#endif
+		};
+		void CThreadLocalBase::Set( void* pValue ) {
+			#if IsWindows()
+				TlsSetValue( m_index, pValue );
+			#elif IsPosix()
+				pthread_setspecific( m_index, pValue );
+			#endif
+		};
+	#endif// NO_THREAD_LOCAL
+#endif    // !__AFXTLS_H__
+
+
 // ----- CThreadRWLock -----
 //
 void CThreadRWLock::LockForWrite() {

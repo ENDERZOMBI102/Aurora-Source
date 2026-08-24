@@ -313,14 +313,15 @@ inline bool ThreadInterlockedAssignIf( int volatile* p, int value, int comperand
 			CThreadLocalBase();
 			~CThreadLocalBase();
 
-			void* Get() const;
-			void Set( void* );
+			[[nodiscard]]
+			auto Get() const -> void*;
+			auto Set( void* ) -> void;
 
 		private:
 			#if IsWindows()
 				uint32 m_index;
 			#elif IsPosix()
-				pthread_key_t m_index;
+				pthread_key_t m_index{};
 			#endif
 		};
 
@@ -1112,8 +1113,7 @@ private:
 class CThreadManualEvent : public CThreadEvent {
 public:
 	CThreadManualEvent()
-		: CThreadEvent( true ) {
-	}
+		: CThreadEvent( true ) { }
 };
 
 inline int ThreadWaitForEvents( int nEvents, CThreadEvent* const* pEvents, bool bWaitAll = true, unsigned timeout = TT_INFINITE ) {
