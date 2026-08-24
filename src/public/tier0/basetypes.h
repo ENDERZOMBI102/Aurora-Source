@@ -20,7 +20,7 @@
 
 
 #if defined( PLATFORM_POSIX )
-	#include <stdint.h>
+	#include <cstdint>
 #endif
 
 #define ExecuteNTimes( nTimes, x )       \

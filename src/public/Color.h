@@ -5,7 +5,6 @@
 // $NoKeywords: $
 //=============================================================================//
 #pragma once
-
 #include <type_traits>
 
 //-----------------------------------------------------------------------------
@@ -17,13 +16,13 @@ public:
 	// constructors
 	constexpr Color() = default;
 	constexpr Color( const Color& ) = default;
-	explicit Color( int _color ) {
+	explicit Color( const int _color ) {
 		this->SetRawColor( _color );
 	};
-	constexpr Color( int _r, int _g, int _b ) {
+	constexpr Color( const int _r, const int _g, const int _b ) {
 		this->SetColor( _r, _g, _b, 0 );
 	}
-	constexpr Color( int _r, int _g, int _b, int _a ) {
+	constexpr Color( const int _r, const int _g, const int _b, const int _a ) {
 		this->SetColor( _r, _g, _b, _a );
 	}
 
@@ -32,7 +31,7 @@ public:
 	// g - green component (0-255)
 	// b - blue component (0-255)
 	// a - alpha component, controls transparency (0 - transparent, 255 - opaque);
-	constexpr void SetColor( int _r, int _g, int _b, int _a = 0 ) {
+	constexpr void SetColor( const int _r, const int _g, const int _b, const int _a = 0 ) {
 		this->_color[ 0 ] = static_cast<unsigned char>( _r );
 		this->_color[ 1 ] = static_cast<unsigned char>( _g );
 		this->_color[ 2 ] = static_cast<unsigned char>( _b );
@@ -46,8 +45,8 @@ public:
 		_a = this->_color[ 3 ];
 	}
 
-	void SetRawColor( int color32 ) {
-		*reinterpret_cast<int*>( this ) = color32;
+	void SetRawColor( const int pColor32 ) {
+		*reinterpret_cast<int*>( this ) = pColor32;
 	}
 
 	[[nodiscard]] int GetRawColor() const {
@@ -63,13 +62,13 @@ public:
 	[[nodiscard]]
 	inline int a() const { return this->_color[ 3 ]; }
 
-	inline void r( unsigned char value ) { this->_color[ 0 ] = value; }
-	inline void g( unsigned char value ) { this->_color[ 1 ] = value; }
-	inline void b( unsigned char value ) { this->_color[ 2 ] = value; }
-	inline void a( unsigned char value ) { this->_color[ 3 ] = value; }
+	inline void r( const unsigned char pValue ) { this->_color[ 0 ] = pValue; }
+	inline void g( const unsigned char pValue ) { this->_color[ 1 ] = pValue; }
+	inline void b( const unsigned char pValue ) { this->_color[ 2 ] = pValue; }
+	inline void a( const unsigned char pValue ) { this->_color[ 3 ] = pValue; }
 
-	constexpr inline unsigned char& operator[]( int index ) {
-		return this->_color[ index ];
+	constexpr inline unsigned char& operator[]( const int pIndex ) {
+		return this->_color[ pIndex ];
 	}
 
 	// Thanks, @JJl77! this the most readable version of operator[] I've ever seen
@@ -83,7 +82,7 @@ public:
 	}
 
 	bool operator!=( const Color& rhs ) const {
-		return ! this->operator==( rhs );
+		return not this->operator==( rhs );
 	}
 
 //	Color& operator=( const Color& rhs ) {
