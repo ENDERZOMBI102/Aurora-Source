@@ -129,9 +129,11 @@ protected:
 	typedef typename ArgumentTypeInfo<AlternateKeyT>::Arg_t KeyAlt_t;
 	typedef CUtlHashtableEntry<KeyT, ValueT> entry_t;
 
-	enum { FLAG_FREE = entry_t::FLAG_FREE };
-	enum { FLAG_LAST = entry_t::FLAG_LAST };
-	enum { MASK_HASH = entry_t::MASK_HASH };
+	enum {
+		FLAG_FREE = entry_t::FLAG_FREE,
+		FLAG_LAST = entry_t::FLAG_LAST,
+		MASK_HASH = entry_t::MASK_HASH,
+	};
 
 	CUtlMemory<entry_t> m_table;
 	int m_nUsed;
@@ -327,7 +329,7 @@ public:
 	//  it is up to the caller to ensure that they are compatible!)
 	void Swap( CUtlHashtable& other ) {
 		m_table.Swap( other.m_table );
-		::V_swap( m_nUsed, other.m_nUsed );
+		V_swap( m_nUsed, other.m_nUsed );
 	}
 
 #if IsDebug()
@@ -405,9 +407,7 @@ void CUtlHashtable<KeyT, ValueT, KeyHashT, KeyIsEqualT, AltKeyT>::BumpEntry( uns
 	entry_t* table = m_table.Base();
 	unsigned int slotmask = m_table.Count() - 1;
 
-// warning: bitwise operation between different enumeration types ‘CUtlHashtable<...>::<unnamed enum>’ and ‘CUtlHashtable<...>::<unnamed enum>’ is deprecated [-Wdeprecated-enum-enum-conversion]
-#pragma GCC diagnostic ignored "-Wdeprecated-enum-enum-conversion"
-	unsigned int new_flags_and_hash = table[ idx ].flags_and_hash & ( FLAG_LAST | MASK_HASH );// NOLINT(*-suspicious-enum-usage)
+	unsigned int new_flags_and_hash = table[ idx ].flags_and_hash & ( FLAG_LAST | MASK_HASH );
 
 	unsigned int chainid = entry_t::IdealIndex( new_flags_and_hash, slotmask );
 

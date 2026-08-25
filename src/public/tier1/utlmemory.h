@@ -10,7 +10,7 @@
 #include "mathlib/mathlib.h"
 #include "tier0/dbg.h"
 #include "tier0/platform.h"
-#include <string.h>
+#include <cstring>
 
 #include "tier0/memalloc.h"
 #include "tier0/memdbgon.h"

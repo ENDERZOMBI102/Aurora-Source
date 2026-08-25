@@ -1,6 +1,14 @@
 //
 // Created by ENDERZOMBI102 on 22/02/2024.
 //
+#include <algorithm>
+#include <utility>
+#if defined( PLATFORM_WINDOWS )
+	#include <shlwapi.h>
+#endif
+#include <vpkpp/vpkpp.h>
+#include <bsppp/PakLump.h>
+
 #include "filesystem.hpp"
 #include "interface.h"
 #include "driver/fsdriver.hpp"
@@ -9,10 +17,6 @@
 #include "driver/rootfsdriver.hpp"
 #include "platform.h"
 #include "utlbuffer.h"
-#include <algorithm>
-#include <utility>
-#include "vpkpp/vpkpp.h"
-#include "bsppp/PakLump.h"
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
 
@@ -289,8 +293,7 @@ bool CFileSystemStdio::FileExists( const char* pFileName, const char* pPathID ) 
 	}
 
 	// try to open the file
-	const auto handle{ Open( pFileName, "r", pPathID ) };
-	if ( handle ) {
+	if ( const auto handle{ Open( pFileName, "r", pPathID ) } ) {
 		Close( handle );
 		return true;
 	}
@@ -302,7 +305,7 @@ bool CFileSystemStdio::SetFileWritable( char const* pFileName, bool writable, co
 
 long CFileSystemStdio::GetFileTime( const char* pFileName, const char* pPathID ) { AssertUnreachable(); return {}; }
 
-bool CFileSystemStdio::ReadFile( const char* pFileName, const char* pPath, CUtlBuffer& buf, int nMaxBytes, int nStartingByte, FSAllocFunc_t pfnAlloc ) {
+bool CFileSystemStdio::ReadFile( const char* pFileName, const char* pPath, CUtlBuffer& buf, const int nMaxBytes, const int nStartingByte, const FSAllocFunc_t pfnAlloc ) {
 	const auto handle{ Open( pFileName, "r", pPath ) };
 	if ( handle == nullptr ) {
 		return false;
@@ -337,8 +340,9 @@ bool CFileSystemStdio::IsSteam() const {
 	return false;
 }
 
-FilesystemMountRetval_t CFileSystemStdio::MountSteamContent( int nExtraAppId ) {
-	return FilesystemMountRetval_t::FILESYSTEM_MOUNT_FAILED;
+FilesystemMountRetval_t CFileSystemStdio::MountSteamContent( const int nExtraAppId ) {
+	(void) nExtraAppId;
+	return FILESYSTEM_MOUNT_FAILED;
 }
 
 

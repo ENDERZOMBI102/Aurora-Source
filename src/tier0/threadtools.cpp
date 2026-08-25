@@ -123,7 +123,12 @@ void ThreadDetach( ThreadHandle_t ) {
 
 void ThreadSetDebugName( ThreadId_t id, const char* pszName ) {
 	#if IsWindows()
-		SetThreadDescription( id, pszName );
+		const size_t size{ strlen( pszName ) };
+		Assert( size < 50 );
+		wchar_t buffer[50] {};
+		mbstowcs( buffer, pszName, size );
+		// FIXME: Here we need the handle not the id, what do?
+		// SetThreadDescription( id, buffer ); // TODO: How to check HRESULTs?
 	#elif IsPosix()
 		pthread_setname_np( id, pszName );
 	#else
@@ -174,21 +179,21 @@ void ThreadSetAffinity( ThreadHandle_t hThread, int nAffinityMask ) {
 	}
 #endif
 int64 ThreadInterlockedIncrement64( int64 volatile* pIt ) {// NOLINT(*-non-const-parameter)
-    #if IsWindows()
+    #ifdef COMPILER_MSVC
         return _InlineInterlockedIncrement64(pIt);
-    #elif IsPosix()
+    #elif defined( COMPILER_CLANG ) || IsPosix()
         return __atomic_add_fetch( pIt, 1, __ATOMIC_ACQ_REL );
     #endif
 }
 int64 ThreadInterlockedDecrement64( int64 volatile* pIt ) {// NOLINT(*-non-const-parameter)
-    #if IsWindows()
+	#ifdef COMPILER_MSVC
         return _InlineInterlockedDecrement64(pIt);
-    #elif IsPosix()
+    #elif defined( COMPILER_CLANG ) || IsPosix()
 	    return __atomic_sub_fetch( pIt, 1, __ATOMIC_ACQ_REL );
     #endif
 }
 int64 ThreadInterlockedCompareExchange64( int64 volatile* pIt, int64 pValue, int64 comperand ) {// NOLINT(*-non-const-parameter)
-    #if IsWindows()
+	#if IsWindows()
         return _InterlockedCompareExchange64(pIt, pValue, comperand);
     #elif IsPosix()
 	    int64 last;
@@ -199,16 +204,16 @@ int64 ThreadInterlockedCompareExchange64( int64 volatile* pIt, int64 pValue, int
     #endif
 }
 int64 ThreadInterlockedExchange64( int64 volatile* pIt, int64 pValue ) {                        // NOLINT(*-non-const-parameter)
-    #if IsWindows()
+    #ifdef COMPILER_MSVC
         return _InlineInterlockedExchange64(pIt, pValue);
-    #elif IsPosix()
+    #elif defined( COMPILER_CLANG ) || IsPosix()
 	    return __atomic_exchange_n( pIt, pValue, __ATOMIC_ACQ_REL );
     #endif
 }
 int64 ThreadInterlockedExchangeAdd64( int64 volatile* pIt, int64 pValue ) {// NOLINT(*-non-const-parameter)
-    #if IsWindows()
+    #ifdef COMPILER_MSVC
         return _InlineInterlockedExchangeAdd64(pIt, pValue);
-    #elif IsPosix()
+    #elif defined( COMPILER_CLANG ) || IsPosix()
 	    return __atomic_fetch_add( pIt, pValue, __ATOMIC_ACQ_REL );
     #endif
 }
@@ -410,7 +415,7 @@ bool CThreadEvent::Wait( uint32 dwTimeout ) {
 static thread_local CThread* g_CurrentThread{ nullptr };
 CThread::CThread() = default;
 CThread::~CThread() = default;
-unsigned int CThread::ThreadProc( void* pv ) {
+CThread::ThreadProcReturnType CThread::ThreadProc( void* pv ) {
 	// load up data
 	const auto init{ static_cast<ThreadInit_t*>( pv ) };
 	// set current thread object
@@ -494,7 +499,9 @@ bool CThread::Join( uint32 timeout ) {
 		if ( res == /*WAIT_TIMEOUT*/0x00000102L || res == /*WAIT_FAILED*/-1 ) {
 			return false;
 		}
-		GetExitCodeThread( m_hThread, m_result );
+		unsigned long exitCode{};
+		GetExitCodeThread( m_hThread, &exitCode );
+		m_result = exitCode;
 		return true;
 	#elif IsPosix()
 		// TODO: Is this correct?

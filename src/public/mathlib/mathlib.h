@@ -730,12 +730,16 @@ ALWAYS_INLINE QAngleByValue Lerp<QAngleByValue>( float flPercent, const QAngleBy
 
 
 /// Same as swap(), but won't cause problems with std::swap
-template<class T>
-ALWAYS_INLINE void V_swap( T& x, T& y ) {
-	T temp = x;
-	x = y;
-	y = temp;
-}
+#if IsWindows() && defined( COMPILER_CLANG )
+	#define V_swap( $a, $b ) ({ auto a = $a; auto b = $b; $b = a; $a = b; })
+#else
+	template<class T>
+	ALWAYS_INLINE void V_swap( T& x, T& y ) {
+		T temp = x;
+		x = y;
+		y = temp;
+	}
+#endif
 
 template<class T>
 ALWAYS_INLINE T AVG( T a, T b ) {

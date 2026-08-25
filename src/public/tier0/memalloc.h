@@ -479,9 +479,13 @@
 	}
 	#define MemAlloc_MemoryAllocFailed() 0
 
+	#undef MemAlloc_GetDebugInfoSize
 	#define MemAlloc_GetDebugInfoSize() 0
+	#undef MemAlloc_SaveDebugInfo
 	#define MemAlloc_SaveDebugInfo( pvDebugInfo ) ((void) 0)
+	#undef MemAlloc_RestoreDebugInfo
 	#define MemAlloc_RestoreDebugInfo( pvDebugInfo ) ((void) 0)
+	#undef MemAlloc_InitDebugInfo
 	#define MemAlloc_InitDebugInfo( pvDebugInfo, pchRootFileName, nLine ) ((void) 0)
 
 
@@ -545,32 +549,37 @@ of 16 will be 16-byte aligned. Existing uses of this class were not changed beca
 the cost/benefit did not justify it.
 */
 // template here to allow adding alignment at levels of hierarchy that aren't the base
-template<int bytesAlignment = 16, class T = aligned_tmp_t>
-class CAlignedNewDelete : public T {
-public:
-	/*
-	Note that this class does not overload operator new[] and delete[] which means that
-	classes that depend on this for alignment may end up misaligned if an array is
-	allocated. This problem is now mostly theoretical because this class is mostly
-	obsolete.
-	*/
-	void* operator new( size_t nSize ) {
-		return MemAlloc_AllocAligned( nSize, bytesAlignment );
-	}
-
-	void* operator new( size_t nSize, int nBlockUse, const char* pFileName, int nLine ) {
-		return MemAlloc_AllocAlignedFileLine( nSize, bytesAlignment, pFileName, nLine );
-	}
-
-	void operator delete( void* pData ) {
-		if ( pData ) {
-			MemAlloc_FreeAligned( pData );
+#if !defined( STEAM ) && !defined( NO_MALLOC_OVERRIDE )
+	template<int bytesAlignment = 16, class T = aligned_tmp_t>
+	class CAlignedNewDelete : public T {
+	public:
+		/*
+		Note that this class does not overload operator new[] and delete[] which means that
+		classes that depend on this for alignment may end up misaligned if an array is
+		allocated. This problem is now mostly theoretical because this class is mostly
+		obsolete.
+		*/
+		void* operator new( size_t nSize ) {
+			return MemAlloc_AllocAligned( nSize, bytesAlignment );
 		}
-	}
 
-	void operator delete( void* pData, int nBlockUse, const char* pFileName, int nLine ) {
-		if ( pData ) {
-			MemAlloc_FreeAligned( pData, pFileName, nLine );
+		void* operator new( size_t nSize, int nBlockUse, const char* pFileName, int nLine ) {
+			return MemAlloc_AllocAlignedFileLine( nSize, bytesAlignment, pFileName, nLine );
 		}
-	}
-};
+
+		void operator delete( void* pData ) {
+			if ( pData ) {
+				MemAlloc_FreeAligned( pData );
+			}
+		}
+
+		void operator delete( void* pData, int nBlockUse, const char* pFileName, int nLine ) {
+			if ( pData ) {
+				MemAlloc_FreeAligned( pData, pFileName, nLine );
+			}
+		}
+	};
+#else
+	template<int bytesAlignment = 16, class T = aligned_tmp_t>
+	using CAlignedNewDelete = T;
+#endif

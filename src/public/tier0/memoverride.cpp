@@ -228,6 +228,9 @@
 				return NULL;
 			}
 
+			#ifdef _amblksiz
+				#undef _amblksiz
+			#endif
 			unsigned int _amblksiz = 16;//BYTES_PER_PARA;
 
 			#if _MSC_VER >= 1400

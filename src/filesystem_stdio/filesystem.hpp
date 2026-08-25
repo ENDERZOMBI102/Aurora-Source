@@ -447,7 +447,7 @@ private:
 	// Filesystem stats, mostly read/write related
 	FileSystemStatistics m_Stats{};
 	// The log level for the `m_Warning` output
-	FileWarningLevel_t m_WarningLevel{ FileWarningLevel_t::FILESYSTEM_WARNING_QUIET };
+	FileWarningLevel_t m_WarningLevel{ FILESYSTEM_WARNING_QUIET };
 	// Warnings output
 	FileWarningFunc_t m_Warning{ nullptr };
 	// Filename dictionary

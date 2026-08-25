@@ -4,9 +4,10 @@
 //
 //=============================================================================
 #pragma once
+#include <climits>
 #include "tier1/strtools.h"
 #include "tier1/utlmemory.h"
-#include <climits>
+
 
 //-----------------------------------------------------------------------------
 // Simple string class.

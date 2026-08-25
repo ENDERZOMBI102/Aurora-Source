@@ -510,7 +510,7 @@ typedef CBitVec<32> CDWordBitVec;
 
 template<typename BITCOUNTTYPE>
 inline CVarBitVecBase<BITCOUNTTYPE>::CVarBitVecBase() {
-	memset( this, 0, sizeof( *this ) );
+	memset( static_cast<void*>( this ), 0, sizeof( *this ) );
 }
 
 //-----------------------------------------------------------------------------

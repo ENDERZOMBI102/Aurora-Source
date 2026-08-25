@@ -13,8 +13,8 @@
 	#include <profileapi.h>
 	#include <processenv.h>
     #include <intrin.h>
-    #include <wow64apiset.h>
     #include <processthreadsapi.h>
+    #include <debugapi.h>
 #elif IsPosix()
 	#include <cpuid.h>
 	#include <sys/utsname.h>
@@ -232,7 +232,7 @@ void* Plat_SimpleLog( const tchar* file, int line );
 		return IsDebuggerPresent();
 	}
 	PLATFORM_INTERFACE void Plat_DebugString( const char* pString ) {
-		OutputDebugStringW( pString );
+		OutputDebugStringA( pString );
 	}
 #endif
 
@@ -241,10 +241,10 @@ bool Is64BitOS() {
 		return true;
     #elif IsWindows()
         using LPFN_ISWOW64PROCESS = BOOL (WINAPI *) (HANDLE, PBOOL);
-		auto isWow64{ false };
+		WINBOOL isWow64{ false };
 		static auto fnIsWow64Process{ reinterpret_cast<LPFN_ISWOW64PROCESS>( GetProcAddress( GetModuleHandle( "kernel32" ), "IsWow64Process" ) ) };
 
-		return fnIsWow64Process && fnIsWow64Process( GetCurrentProcess(), &isWow64 ) && isWow64;
+		return fnIsWow64Process and fnIsWow64Process( GetCurrentProcess(), &isWow64 ) and isWow64;
 	#elif IsPosix()
 		utsname data{};
 		uname( &data );

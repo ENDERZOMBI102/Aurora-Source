@@ -4,8 +4,6 @@
 #include "commandline.hpp"
 #include "dbg.h"
 
-#include <bits/streambuf_iterator.h>
-
 
 namespace {
 	CCommandLine s_pCommandLine{};

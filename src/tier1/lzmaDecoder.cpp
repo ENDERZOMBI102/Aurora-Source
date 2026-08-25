@@ -9,6 +9,7 @@
 //========================================================================//
 
 #define _LZMADECODER_CPP
+#include <algorithm>
 
 #include "tier0/platform.h"
 #include "tier0/basetypes.h"

@@ -6,11 +6,11 @@
 //
 //=============================================================================
 #pragma once
-#include "tier0/dbg.h"
-#include "tier0/platform.h"
 #include <algorithm>
 #include <climits>
 #include <cerrno>
+#include "tier0/dbg.h"
+#include "tier0/platform.h"
 
 
 #if IsWindows() && IsPC()
@@ -1339,7 +1339,12 @@ protected:
 	bool WaitForCreateComplete( CThreadEvent* pEvent );
 
 	// "Virtual static" facility
-	using ThreadProc_t = unsigned (__stdcall*)( void* );
+	#if IsWindows()
+		using ThreadProcReturnType = unsigned long;
+	#else
+		using ThreadProcReturnType = unsigned int;
+	#endif
+	using ThreadProc_t = ThreadProcReturnType (__stdcall*)( void* );
 	virtual ThreadProc_t GetThreadProc();
 	virtual bool IsThreadRunning();
 
@@ -1366,7 +1371,7 @@ private:
 
 	// Thread initially runs this. param is actually 'this'. function
 	// just gets this and calls ThreadProc
-	static unsigned __stdcall ThreadProc( void* pv );
+	static ThreadProcReturnType __stdcall ThreadProc( void* pv );
 
 	// make copy constructor and assignment operator inaccessible
 	CThread( const CThread& );

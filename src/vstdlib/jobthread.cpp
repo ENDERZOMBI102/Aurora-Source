@@ -5,6 +5,7 @@
 #include "tier0/platform.h"
 #if IsWindows()
 	#include <synchapi.h>
+	#include <winbase.h>
 #endif
 #include "jobthread.hpp"
 

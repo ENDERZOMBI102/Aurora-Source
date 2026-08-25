@@ -237,7 +237,7 @@ int CUtlSortVector<T, LessFunc, BaseVector>::Find( const TKey& search ) const {
 
 	int start = 0, end = this->Count() - 1;
 	while ( start <= end ) {
-		const int mid = start + end >> 1;
+		const int mid = (start + end) >> 1;
 		if ( less.Less( this->Element( mid ), search, m_pLessContext ) ) {
 			start = mid + 1;
 		} else if ( less.Less( search, this->Element( mid ), m_pLessContext ) ) {
@@ -283,7 +283,7 @@ int CUtlSortVector<T, LessFunc, BaseVector>::FindLessOrEqual( const TKey& search
 	LessFunc less;
 	int start = 0, end = this->Count() - 1;
 	while ( start <= end ) {
-		const int mid = start + end >> 1;
+		const int mid = (start + end) >> 1;
 		if ( less.Less( this->Element( mid ), search, m_pLessContext ) ) {
 			start = mid + 1;
 		} else if ( less.Less( search, this->Element( mid ), m_pLessContext ) ) {
@@ -313,7 +313,7 @@ int CUtlSortVector<T, LessFunc, BaseVector>::FindLess( const TKey& search ) cons
 	LessFunc less;
 	int start = 0, end = this->Count() - 1;
 	while ( start <= end ) {
-		const int mid = start + end >> 1;
+		const int mid = (start + end) >> 1;
 		if ( less.Less( this->Element( mid ), search, m_pLessContext ) ) {
 			start = mid + 1;
 		} else {

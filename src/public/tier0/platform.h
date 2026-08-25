@@ -177,7 +177,7 @@ static_assert( sizeof( float64 ) == 8 );
 	#define MULTIPLE_INHERITANCE
 #endif
 
-#if defined( COMPILER_MSVC ) || defined( COMPILER_CLANG )
+#if defined( COMPILER_MSVC )
 	#define NO_VTABLE __declspec( novtable )
 #else
 	#define NO_VTABLE

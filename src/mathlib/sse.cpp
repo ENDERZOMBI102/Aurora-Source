@@ -1028,7 +1028,7 @@
 	}
 	#endif
 
-	#if IsWindows()
+	#if defined(COMPILER_MSVC)
 	void _declspec(naked) _SSE_VectorMA( const float *start, float scale, const float *direction, float *dest )
 	{
 		// FIXME: This don't work!! It will overwrite memory in the write to dest
@@ -1040,21 +1040,21 @@
 			mov ecx, DWORD PTR [esp+0x0c]	; *direction, d0..d2
 			mov edx, DWORD PTR [esp+0x10]	; *dest
 			movss	xmm2, [esp+0x08]		; x2 = scale, 0, 0, 0
-	#ifdef ALIGNED_VECTOR
-			movaps	xmm3, [ecx]				; x3 = dir0,dir1,dir2,X
-			pshufd	xmm2, xmm2, 0			; x2 = scale, scale, scale, scale
-			movaps	xmm1, [eax]				; x1 = start1, start2, start3, X
-			mulps	xmm3, xmm2				; x3 *= x2
-			addps	xmm3, xmm1				; x3 += x1
-			movaps	[edx], xmm3				; *dest = x3
-	#else
-			movups	xmm3, [ecx]				; x3 = dir0,dir1,dir2,X
-			pshufd	xmm2, xmm2, 0			; x2 = scale, scale, scale, scale
-			movups	xmm1, [eax]				; x1 = start1, start2, start3, X
-			mulps	xmm3, xmm2				; x3 *= x2
-			addps	xmm3, xmm1				; x3 += x1
-			movups	[edx], xmm3				; *dest = x3
-	#endif
+			#ifdef ALIGNED_VECTOR
+				movaps	xmm3, [ecx]				; x3 = dir0,dir1,dir2,X
+				pshufd	xmm2, xmm2, 0			; x2 = scale, scale, scale, scale
+				movaps	xmm1, [eax]				; x1 = start1, start2, start3, X
+				mulps	xmm3, xmm2				; x3 *= x2
+				addps	xmm3, xmm1				; x3 += x1
+				movaps	[edx], xmm3				; *dest = x3
+			#else
+				movups	xmm3, [ecx]				; x3 = dir0,dir1,dir2,X
+				pshufd	xmm2, xmm2, 0			; x2 = scale, scale, scale, scale
+				movups	xmm1, [eax]				; x1 = start1, start2, start3, X
+				mulps	xmm3, xmm2				; x3 *= x2
+				addps	xmm3, xmm1				; x3 += x1
+				movups	[edx], xmm3				; *dest = x3
+			#endif
 		}
 	}
 	#endif

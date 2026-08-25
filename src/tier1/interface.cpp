@@ -3,6 +3,8 @@
 // Purpose:
 //
 //===========================================================================//
+#include <cstdio>
+#include <cstring>
 #if defined( PLATFORM_WINDOWS )
 	#include <libloaderapi.h>
 	#include <errhandlingapi.h>
@@ -30,8 +32,7 @@
 #include "tier0/dbg.h"
 #include "tier0/threadtools.h"
 #include "tier1/strtools.h"
-#include <cstdio>
-#include <cstring>
+#include "tier0/icommandline.h"
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
 
@@ -134,10 +135,10 @@ auto Sys_LoadLibrary( const char* pLibraryName, const Sys_Flags flags ) -> HMODU
 
 	#if IsWindows()
 		if ( flags & SYS_NOLOAD ) {
-			return GetModuleHandle( pName );
+			return GetModuleHandle( pLibraryName );
 		}
 
-		return LoadLibraryEx( pName, NULL, LOAD_WITH_ALTERED_SEARCH_PATH );
+		return LoadLibraryEx( pLibraryName, nullptr, LOAD_WITH_ALTERED_SEARCH_PATH );
 	#elif IsPosix()
 		int dlopen_mode = RTLD_NOW;
 
@@ -194,7 +195,7 @@ auto Sys_LoadModule( const char* pModuleName, const Sys_Flags flags ) -> CSysMod
 	#if !IsLinux()
 		// If running in the debugger, assume debug binaries are okay, otherwise they must run with -allowdebug
 		if ( Sys_GetProcAddress( dll, "BuiltDebug" ) ) {
-			if ( hDLL and not CommandLine()->FindParm( "-allowdebug" ) and not Plat_IsInDebugSession() ) {
+			if ( dll and not CommandLine()->FindParm( "-allowdebug" ) and not Plat_IsInDebugSession() ) {
 				Error( "Module %s is a debug build\n", pModuleName );
 			}
 
