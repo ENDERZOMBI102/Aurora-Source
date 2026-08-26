@@ -14,7 +14,8 @@ AllowShortFunctionsOnASingleLine: Inline
 AllowShortIfStatementsOnASingleLine: WithoutElse
 AllowShortLoopsOnASingleLine: false
 AlwaysBreakTemplateDeclarations: Yes
-BraceWrapping: 
+BreakBeforeBraces: Custom
+BraceWrapping:
   AfterCaseLabel: false
   AfterClass: false
   AfterControlStatement: Never
@@ -31,11 +32,10 @@ BraceWrapping:
   SplitEmptyFunction: false
   SplitEmptyRecord: false
   SplitEmptyNamespace: false
-BreakBeforeBraces: Custom
 BreakBeforeBinaryOperators: NonAssignment
 ColumnLimit: 0
-Cpp11BracedListStyle: Block
-IncludeCategories: 
+Cpp11BracedListStyle: false
+IncludeCategories:
   - Regex: '^<.*'
     Priority: 1
   - Regex: '^".*'
@@ -56,7 +56,7 @@ SpaceAfterTemplateKeyword: false
 SpacesInAngles: Leave
 SpacesInContainerLiterals: false
 SpacesInParens: Custom
-SpacesInParensOptions: 
+SpacesInParensOptions:
   InCStyleCasts: false
   InEmptyParentheses: false
   InConditionalStatements: true
@@ -65,3 +65,7 @@ SpacesInParensOptions:
 SpacesInSquareBrackets: true
 TabWidth: 4
 UseTab: ForContinuationAndIndentation
+LineEnding: DeriveLF
+KeepEmptyLines:
+  AtEndOfFile: true
+BreakBeforeConceptDeclarations: Always
