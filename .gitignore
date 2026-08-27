@@ -22,7 +22,7 @@ obj*/
 # Game stuff
 /game/**/user_custom
 /game/**/screenshots
-/game/**/bin
+/game/**/bin*/
 /game/test
 /game/hl2
 /game/hl2mp
