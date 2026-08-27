@@ -91,7 +91,7 @@ private:
 
 namespace Interface {
 	template<typename T>
-	inline constexpr bool is_modern_interface{ std::is_same_v<decltype( T::INTERFACE_VERSION ), const char* const> };
+	inline constexpr bool is_modern_interface_v{ std::is_same_v<decltype( T::INTERFACE_VERSION ), const char* const> };
 }
 
 // Use this to expose a singleton modern interface with a global variable you've created.
@@ -99,7 +99,7 @@ namespace Interface {
 	static_assert( std::is_class_v<decltype( globalVarName )>, "Must be a plain object (not * nor &)" ); \
 	static_assert( std::is_base_of_v<ifaceName, className>, "Class must implement the interface" ); \
 	static_assert( std::is_default_constructible_v<className>, "Class must have no other constructor than default" ); \
-	static_assert( Interface::is_modern_interface<ifaceName>, "The given interface doesn't expose its version!" ); \
+	static_assert( Interface::is_modern_interface_v<ifaceName>, "The given interface doesn't expose its version!" ); \
 	static InterfaceReg __g_Create##className##ifaceName##_reg( []() -> void* { return static_cast<ifaceName*>( &globalVarName ); }, ifaceName::INTERFACE_VERSION ); // NOLINT(*-reserved-identifier)
 
 
