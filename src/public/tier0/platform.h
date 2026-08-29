@@ -258,6 +258,7 @@ FIXME: Enable this when we no longer fear change =)
 	typedef unsigned short WORD;
 	typedef void* HINSTANCE;
 	#define _MAX_PATH PATH_MAX // NOLINT(*-reserved-identifier)
+	#define _MAX_EXT 256       // NOLINT(*-reserved-identifier)
 	#define __cdecl            // NOLINT(*-reserved-identifier)
 	#define __stdcall          // NOLINT(*-reserved-identifier)
 	#define __declspec         // NOLINT(*-reserved-identifier)
