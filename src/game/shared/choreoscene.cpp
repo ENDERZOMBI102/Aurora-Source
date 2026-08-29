@@ -5,12 +5,6 @@
 // $NoKeywords: $
 //
 //=============================================================================//
-
-
-#if IsWindows()
-#include <windows.h>
-#endif
-
 #include "basetypes.h"
 #include <stdio.h>
 #include "choreoscene.h"
