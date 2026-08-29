@@ -27,6 +27,8 @@ set( IDE_FOLDER )
 
 # Target type
 set( KIND "SHARED|STATIC|MODULE|EXEC" )
+# Whether to set the exec's WIN32 flag
+set( EXEC_WIN32 1 )
 # If should always be imported
 set( VENDORED 1 )
 
