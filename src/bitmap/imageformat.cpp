@@ -1736,7 +1736,7 @@ namespace ImageLoader {
 		return true;
 	}
 
-	bool ResampleRGB323232F( const ImageLoader::ResampleInfo_t& info ) {
+	bool ResampleRGB323232F( const ResampleInfo_t& info ) {
 		AssertAlways( "TODO: Implement this!!" );
 		return false;
 	}
@@ -1875,6 +1875,53 @@ namespace ImageLoader {
 		for ( ; src < lastPixel; src += 4, dst += 2 ) {
 			dst[0] = static_cast<char>( static_cast<int>( src[0] ) - 127 );
 			dst[1] = static_cast<char>( static_cast<int>( src[1] ) - 127 );
+		}
+	}
+
+	void ConvertIA88ImageToNormalMapRGBA8888( const unsigned char* const src, const int width, const int height, unsigned char* const dst, const float bumpScale ) {
+		const float heightScale{ ( 1.0f / 255.0f ) * bumpScale };
+		const float maxDim{ width > height ? width : height };
+		const float ooMaxDim{ 1.0f / maxDim };
+
+		for ( int t = 0; t < height; t++ ) {
+			unsigned char* dstPixel = &dst[t * width * 4];
+			for ( int s = 0; s < width; s++ ) {
+				const float c = src[( t * width + s ) * 2];
+				const float cx = src[( t * width + ( ( s + 1 ) % width ) ) * 2];
+				const float cy = src[( ( ( t + 1 ) % height ) * width + s ) * 2];
+
+				// \Z (out of screen)
+				//  \
+				//   \
+				//    \
+				//     \-----------  X
+				//     |
+				//     |
+				//     |
+				//     |
+				//     |
+				//     Y
+
+				Vector xVect;
+				xVect[0] = ooMaxDim;
+				xVect[1] = 0.0f;
+				xVect[2] = ( cx - c ) * heightScale;
+				Vector yVect;
+				yVect[0] = 0.0f;
+				yVect[1] = ooMaxDim;
+				yVect[2] = ( cy - c ) * heightScale;
+
+				Vector normal;
+				CrossProduct( xVect, yVect, normal );
+				VectorNormalize( normal );
+
+				// Repack the normalized vector into an RGB unsigned byte vector in the normal map image.
+				dstPixel[0] = static_cast<unsigned char>( 128 + 127 * normal[0] );
+				dstPixel[1] = static_cast<unsigned char>( 128 + 127 * normal[1] );
+				dstPixel[2] = static_cast<unsigned char>( 128 + 127 * normal[2] );
+				dstPixel[3] = src[(t * width + s) * 2 + 1];
+				dstPixel += 4;
+			}
 		}
 	}
 
