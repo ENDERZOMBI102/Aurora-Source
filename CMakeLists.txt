@@ -137,7 +137,7 @@ add_group_subdir( "${SRC_DIR}/utils/height2normal"         IN                 "t
 add_group_subdir( "${SRC_DIR}/utils/motionmapper"          IN                 "tools" )
 add_group_subdir( "${SRC_DIR}/utils/phonemeextractor"      IN                 "tools" WINDOWS_ONLY )
 add_group_subdir( "${SRC_DIR}/utils/qc_eyes"               IN                 "tools" WINDOWS_ONLY )
-#add_group_subdir( "${SRC_DIR}/utils/tgadiff"               IN                 "tools" WINDOWS_ONLY )
+add_group_subdir( "${SRC_DIR}/utils/tgadiff"               IN                 "tools" )
 add_group_subdir( "${SRC_DIR}/utils/vice"                  IN                 "tools" )
 #add_group_subdir( "${SRC_DIR}/utils/vtf2tga"               IN                 "tools" WINDOWS_ONLY )
 #add_group_subdir( "${SRC_DIR}/utils/vtfdiff"               IN                 "tools" WINDOWS_ONLY )
