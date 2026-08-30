@@ -134,7 +134,7 @@ add_group_subdir( "${SRC_DIR}/utils/vvis_launcher"         IN                 "t
 add_group_subdir( "${SRC_DIR}/utils/vrad"                  IN                 "tools" )
 add_group_subdir( "${SRC_DIR}/utils/vrad_launcher"         IN                 "tools" )
 add_group_subdir( "${SRC_DIR}/utils/height2normal"         IN                 "tools" )
-#add_group_subdir( "${SRC_DIR}/utils/motionmapper"          IN                 "tools" WINDOWS_ONLY )
+add_group_subdir( "${SRC_DIR}/utils/motionmapper"          IN                 "tools" )
 add_group_subdir( "${SRC_DIR}/utils/qc_eyes"               IN                 "tools" WINDOWS_ONLY )
 #add_group_subdir( "${SRC_DIR}/utils/tgadiff"               IN                 "tools" WINDOWS_ONLY )
 add_group_subdir( "${SRC_DIR}/utils/vice"                  IN                 "tools" )
