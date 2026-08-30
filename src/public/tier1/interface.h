@@ -102,6 +102,11 @@ namespace Interface {
 	static_assert( Interface::is_modern_interface_v<ifaceName>, "The given interface doesn't expose its version!" ); \
 	static InterfaceReg __g_Create##className##ifaceName##_reg( []() -> void* { return static_cast<ifaceName*>( &globalVarName ); }, ifaceName::INTERFACE_VERSION ); // NOLINT(*-reserved-identifier)
 
+// Use this to expose a singleton modern interface. This creates the global variable for you automatically.
+#define EXPOSE_SINGLE_INTERFACE_T( className, interfaceName ) \
+	static className __g_##className##_singleton;           \
+	EXPOSE_SINGLE_INTERFACE_GLOBALVAR_T( className, interfaceName, __g_##className##_singleton );
+
 
 // load/unload components
 class CSysModule;
