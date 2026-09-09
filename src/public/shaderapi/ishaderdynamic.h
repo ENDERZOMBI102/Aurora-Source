@@ -141,6 +141,8 @@ struct ShaderViewport_t {
 #define SHADERDYNAMIC_INTERFACE_VERSION "ShaderDynamic001"
 abstract_class IShaderDynamicAPI {
 public:
+	static constexpr auto INTERFACE_VERSION{ SHADERDYNAMIC_INTERFACE_VERSION };
+public:
 	virtual void SetViewports( int nCount, const ShaderViewport_t* pViewports ) = 0;
 	virtual int GetViewports( ShaderViewport_t * pViewports, int nMax ) const = 0;
 

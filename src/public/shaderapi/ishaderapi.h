@@ -8,7 +8,7 @@
 #pragma once
 #include "materialsystem/deformations.h"
 #include "mathlib/vector4d.h"
-#include "shaderapi/IShaderDevice.h"
+#include "shaderapi/ishaderdevice.h"
 #include "shaderapi/ishaderdynamic.h"
 
 
@@ -123,6 +123,8 @@ enum ShaderAPIOcclusionQueryResult_t {
 //-----------------------------------------------------------------------------
 #define SHADERAPI_INTERFACE_VERSION "ShaderApi030"
 abstract_class IShaderAPI : public IShaderDynamicAPI {
+public:
+	static constexpr auto INTERFACE_VERSION{ SHADERAPI_INTERFACE_VERSION };
 public:
 	//
 	// NOTE: These methods have been ported to DX10

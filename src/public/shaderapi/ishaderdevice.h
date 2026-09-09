@@ -132,6 +132,7 @@ public:
 	static constexpr auto INTERFACE_VERSION{ SHADER_DEVICE_MGR_INTERFACE_VERSION };
 public:
 	// Gets the number of adapters...
+	[[nodiscard]]
 	virtual int GetAdapterCount() const = 0;
 
 	// Returns info about each adapter
@@ -142,6 +143,7 @@ public:
 	virtual bool GetRecommendedConfigurationInfo( int nAdapter, int nDXLevel, KeyValues* pConfiguration ) = 0;
 
 	// Returns the number of modes
+	[[nodiscard]]
 	virtual int GetModeCount( int nAdapter ) const = 0;
 
 	// Returns mode information...
@@ -171,27 +173,34 @@ public:
 #define SHADER_DEVICE_INTERFACE_VERSION "ShaderDevice001"
 abstract_class IShaderDevice {
 public:
+	static constexpr auto INTERFACE_VERSION{ SHADER_DEVICE_INTERFACE_VERSION };
+public:
 	// Releases/reloads resources when other apps want some memory
 	virtual void ReleaseResources() = 0;
 	virtual void ReacquireResources() = 0;
 
 	// returns the backbuffer format and dimensions
+	[[nodiscard]]
 	virtual ImageFormat GetBackBufferFormat() const = 0;
 	virtual void GetBackBufferDimensions( int& width, int& height ) const = 0;
 
 	// Returns the current adapter in use
+	[[nodiscard]]
 	virtual int GetCurrentAdapter() const = 0;
 
 	// Are we using graphics?
+	[[nodiscard]]
 	virtual bool IsUsingGraphics() const = 0;
 
 	// Use this to spew information about the 3D layer
 	virtual void SpewDriverInfo() const = 0;
 
 	// What's the bit depth of the stencil buffer?
+	[[nodiscard]]
 	virtual int StencilBufferBits() const = 0;
 
 	// Are we using a mode that uses MSAA
+	[[nodiscard]]
 	virtual bool IsAAEnabled() const = 0;
 
 	// Does a page flip
@@ -203,7 +212,7 @@ public:
 	// Gamma ramp control
 	virtual void SetHardwareGammaRamp( float fGamma, float fGammaTVRangeMin, float fGammaTVRangeMax, float fGammaTVExponent, bool bTVEnabled ) = 0;
 
-	// Creates/ destroys a child window
+	// Creates/destroys a child window
 	virtual bool AddView( void* hWnd ) = 0;
 	virtual void RemoveView( void* hWnd ) = 0;
 

@@ -221,6 +221,8 @@ enum PolygonOffsetMode_t {
 //-----------------------------------------------------------------------------
 abstract_class IShaderShadow {
 public:
+	static constexpr auto INTERFACE_VERSION{ SHADERSHADOW_INTERFACE_VERSION };
+public:
 	// Sets the default *shadow* state
 	virtual void SetDefaultState() = 0;
 
