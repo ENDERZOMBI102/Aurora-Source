@@ -154,15 +154,15 @@ namespace ImageLoader {
 			case IMAGE_FORMAT_BGR888:
 				return BGR888ToRGBA8888;
 			case IMAGE_FORMAT_RGB565:
+				// return RGB565ToRGBA8888;
 				return nullptr;
-				//			return RGB565ToRGBA8888;
 			case IMAGE_FORMAT_I8:
 				return I8ToRGBA8888;
 			case IMAGE_FORMAT_IA88:
 				return IA88ToRGBA8888;
 			case IMAGE_FORMAT_P8:
+				// return P8ToRGBA8888;
 				return nullptr;
-				//			return P8ToRGBA8888;
 			case IMAGE_FORMAT_A8:
 				return A8ToRGBA8888;
 			case IMAGE_FORMAT_RGB888_BLUESCREEN:
@@ -190,8 +190,8 @@ namespace ImageLoader {
 			case IMAGE_FORMAT_UVLX8888:
 				return UVLX8888ToRGBA8888;
 			case IMAGE_FORMAT_RGBA16161616F:
+				// return RGBA16161616FToRGBA8888;
 				return nullptr;
-				//		return RGBA16161616FToRGBA8888;
 			default:
 				return nullptr;
 		}
@@ -208,15 +208,15 @@ namespace ImageLoader {
 			case IMAGE_FORMAT_BGR888:
 				return RGBA8888ToBGR888;
 			case IMAGE_FORMAT_RGB565:
+				 //return RGBA8888ToRGB565;
 				return nullptr;
-				//			return RGBA8888ToRGB565;
 			case IMAGE_FORMAT_I8:
 				return RGBA8888ToI8;
 			case IMAGE_FORMAT_IA88:
 				return RGBA8888ToIA88;
 			case IMAGE_FORMAT_P8:
+				 //return RGBA8888ToP8;
 				return nullptr;
-				//			return RGBA8888ToP8;
 			case IMAGE_FORMAT_A8:
 				return RGBA8888ToA8;
 			case IMAGE_FORMAT_RGB888_BLUESCREEN:
@@ -244,8 +244,8 @@ namespace ImageLoader {
 			case IMAGE_FORMAT_UVLX8888:
 				return RGBA8888ToUVLX8888;
 			case IMAGE_FORMAT_RGBA16161616F:
+				// return RGBA8888ToRGBA16161616F;
 				return nullptr;
-				//		return RGBA8888ToRGBA16161616F;
 			default:
 				return nullptr;
 		}
@@ -325,18 +325,6 @@ namespace ImageLoader {
 	int GetMemRequired( int width, int height, int depth, ImageFormat imageFormat, bool mipmap ) {
 		if ( not mipmap ) {
 			if ( imageFormat == IMAGE_FORMAT_DXT1 || imageFormat == IMAGE_FORMAT_DXT3 || imageFormat == IMAGE_FORMAT_DXT5 ) {
-				/*
-			DDSURFACEDESC desc;
-			memset( &desc, 0, sizeof(desc) );
-
-			DWORD dwEncodeType;
-			dwEncodeType = GetDXTCEncodeType( imageFormat );
-			desc.dwSize = sizeof( desc );
-			desc.dwFlags = DDSD_WIDTH | DDSD_HEIGHT;
-			desc.dwWidth = width;
-			desc.dwHeight = height;
-			return S3TCgetEncodeSize( &desc, dwEncodeType );
-*/
 				Assert( ( width < 4 ) or not ( width % 4 ) );
 				Assert( ( height < 4 ) or not ( height % 4 ) );
 				if ( width < 4 and width > 0 ) {

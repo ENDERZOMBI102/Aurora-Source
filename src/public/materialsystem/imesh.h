@@ -87,9 +87,10 @@ struct VertexDesc_t {
 
 	int m_VertexSize_UserData;
 
-	int m_ActualVertexSize;// Size of the vertices.. Some of the m_VertexSize_ elements above
-						   // are set to this value and some are set to zero depending on which
-						   // fields exist in a buffer's vertex format.
+	/// Size of the vertices.. Some of the m_VertexSize_ elements above
+	/// are set to this value and some are set to zero depending on which
+	/// fields exist in a buffer's vertex format.
+	int m_ActualVertexSize;
 
 	// The type of compression applied to this vertex data
 	VertexCompressionType_t m_CompressionType;
@@ -203,20 +204,14 @@ inline void IncrementFloatPointer( float*& pBufferPointer, int vertexSize ) {
 //-----------------------------------------------------------------------------
 class CPrimList {
 public:
-	CPrimList();
-	CPrimList( int nFirstIndex, int nIndexCount );
+	CPrimList() = default;
+	CPrimList( const int nFirstIndex, const int nIndexCount )
+		: m_FirstIndex{ nFirstIndex }, m_NumIndices{ nIndexCount } { }
 
-	int m_FirstIndex;
-	int m_NumIndices;
+	int m_FirstIndex{};
+	int m_NumIndices{};
 };
 
-inline CPrimList::CPrimList() {
-}
-
-inline CPrimList::CPrimList( int nFirstIndex, int nIndexCount ) {
-	m_FirstIndex = nFirstIndex;
-	m_NumIndices = nIndexCount;
-}
 
 abstract_class IVertexBuffer {
 public:
