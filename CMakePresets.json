@@ -33,28 +33,28 @@
             "name": "windows-msvc-everything",
             "inherits": [ "windows-msvc" ],
             "cacheVariables": {
-                "BUILD_GROUP": "everything"
+                "ASOURCE_BUILD_GROUP": "everything"
             }
         },
         {
             "name": "windows-msvc-game",
             "inherits": [ "windows-msvc" ],
             "cacheVariables": {
-                "BUILD_GROUP": "game"
+                "ASOURCE_BUILD_GROUP": "game"
             }
         },
         {
             "name": "windows-msvc-shaders",
             "inherits": [ "windows-msvc" ],
             "cacheVariables": {
-                "BUILD_GROUP": "shaders"
+                "ASOURCE_BUILD_GROUP": "shaders"
             }
         },
         {
             "name": "windows-msvc-tools",
             "inherits": [ "windows-msvc" ],
             "cacheVariables": {
-                "BUILD_GROUP": "tools"
+                "ASOURCE_BUILD_GROUP": "tools"
             }
         }
     ]

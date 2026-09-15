@@ -166,8 +166,8 @@ endif()
 # 	-	_ALLOW_MSCC_VER_MISMATCH
 list( APPEND DEFINES
 	# compile toggles
-	$<$<BOOL:${RETAIL}>:_RETAIL>
-	$<$<BOOL:${STAGING_ONLY}>:STAGING_ONLY>
+	$<$<BOOL:${ASOURCE_RETAIL}>:_RETAIL>
+	$<$<BOOL:${ASOURCE_STAGING_ONLY}>:STAGING_ONLY>
 	$<${TF_BETA}:TF_BETA>
 	$<${RAD_TELEMETRY_DISABLED}:RAD_TELEMETRY_DISABLED>
 
@@ -178,7 +178,7 @@ list( APPEND DEFINES
 
     # platform detection
     $<${IS_64BIT}:PLATFORM_64BITS>
-    $<$<BOOL:${RETAIL}>:PLATFORM_RETAIL>
+    $<$<BOOL:${ASOURCE_RETAIL}>:PLATFORM_RETAIL>
 
     # misc
     USE_SDL # We use SDL instead of whatever windows provides

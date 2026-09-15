@@ -29,7 +29,7 @@ set( SOURCE_FILES
     "${SHADERS_DIR}/stdshader_dx9_30.txt"
 )
 
-include( "game_shader_dx9_${BUILD_GAME}.cmake" )
+include( "game_shader_dx9_${ASOURCE_BUILD_GAME}.cmake" )
 
 asource_link_libraries(
     PRIVATE
@@ -50,5 +50,5 @@ asource_compile_definitions(
         STDSHADER_DX9_DLL_EXPORT
         FAST_MATERIALVAR_ACCESS
         GAME_SHADER_DLL
-        $<$<NOT:$<BOOL:${USE_TOGL}>>:USE_ACTUAL_DX>
+        $<$<NOT:$<BOOL:${ASOURCE_USE_TOGL}>>:USE_ACTUAL_DX>
 )

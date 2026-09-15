@@ -10,8 +10,8 @@ set( SOURCE_FILES
     "${SERVER_DIR}/gamedll_replay.cpp"
     "${SRC_DIR}/common/replay/ireplaysessionrecorder.h"
 
-    "$<$<BOOL:${BUILD_REPLAY}>:${SRC_DIR}/game/shared/replay_gamestats_shared.cpp>"
-    "$<$<BOOL:${BUILD_REPLAY}>:${SRC_DIR}/game/shared/replay_gamestats_shared.h>"
+    "$<$<BOOL:${ASOURCE_BUILD_REPLAY}>:${SRC_DIR}/game/shared/replay_gamestats_shared.cpp>"
+    "$<$<BOOL:${ASOURCE_BUILD_REPLAY}>:${SRC_DIR}/game/shared/replay_gamestats_shared.h>"
 
     # Source Files
     "${SRC_DIR}/game/shared/achievement_saverestore.cpp"
@@ -945,7 +945,7 @@ set_source_files_properties(
 # Where to put the project in IDEs.
 set( IDE_FOLDER "Game" )
 
-include( "${SERVER_DIR}/server_${BUILD_GAME}.cmake" )
+include( "${SERVER_DIR}/server_${ASOURCE_BUILD_GAME}.cmake" )
 
 asource_link_libraries(
     PRIVATE

@@ -1037,7 +1037,7 @@ set( SOURCE_FILES
     "${CLIENT_DIR}/game_controls/IconPanel.h"
 )
 
-if ( ${BUILD_REPLAY} )
+if ( ${ASOURCE_BUILD_REPLAY} )
     list( APPEND SOURCE_FILES
         "${CLIENT_DIR}/replay/gamedefs.h"
         "${CLIENT_DIR}/replay/gamedefs.cpp"
@@ -1152,13 +1152,13 @@ set_source_files_properties(
 # Where to put the project in IDEs.
 set( IDE_FOLDER "Game" )
 
-include( "${CLIENT_DIR}/client_${BUILD_GAME}.cmake" )
+include( "${CLIENT_DIR}/client_${ASOURCE_BUILD_GAME}.cmake" )
 
 asource_link_libraries(
     PRIVATE
         $<${IS_LINUX}:rt>
         $<${IS_WINDOWS}:winmm>
-        "$<$<AND:${IS_WINDOWS},$<BOOL:${BUILD_REPLAY}>>:wsock32;Ws2_32>"
+        "$<$<AND:${IS_WINDOWS},$<BOOL:${ASOURCE_BUILD_REPLAY}>>:wsock32;Ws2_32>"
         particles
 
         tier0
@@ -1204,7 +1204,7 @@ asource_compile_definitions(
         _snprintf=use_Q_snprintf_instead
         $<${IS_WINDOWS}:fopen=dont_use_fopen>
         $<${IS_LINUX}:USE_WEBM_FOR_REPLAY>
-        $<$<AND:${IS_WINDOWS},$<BOOL:${BUILD_REPLAY}>>:CURL_STATICLIB>
+        $<$<AND:${IS_WINDOWS},$<BOOL:${ASOURCE_BUILD_REPLAY}>>:CURL_STATICLIB>
 )
 
 target_precompile_headers( ${PROJECT}
