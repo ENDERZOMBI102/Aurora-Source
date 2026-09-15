@@ -28,7 +28,7 @@ IP4* p4;
 IMdlLib* mdllib;
 IQueuedLoader* g_pQueuedLoader;
 
-void ConnectTier2Libraries( const CreateInterfaceFn* pFactoryList, const int pFactoryCount ) {
+void ConnectTier2Libraries( CreateInterfaceFn* const pFactoryList, const int pFactoryCount ) {
 	for ( int i{ 0 }; i < pFactoryCount; i += 1 ) {
 		if ( g_pFullFileSystem == nullptr ) {
 			g_pFullFileSystem = static_cast<IFileSystem*>( (*pFactoryList[i])( FILESYSTEM_INTERFACE_VERSION, nullptr ) );
