@@ -147,10 +147,10 @@ public:
 	virtual int GetModeCount( int nAdapter ) const = 0;
 
 	// Returns mode information...
-	virtual void GetModeInfo( ShaderDisplayMode_t * pInfo, int nAdapter, int nMode ) const = 0;
+	virtual void GetModeInfo( ShaderDisplayMode_t* pInfo, int nAdapter, int nMode ) const = 0;
 
 	// Returns the current mode info for the requested adapter
-	virtual void GetCurrentModeInfo( ShaderDisplayMode_t * pInfo, int nAdapter ) const = 0;
+	virtual void GetCurrentModeInfo( ShaderDisplayMode_t* pInfo, int nAdapter ) const = 0;
 
 	// Initialization, shutdown
 	virtual bool SetAdapter( int nAdapter, int nFlags ) = 0;
@@ -223,34 +223,34 @@ public:
 	virtual IShaderBuffer* CompileShader( const char* pProgram, size_t nBufLen, const char* pShaderVersion ) = 0;
 
 	// Shader creation, destruction
-	virtual VertexShaderHandle_t CreateVertexShader( IShaderBuffer * pShaderBuffer ) = 0;
+	virtual VertexShaderHandle_t CreateVertexShader( IShaderBuffer* pShaderBuffer ) = 0;
 	virtual void DestroyVertexShader( VertexShaderHandle_t hShader ) = 0;
-	virtual GeometryShaderHandle_t CreateGeometryShader( IShaderBuffer * pShaderBuffer ) = 0;
+	virtual GeometryShaderHandle_t CreateGeometryShader( IShaderBuffer* pShaderBuffer ) = 0;
 	virtual void DestroyGeometryShader( GeometryShaderHandle_t hShader ) = 0;
-	virtual PixelShaderHandle_t CreatePixelShader( IShaderBuffer * pShaderBuffer ) = 0;
+	virtual PixelShaderHandle_t CreatePixelShader( IShaderBuffer* pShaderBuffer ) = 0;
 	virtual void DestroyPixelShader( PixelShaderHandle_t hShader ) = 0;
 
 	// Utility methods to make shader creation simpler
 	// NOTE: For the utlbuffer version, use a binary buffer for a compiled shader
 	// and a text buffer for a source-code (.fxc) shader
 	VertexShaderHandle_t CreateVertexShader( const char* pProgram, size_t nBufLen, const char* pShaderVersion );
-	VertexShaderHandle_t CreateVertexShader( CUtlBuffer & buf, const char* pShaderVersion = nullptr );
+	VertexShaderHandle_t CreateVertexShader( CUtlBuffer& buf, const char* pShaderVersion = nullptr );
 	GeometryShaderHandle_t CreateGeometryShader( const char* pProgram, size_t nBufLen, const char* pShaderVersion );
-	GeometryShaderHandle_t CreateGeometryShader( CUtlBuffer & buf, const char* pShaderVersion = nullptr );
+	GeometryShaderHandle_t CreateGeometryShader( CUtlBuffer& buf, const char* pShaderVersion = nullptr );
 	PixelShaderHandle_t CreatePixelShader( const char* pProgram, size_t nBufLen, const char* pShaderVersion );
-	PixelShaderHandle_t CreatePixelShader( CUtlBuffer & buf, const char* pShaderVersion = nullptr );
+	PixelShaderHandle_t CreatePixelShader( CUtlBuffer& buf, const char* pShaderVersion = nullptr );
 
 	// NOTE: Deprecated!! Use CreateVertexBuffer/CreateIndexBuffer instead
 	// Creates/destroys Mesh
 	virtual IMesh* CreateStaticMesh( VertexFormat_t vertexFormat, const char* pTextureBudgetGroup, IMaterial* pMaterial = nullptr ) = 0;
-	virtual void DestroyStaticMesh( IMesh * mesh ) = 0;
+	virtual void DestroyStaticMesh( IMesh* mesh ) = 0;
 
 	// Creates/destroys static vertex + index buffers
 	virtual IVertexBuffer* CreateVertexBuffer( ShaderBufferType_t type, VertexFormat_t fmt, int nVertexCount, const char* pBudgetGroup ) = 0;
-	virtual void DestroyVertexBuffer( IVertexBuffer * pVertexBuffer ) = 0;
+	virtual void DestroyVertexBuffer( IVertexBuffer* pVertexBuffer ) = 0;
 
 	virtual IIndexBuffer* CreateIndexBuffer( ShaderBufferType_t bufferType, MaterialIndexFormat_t fmt, int nIndexCount, const char* pBudgetGroup ) = 0;
-	virtual void DestroyIndexBuffer( IIndexBuffer * pIndexBuffer ) = 0;
+	virtual void DestroyIndexBuffer( IIndexBuffer* pIndexBuffer ) = 0;
 
 	// Do we need to specify the stream here in the case of locking multiple dynamic VBs on different streams?
 	virtual IVertexBuffer* GetDynamicVertexBuffer( int nStreamID, VertexFormat_t vertexFormat, bool bBuffered = true ) = 0;
@@ -274,7 +274,8 @@ public:
 //-----------------------------------------------------------------------------
 class CUtlShaderBuffer : public IShaderBuffer {
 public:
-	explicit CUtlShaderBuffer( CUtlBuffer& buf ) : m_pBuf( &buf ) {}
+	explicit CUtlShaderBuffer( CUtlBuffer& buf )
+		: m_pBuf( &buf ) { }
 
 	auto GetSize() const -> size_t override {
 		return m_pBuf->TellMaxPut();

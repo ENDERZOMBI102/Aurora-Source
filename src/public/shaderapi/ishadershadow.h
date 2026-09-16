@@ -270,8 +270,7 @@ public:
 	// The flags to pass in here come from the VertexFormatFlags_t enum
 	// If pTexCoordDimensions is *not* specified, we assume all coordinates
 	// are 2-dimensional
-	virtual void VertexShaderVertexFormat( unsigned int nFlags,
-										   int nTexCoordCount, int* pTexCoordDimensions, int nUserDataSize ) = 0;
+	virtual void VertexShaderVertexFormat( unsigned int nFlags, int nTexCoordCount, int* pTexCoordDimensions, int nUserDataSize ) = 0;
 
 	// Pixel and vertex shader methods
 	virtual void SetVertexShader( const char* pFileName, int nStaticVshIndex ) = 0;
@@ -304,8 +303,7 @@ public:
 	// Can be used to specify different operation per channel (alpha/color)...
 	virtual void EnableCustomPixelPipe( bool bEnable ) = 0;
 	virtual void CustomTextureStages( int stageCount ) = 0;
-	virtual void CustomTextureOperation( TextureStage_t stage, ShaderTexChannel_t channel,
-										 ShaderTexOp_t op, ShaderTexArg_t arg1, ShaderTexArg_t arg2 ) = 0;
+	virtual void CustomTextureOperation( TextureStage_t stage, ShaderTexChannel_t channel, ShaderTexOp_t op, ShaderTexArg_t arg1, ShaderTexArg_t arg2 ) = 0;
 
 	// indicates what per-vertex data we're providing
 	virtual void DrawFlags( unsigned int drawFlags ) = 0;

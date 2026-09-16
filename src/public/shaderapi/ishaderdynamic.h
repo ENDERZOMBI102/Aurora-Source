@@ -108,15 +108,15 @@ enum StandardTextureId_t {
 //-----------------------------------------------------------------------------
 #define SHADER_VIEWPORT_VERSION 1
 struct ShaderViewport_t {
-	int m_nVersion;
-	int m_nTopLeftX;
-	int m_nTopLeftY;
-	int m_nWidth;
-	int m_nHeight;
-	float m_flMinZ;
-	float m_flMaxZ;
+	int m_nVersion{ SHADER_VIEWPORT_VERSION };
+	int m_nTopLeftX{};
+	int m_nTopLeftY{};
+	int m_nWidth{};
+	int m_nHeight{};
+	float m_flMinZ{};
+	float m_flMaxZ{};
 
-	ShaderViewport_t() : m_nVersion( SHADER_VIEWPORT_VERSION ) {}
+	ShaderViewport_t() = default;
 
 	void Init() {
 		memset( this, 0, sizeof( ShaderViewport_t ) );
