@@ -3,11 +3,11 @@
 //
 #include "bitmap/tgaloader.h"
 #include "filesystem.h"
-#include "dbg.h"
-#include "utlbuffer.h"
+#include "tier0/dbg.h"
+#include "tier1/utlbuffer.h"
 #include "tgaspec.hpp"
 // This must be the final include in a .cpp or .h file!!!
-#include "memdbgon.h"
+#include "tier0/memdbgon.h"
 
 
 namespace {

@@ -5,7 +5,7 @@
 #include "gameapploader.hpp"
 #include "tier0/icommandline.h"
 // This must be the final include in a .cpp file!!!
-#include "memdbgon.h"
+#include "tier0/memdbgon.h"
 
 
 SpewRetval_t LauncherSpewFunc( SpewType_t pSpewType, char const* pMsg );

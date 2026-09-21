@@ -2,12 +2,12 @@
 // Created by ENDERZOMBI102 on 12/08/2024.
 //
 #include "bitmap/tgawriter.h"
-#include "dbg.h"
+#include "tier0/dbg.h"
 #include "filesystem.h"
 #include "tgaspec.hpp"
-#include "utlbuffer.h"
+#include "tier1/utlbuffer.h"
 // This must be the final include in a .cpp or .h file!!!
-#include "memdbgon.h"
+#include "tier0/memdbgon.h"
 
 
 namespace TGAWriter {

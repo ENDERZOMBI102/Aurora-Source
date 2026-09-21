@@ -2,8 +2,8 @@
 // Created by ENDERZOMBI102 on 21/11/2024.
 //
 #include "vstdlib/osversion.h"
-#include "dbg.h"
-#include "strtools.h"
+#include "tier0/dbg.h"
+#include "tier1/strtools.h"
 #include <cstdio>
 #include <fstream>
 #if IsWindows()
@@ -12,7 +12,7 @@
 	#include <sys/utsname.h>
 #endif
 // This must be the final include in a .cpp file!!!
-#include "memdbgon.h"
+#include "tier0/memdbgon.h"
 
 
 auto GetNameFromOSType( const EOSType eOSType ) -> const char* {

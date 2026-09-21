@@ -4,7 +4,7 @@
 #include "wildcard/wildcard.hpp"
 #include "tier0/platform.h"
 // memdbgon must be the last include file in a .cpp file!!!
-#include "memdbgon.h"
+#include "tier0/memdbgon.h"
 
 
 #if IsWindows()

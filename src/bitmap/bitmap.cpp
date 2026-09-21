@@ -3,9 +3,9 @@
 //
 #include "bitmap/bitmap.h"
 #include "filesystem.h"
-#include "dbg.h"
+#include "tier0/dbg.h"
 // This must be the final include in a .cpp or .h file!!!
-#include "memdbgon.h"
+#include "tier0/memdbgon.h"
 
 
 void Bitmap_t::Init( const int32 nWidth, const int32 nHeight, const ImageFormat imageFormat, const int32 nStride ) {

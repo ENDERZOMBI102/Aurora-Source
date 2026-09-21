@@ -3,7 +3,7 @@
 //
 #include "vstdlib/cvar.h"
 // This must be the final include in a .cpp file!!!
-#include "memdbgon.h"
+#include "tier0/memdbgon.h"
 
 
 CreateInterfaceFn VStdLib_GetICVarFactory() {

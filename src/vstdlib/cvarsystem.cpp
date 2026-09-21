@@ -6,7 +6,7 @@
 #include "tier0/icommandline.h"
 #include "Color.h"
 // This must be the final include in a .cpp file!!!
-#include "memdbgon.h"
+#include "tier0/memdbgon.h"
 
 
 // --- IAppSystem ---

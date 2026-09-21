@@ -27,7 +27,7 @@
 #include <SDL3/SDL_version.h>
 #include "appframework/ilaunchermgr.h"
 // This must be the final include in a .cpp file!!!
-#include "memdbgon.h"
+#include "tier0/memdbgon.h"
 
 
 IFileSystem* g_pFileSystem{nullptr};
