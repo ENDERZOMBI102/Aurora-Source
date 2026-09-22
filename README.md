@@ -35,6 +35,11 @@ Support for macOS was removed.
 4. Invoke build action with desired target inside build directory (ex. `cmake --build . -t client_hl2mp --parallel`)
 5. Built binaries will be located inside the `game` directory
 
+## License
+Aurora Source uses a dual license system:
+- Code by or derived from Valve's Source SDKs is under the original [Source 1 SDK license](LICENSE_valve)
+- Any reimplementation or code made primarily by us (usually denoted by a "Created by" header) is under the [MPL-2 license](LICENSE_asource)
+
 ## Leak Policy
 We do not endorse nor allow for any contributions derived from leaked code; this is a leak-free project.
 

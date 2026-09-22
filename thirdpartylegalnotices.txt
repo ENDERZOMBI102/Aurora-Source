@@ -1,6 +1,6 @@
 The Source engine and Valve games use Third Party code for certain functions.  The 
 required legal notices for using such code are reproduced below in accordance with 
-Valve�s obligations to provide such notices:
+Valve's obligations to provide such notices:
 
 ************************************************************************************
 Xzip/Xunzip:
