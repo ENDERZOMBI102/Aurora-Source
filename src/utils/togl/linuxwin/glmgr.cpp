@@ -54,26 +54,24 @@ uint g_nTotalDrawsOrClears, g_nTotalVBLockBytes, g_nTotalIBLockBytes;
 	TelemetryGPUStats_t g_TelemetryGPUStats;
 #endif
 
-char g_nullFragmentProgramText[ ] = {
+static char g_nullFragmentProgramText[ ] = {
 	"!!ARBfp1.0  \n"
 	"PARAM black = { 0.0, 0.0, 0.0, 1.0 };  \n" // opaque black
 	"MOV result.color, black;  \n"
 	"END  \n\n\n"
 	"//GLSLfp\n"
-	"void main()\n"
-	"{\n"
+	"void main() {\n"
 	"gl_FragColor = vec4( 0.0, 0.0, 0.0, 1.0 );\n"
 	"}\n"
 
 };
 
 // make dummy programs for doing texture preload via dummy draw
-char g_preloadTexVertexProgramText[ ] = {
+static char g_preloadTexVertexProgramText[ ] = {
 	"//GLSLvp  \n"
 	"#version 120  \n"
 	"varying vec4 otex;  \n"
-	"void main()  \n"
-	"{  \n"
+	"void main() {  \n"
 	"vec4 pos = ftransform(); // vec4( 0.1, 0.1, 0.1, 0.1 );  \n"
 	"vec4 tex = vec4( 0.0, 0.0, 0.0, 0.0 );  \n"
 	"  \n"
@@ -82,7 +80,7 @@ char g_preloadTexVertexProgramText[ ] = {
 	"}  \n"
 };
 
-char g_preload2DTexFragmentProgramText[ ] = {
+static char g_preload2DTexFragmentProgramText[ ] = {
 	"//GLSLfp  \n"
 	"#version 120  \n"
 	"varying vec4 otex;  \n"
@@ -92,15 +90,14 @@ char g_preload2DTexFragmentProgramText[ ] = {
 	"uniform vec4 pc[31];  \n"
 	"uniform sampler2D sampler15;  \n"
 	"  \n"
-	"void main()  \n"
-	"{  \n"
+	"void main() {  \n"
 	"vec4 r0;  \n"
 	"r0 = texture2D( sampler15, otex.xy );  \n"
 	"gl_FragColor = r0;	//discard;  \n"
 	"}  \n"
 };
 
-char g_preload3DTexFragmentProgramText[ ] = {
+static char g_preload3DTexFragmentProgramText[ ] = {
 	"//GLSLfp  \n"
 	"#version 120  \n"
 	"varying vec4 otex;  \n"
@@ -110,15 +107,14 @@ char g_preload3DTexFragmentProgramText[ ] = {
 	"uniform vec4 pc[31];  \n"
 	"uniform sampler3D sampler15;  \n"
 	"  \n"
-	"void main()  \n"
-	"{  \n"
+	"void main() {  \n"
 	"vec4 r0;  \n"
 	"r0 = texture3D( sampler15, otex.xyz );  \n"
 	"gl_FragColor = r0;	//discard;  \n"
 	"}  \n"
 };
 
-char g_preloadCubeTexFragmentProgramText[ ] = {
+static char g_preloadCubeTexFragmentProgramText[ ] = {
 	"//GLSLfp  \n"
 	"#version 120  \n"
 	"varying vec4 otex;  \n"
@@ -128,15 +124,14 @@ char g_preloadCubeTexFragmentProgramText[ ] = {
 	"uniform vec4 pc[31];  \n"
 	"uniform samplerCube sampler15;  \n"
 	"  \n"
-	"void main()  \n"
-	"{  \n"
+	"void main() {  \n"
 	"vec4 r0;  \n"
 	"r0 = textureCube( sampler15, otex.xyz );  \n"
 	"gl_FragColor = r0;	//discard;  \n"
 	"}  \n"
 };
 
-const char* glSourceToString( GLenum source ) {
+static const char* glSourceToString( const GLenum source ) {
 	switch ( source ) {
 		case GL_DEBUG_SOURCE_API_ARB:
 			return "API";
@@ -156,7 +151,7 @@ const char* glSourceToString( GLenum source ) {
 	return "UNKNOWN";
 }
 
-const char* glTypeToString( GLenum type ) {
+static const char* glTypeToString( const GLenum type ) {
 	switch ( type ) {
 		case GL_DEBUG_TYPE_ERROR_ARB:
 			return "ERROR";
@@ -176,7 +171,7 @@ const char* glTypeToString( GLenum type ) {
 	return "UNKNOWN";
 }
 
-const char* glSeverityToString( GLenum severity ) {
+static const char* glSeverityToString( const GLenum severity ) {
 	switch ( severity ) {
 		case GL_DEBUG_SEVERITY_HIGH_ARB:
 			return "HIGH";
@@ -190,23 +185,29 @@ const char* glSeverityToString( GLenum severity ) {
 	return "UNKNOWN";
 }
 
-bool g_bDebugOutputBreakpoints = true;
+static bool g_bDebugOutputBreakpoints = true;
 
 void APIENTRY GL_Debug_Output_Callback( GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, GLvoid* userParam ) {
-	const char*sSource = glSourceToString( source ),
-		*sType = glTypeToString( type ),
-		*sSeverity = glSeverityToString( severity );
+	const char* sSource = glSourceToString( source );
+	const char* sType = glTypeToString( type );
+	const char* sSeverity = glSeverityToString( severity );
 
 	// According to NVidia, this error is a bug in the driver and not really an error (it's a warning in newer drivers): "Texture X is base level inconsistent. Check texture size"
-	if ( ( type == GL_DEBUG_TYPE_ERROR_ARB ) && strstr( message, "base level inconsistent" ) ) { return; }
+	if ( type == GL_DEBUG_TYPE_ERROR_ARB and strstr( message, "base level inconsistent" ) ) {
+		return;
+	}
 
-	if ( gl_debug_output.GetBool() || type == GL_DEBUG_TYPE_ERROR_ARB ) { Msg( "GL: [%s][%s][%s][%d]: %s\n", sSource, sType, sSeverity, id, message ); }
+	if ( gl_debug_output.GetBool() or type == GL_DEBUG_TYPE_ERROR_ARB ) {
+		Msg( "GL: [%s][%s][%s][%d]: %s\n", sSource, sType, sSeverity, id, message );
+	}
 
 	#if IsWindows()
-	OutputDebugStringA( message );
+		OutputDebugStringA( message );
 	#endif
 
-	if ( ( type == GL_DEBUG_TYPE_ERROR_ARB ) && ( g_bDebugOutputBreakpoints ) ) { DebuggerBreak(); }
+	if ( type == GL_DEBUG_TYPE_ERROR_ARB and g_bDebugOutputBreakpoints ) {
+		DebuggerBreak();
+	}
 }
 
 void GLMDebugPrintf( const char* pMsg, ... ) {
@@ -222,38 +223,60 @@ void GLMDebugPrintf( const char* pMsg, ... ) {
 //===============================================================================
 // functions that are dependant on g_pLauncherMgr
 
-inline bool MakeContextCurrent( PseudoGLContextPtr hContext ) { return g_pLauncherMgr->MakeContextCurrent( hContext ); }
+inline bool MakeContextCurrent( PseudoGLContextPtr hContext ) {
+	return g_pLauncherMgr->MakeContextCurrent( hContext );
+}
 
-inline PseudoGLContextPtr GetMainContext() { return g_pLauncherMgr->GetMainContext(); }
+inline PseudoGLContextPtr GetMainContext() {
+	return g_pLauncherMgr->GetMainContext();
+}
 
-inline PseudoGLContextPtr GetGLContextForWindow( void* windowref ) { return g_pLauncherMgr->GetGLContextForWindow( windowref ); }
+inline PseudoGLContextPtr GetGLContextForWindow( void* windowref ) {
+	return g_pLauncherMgr->GetGLContextForWindow( windowref );
+}
 
 inline void IncrementWindowRefCount() {
-	//	g_pLauncherMgr->IncWindowRefCount();
+	g_pLauncherMgr->IncWindowRefCount();
 }
 
 inline void DecrementWindowRefCount() {
-	//	g_pLauncherMgr->DecWindowRefCount();
+	g_pLauncherMgr->DecWindowRefCount();
 }
 
-inline void ShowPixels( CShowPixelsParams* params ) { g_pLauncherMgr->ShowPixels( params ); }
+inline void ShowPixels( CShowPixelsParams* params ) {
+	g_pLauncherMgr->ShowPixels( params );
+}
 
-inline void DisplayedSize( uint& width, uint& height ) { g_pLauncherMgr->DisplayedSize( width, height ); }
+inline void DisplayedSize( uint& width, uint& height ) {
+	g_pLauncherMgr->DisplayedSize( width, height );
+}
 
-inline void GetDesiredPixelFormatAttribsAndRendererInfo( uint** ptrOut, uint* countOut, GLMRendererInfoFields* rendInfoOut ) { g_pLauncherMgr->GetDesiredPixelFormatAttribsAndRendererInfo( ptrOut, countOut, rendInfoOut ); }
+inline void GetDesiredPixelFormatAttribsAndRendererInfo( uint** ptrOut, uint* countOut, GLMRendererInfoFields* rendInfoOut ) {
+	g_pLauncherMgr->GetDesiredPixelFormatAttribsAndRendererInfo( ptrOut, countOut, rendInfoOut );
+}
 
-inline void GetStackCrawl( CStackCrawlParams* params ) { g_pLauncherMgr->GetStackCrawl( params ); }
+inline void GetStackCrawl( CStackCrawlParams* params ) {
+	g_pLauncherMgr->GetStackCrawl( params );
+}
 
 #if GLMDEBUG
-inline void PumpWindowsMessageLoop() { g_pLauncherMgr->PumpWindowsMessageLoop(); }
-inline int GetEvents( CCocoaEvent* pEvents, int nMaxEventsToReturn, bool debugEvents = false ) { return g_pLauncherMgr->GetEvents( pEvents, nMaxEventsToReturn, debugEvents ); }
+	inline void PumpWindowsMessageLoop() {
+		g_pLauncherMgr->PumpWindowsMessageLoop();
+	}
+	inline int GetEvents( CCocoaEvent* pEvents, int nMaxEventsToReturn, bool debugEvents = false ) {
+		return g_pLauncherMgr->GetEvents( pEvents, nMaxEventsToReturn, debugEvents );
+	}
 #endif
 
 //===============================================================================
 // helper routines for debug
 
 static bool hasnonzeros( float* values, int count ) {
-	for ( int i = 0; i < count; i++ ) { if ( values[ i ] != 0.0 ) { return true; } }
+	for ( int i = 0; i < count; i++ ) {
+		if ( values[ i ] != 0.0 ) {
+			return true;
+		}
+	}
 	return false;
 }
 
@@ -299,7 +322,9 @@ static void printmat( char* label, int baseSlotNumber, int slots, float* m00 ) {
 			}
 		}
 		GLMPRINTSTR( ("-D-") );
-	} else { GLMPRINTF( ("-D-  %s - (all 0.0)", label ) ); }
+	} else {
+		GLMPRINTF( ("-D-  %s - (all 0.0)", label ) );
+	}
 
 }
 
@@ -317,9 +342,13 @@ static void transform_dp4( float* in4, float* m00, int slots, float* out4 ) {
 		col4[ 3 ] = m00[ ( 4 * n ) + 3 ];
 
 		out4[ n ] = 0.0;
-		for ( int inner = 0; inner < 4; inner++ ) { out4[ n ] += in4[ inner ] * col4[ inner ]; }
+		for ( int inner = 0; inner < 4; inner++ ) {
+			out4[ n ] += in4[ inner ] * col4[ inner ];
+		}
 	}
-	if ( slots == 3 ) { out4[ 3 ] = 1.0; }
+	if ( slots == 3 ) {
+		out4[ 3 ] = 1.0;
+	}
 }
 
 //===============================================================================
@@ -328,66 +357,68 @@ static void transform_dp4( float* in4, float* m00, int slots, float* out4 ) {
 //===============================================================================
 // GLMgr static methods
 
-GLMgr* g_glmgr = NULL;
+GLMgr* g_glmgr = nullptr;
 
-void GLMgr::NewGLMgr( void ) {
-	if ( !g_glmgr ) {
+void GLMgr::NewGLMgr() {
+	if ( not g_glmgr ) {
 		#if GLMDEBUG
-		// check debug mode early in program lifetime
-		GLMDebugInitialize( true );
+			// check debug mode early in program lifetime
+			GLMDebugInitialize( true );
 		#endif
 
 		g_glmgr = new GLMgr;
 	}
 }
 
-GLMgr* GLMgr::aGLMgr( void ) {
-	assert( g_glmgr != NULL );
+GLMgr* GLMgr::aGLMgr() {
+	assert( g_glmgr != nullptr );
 	return g_glmgr;
 }
 
-void GLMgr::DelGLMgr( void ) {
+void GLMgr::DelGLMgr() {
 	if ( g_glmgr ) {
 		delete g_glmgr;
-		g_glmgr = NULL;
+		g_glmgr = nullptr;
 	}
 }
 
 // GLMgr class methods
 
-GLMgr::GLMgr() { }
+GLMgr::GLMgr() = default;
 
 
-GLMgr::~GLMgr() { }
+GLMgr::~GLMgr() = default;
 
 //===============================================================================
 
 GLMContext* GLMgr::NewContext( IDirect3DDevice9* pDevice, GLMDisplayParams* params ) {
 	// this now becomes really simple.  We just pass through the params.
-
 	return new GLMContext( pDevice, params );
 }
 
-void GLMgr::DelContext( GLMContext* context ) { delete context; }
+void GLMgr::DelContext( GLMContext* context ) {
+	delete context;
+}
 
 void GLMgr::SetCurrentContext( GLMContext* context ) {
 	#if defined( USE_SDL )
-	context->m_nCurOwnerThreadId = ThreadGetCurrentId();
-	if ( !MakeContextCurrent( context->m_ctx ) ) {
-		// give up
-		GLMStop();
-	}
-	Assert( 0 );
+		context->m_nCurOwnerThreadId = ThreadGetCurrentId();
+		if ( not MakeContextCurrent( context->m_ctx ) ) {
+			// give up
+			GLMStop();
+		}
+	#else
+		Assert( 0 );
 	#endif
 }
 
-GLMContext* GLMgr::GetCurrentContext( void ) {
+GLMContext* GLMgr::GetCurrentContext() {
 	#if defined( USE_SDL )
-	PseudoGLContextPtr context = GetMainContext();
-	return (GLMContext*) context;
+		PseudoGLContextPtr context = GetMainContext();
+		return static_cast<GLMContext*>( context );
 	#else
-	Assert( 0 );
-	return NULL;
+		Assert( 0 );
+		return nullptr;
 	#endif
 }
 
@@ -399,33 +430,36 @@ GLMContext* GLMgr::GetCurrentContext( void ) {
 // GLMContext public methods
 void GLMContext::MakeCurrent( bool bRenderThread ) {
 	// TM_ZONE( TELEMETRY_LEVEL0, 0, "GLMContext::MakeCurrent" );
-	Assert( m_nCurOwnerThreadId == 0 || m_nCurOwnerThreadId == ThreadGetCurrentId() );
+	Assert( m_nCurOwnerThreadId == 0 or m_nCurOwnerThreadId == ThreadGetCurrentId() );
 
 	#if defined( USE_SDL )
+		#ifndef CHECK_THREAD_USAGE
+			if ( bRenderThread ) {
+				// Msg( "********************************************  %08x Acquiring Context\n", ThreadGetCurrentId() );
+				m_nCurOwnerThreadId = ThreadGetCurrentId();
+				bool bSuccess = MakeContextCurrent( m_ctx );
+				if ( not bSuccess ) {
+					Assert( 0 );
+				}
+			}
+		#else
+			uint32 dwThreadId = ThreadGetCurrentId();
 
-	#ifndef CHECK_THREAD_USAGE
-	if ( bRenderThread ) {
-		//		Msg( "********************************************  %08x Acquiring Context\n", ThreadGetCurrentId() );
-		m_nCurOwnerThreadId = ThreadGetCurrentId();
-		bool bSuccess = MakeContextCurrent( m_ctx );
-		if ( !bSuccess ) { Assert( 0 ); }
-	}
+			if ( bRenderThread or dwThreadId == m_dwRenderThreadId ) {
+				m_nCurOwnerThreadId = ThreadGetCurrentId();
+				m_dwRenderThreadId = dwThreadId;
+				MakeContextCurrent( m_ctx );
+				m_bIsThreading = true;
+			} else if ( not m_bIsThreading ) {
+				m_nCurOwnerThreadId = ThreadGetCurrentId();
+				MakeContextCurrent( m_ctx );
+			} else {
+				Assert( 0 );
+			}
+		#endif
+
 	#else
-	uint32 dwThreadId = ThreadGetCurrentId();
-
-	if ( bRenderThread || dwThreadId == m_dwRenderThreadId ) {
-		m_nCurOwnerThreadId = ThreadGetCurrentId();
-		m_dwRenderThreadId = dwThreadId;
-		MakeContextCurrent( m_ctx );
-		m_bIsThreading = true;
-	} else if ( !m_bIsThreading ) {
-		m_nCurOwnerThreadId = ThreadGetCurrentId();
-		MakeContextCurrent( m_ctx );
-	} else { Assert( 0 ); }
-	#endif
-
-	#else
-	Assert( 0 );
+		Assert( 0 );
 	#endif
 }
 
@@ -435,23 +469,24 @@ void GLMContext::ReleaseCurrent( bool bRenderThread ) {
 	Assert( m_nCurOwnerThreadId == ThreadGetCurrentId() );
 
 	#if defined( USE_SDL )
+		#ifndef CHECK_THREAD_USAGE
+			if ( bRenderThread ) {
+				//		Msg( "********************************************  %08x Releasing Context\n", ThreadGetCurrentId() );
+				m_nCurOwnerThreadId = 0;
+				m_nThreadOwnershipReleaseCounter += 1;
+				MakeContextCurrent( nullptr );
+			}
+		#else
+			m_nCurOwnerThreadId = 0;
+			m_nThreadOwnershipReleaseCounter += 1;
+			MakeContextCurrent( nullptr );
+			if ( bRenderThread ) {
+				m_bIsThreading = false;
+			}
+		#endif
 
-	#ifndef CHECK_THREAD_USAGE
-	if ( bRenderThread ) {
-		//		Msg( "********************************************  %08x Releasing Context\n", ThreadGetCurrentId() );
-		m_nCurOwnerThreadId = 0;
-		m_nThreadOwnershipReleaseCounter++;
-		MakeContextCurrent( NULL );
-	}
 	#else
-	m_nCurOwnerThreadId = 0;
-	m_nThreadOwnershipReleaseCounter++;
-	MakeContextCurrent( NULL );
-	if ( bRenderThread ) { m_bIsThreading = false; }
-	#endif
-
-	#else
-	Assert( 0 );
+		Assert( 0 );
 	#endif
 }
 
@@ -530,12 +565,16 @@ void GLMContext::ForceFlushStates() {
 	gGL->glBindBufferARB( GL_ELEMENT_ARRAY_BUFFER_ARB, m_nBoundGLBuffer[ kGLMIndexBuffer ] );
 	gGL->glBindBufferARB( GL_ARRAY_BUFFER_ARB, m_nBoundGLBuffer[ kGLMVertexBuffer ] );
 
-	if ( gGL->m_bHave_GL_AMD_pinned_memory ) { gGL->glBindBufferARB( GL_EXTERNAL_VIRTUAL_MEMORY_BUFFER_AMD, m_PinnedMemoryBuffers[ m_nCurPinnedMemoryBuffer ].GetHandle() ); }
+	if ( gGL->m_bHave_GL_AMD_pinned_memory ) {
+		gGL->glBindBufferARB( GL_EXTERNAL_VIRTUAL_MEMORY_BUFFER_AMD, m_PinnedMemoryBuffers[ m_nCurPinnedMemoryBuffer ].GetHandle() );
+	}
 }
 
-const GLMRendererInfoFields& GLMContext::Caps( void ) { return m_caps; }
+const GLMRendererInfoFields& GLMContext::Caps() {
+	return m_caps;
+}
 
-void GLMContext::DumpCaps( void ) {
+void GLMContext::DumpCaps() {
 	/*
 		#define	dumpfield( fff ) printf( "\n  "#fff" : %d", (int) m_caps.fff )
 		#define	dumpfield_hex( fff ) printf( "\n  "#fff" : 0x%08x", (int) m_caps.fff )
@@ -636,7 +675,11 @@ CGLMTex* GLMContext::NewTex( GLMTexLayoutKey* key, const char* debugLabel ) {
 }
 
 void GLMContext::DelTex( CGLMTex* tex ) {
-	for ( int i = 0; i < GLM_SAMPLER_COUNT; i++ ) { if ( m_samplers[ i ].m_pBoundTex == tex ) { BindTexToTMU( NULL, i ); } }
+	for ( int i = 0; i < GLM_SAMPLER_COUNT; i++ ) {
+		if ( m_samplers[ i ].m_pBoundTex == tex ) {
+			BindTexToTMU( nullptr, i );
+		}
+	}
 
 	if ( tex->m_rtAttachCount != 0 ) {
 		// RG - huh? wtf? TODO: fix this code which seems to be purposely leaking
@@ -652,17 +695,19 @@ void GLMContext::DelTex( CGLMTex* tex ) {
 		}
 		tex->m_rtAttachCount = 0;
 		#endif
-	} else { delete tex; }
+	} else {
+		delete tex;
+	}
 }
 
 // push and pop attrib when blit has mixed srgb source and dest?
-ConVar gl_radar7954721_workaround_mixed( "gl_radar7954721_workaround_mixed", "1" );
+ConVar gl_radar7954721_workaround_mixed{ "gl_radar7954721_workaround_mixed", "1" };
 
 // push and pop attrib on any blit?
-ConVar gl_radar7954721_workaround_all( "gl_radar7954721_workaround_all", "0" );
+ConVar gl_radar7954721_workaround_all{ "gl_radar7954721_workaround_all", "0" };
 
 // what attrib mask to use ?
-ConVar gl_radar7954721_workaround_maskval( "gl_radar7954721_workaround_maskval", "0" );
+ConVar gl_radar7954721_workaround_maskval{ "gl_radar7954721_workaround_maskval", "0" };
 
 enum eBlitFormatClass {
 	eColor,
@@ -670,7 +715,7 @@ enum eBlitFormatClass {
 	eDepthStencil
 };
 
-uint glAttachFromClass[ 3 ] = { GL_COLOR_ATTACHMENT0_EXT, GL_DEPTH_ATTACHMENT_EXT, GL_DEPTH_STENCIL_ATTACHMENT_EXT };
+uint glAttachFromClass[ 3 ] { GL_COLOR_ATTACHMENT0_EXT, GL_DEPTH_ATTACHMENT_EXT, GL_DEPTH_STENCIL_ATTACHMENT_EXT };
 
 void glScrubFBO( GLenum target ) {
 	gGL->glFramebufferRenderbufferEXT( target, GL_COLOR_ATTACHMENT0_EXT, GL_RENDERBUFFER_EXT, 0 );
@@ -715,13 +760,13 @@ void glAttachTex2DtoFBO( GLenum target, eBlitFormatClass formatClass, uint texNa
 	}
 }
 
-ConVar gl_can_resolve_flipped( "gl_can_resolve_flipped", "0" );
-ConVar gl_cannot_resolve_flipped( "gl_cannot_resolve_flipped", "0" );
+ConVar gl_can_resolve_flipped{ "gl_can_resolve_flipped", "0" };
+ConVar gl_cannot_resolve_flipped{ "gl_cannot_resolve_flipped", "0" };
 
 // these are only consulted if the m_cant_resolve_scaled cap bool is false.
 
-ConVar gl_minify_resolve_mode( "gl_minify_resolve_mode", "1" ); // if scaled resolve available, for downscaled resolve blits only (i.e. internal blits)
-ConVar gl_magnify_resolve_mode( "gl_magnify_resolve_mode", "2" ); // if scaled resolve available, for upscaled resolve blits only
+ConVar gl_minify_resolve_mode{ "gl_minify_resolve_mode", "1" }; // if scaled resolve available, for downscaled resolve blits only (i.e. internal blits)
+ConVar gl_magnify_resolve_mode{ "gl_magnify_resolve_mode", "2" }; // if scaled resolve available, for upscaled resolve blits only
 
 // 0 == old style, two steps
 // 1 == faster, one step blit aka XGL_SCALED_RESOLVE_FASTEST_EXT - if available.
@@ -737,12 +782,14 @@ void GLMContext::SaveColorMaskAndSetToDefault() {
 	m_ColorMaskSingle.Write( &newColorMask );
 }
 
-void GLMContext::RestoreSavedColorMask() { m_ColorMaskSingle.Write( &m_SavedColorMask ); }
+void GLMContext::RestoreSavedColorMask() {
+	m_ColorMaskSingle.Write( &m_SavedColorMask );
+}
 
 void GLMContext::Blit2( CGLMTex* srcTex, GLMRect* srcRect, int srcFace, int srcMip, CGLMTex* dstTex, GLMRect* dstRect, int dstFace, int dstMip, uint filter ) {
 	#if GL_TELEMETRY_GPU_ZONES
-	CScopedGLMPIXEvent glmPIXEvent( "Blit2" );
-	g_TelemetryGPUStats.m_nTotalBlit2++;
+		CScopedGLMPIXEvent glmPIXEvent( "Blit2" );
+		g_TelemetryGPUStats.m_nTotalBlit2++;
 	#endif
 
 	SaveColorMaskAndSetToDefault();
@@ -787,20 +834,22 @@ void GLMContext::Blit2( CGLMTex* srcTex, GLMRect* srcRect, int srcFace, int srcM
 
 
 	bool blitResolves = srcTex->m_rboName != 0;
-	bool blitScales = ( ( srcRect->xmax - srcRect->xmin ) != ( dstRect->xmax - dstRect->xmin ) ) || ( ( srcRect->ymax - srcRect->ymin ) != ( dstRect->ymax - dstRect->ymin ) );
+	bool blitScales = ( ( srcRect->xmax - srcRect->xmin ) != ( dstRect->xmax - dstRect->xmin ) ) or ( ( srcRect->ymax - srcRect->ymin ) != ( dstRect->ymax - dstRect->ymin ) );
 
-	bool blitToBack = ( dstTex == NULL );
+	bool blitToBack = ( dstTex == nullptr );
 	bool blitFlips = blitToBack; // implicit y-flip upon blit to GL_BACK supplied
 
 	//should we support blitFromBack ?
 
-	bool srcGamma = srcTex && ( ( srcTex->m_layout->m_key.m_texFlags & kGLMTexSRGB ) != 0 );
-	bool dstGamma = dstTex && ( ( dstTex->m_layout->m_key.m_texFlags & kGLMTexSRGB ) != 0 );
+	bool srcGamma = srcTex and ( ( srcTex->m_layout->m_key.m_texFlags & kGLMTexSRGB ) != 0 );
+	bool dstGamma = dstTex and ( ( dstTex->m_layout->m_key.m_texFlags & kGLMTexSRGB ) != 0 );
 
-	bool doPushPop = ( srcGamma != dstGamma ) && gl_radar7954721_workaround_mixed.GetInt() && m_caps.m_nv; // workaround for cross gamma blit problems on NV
+	bool doPushPop = ( srcGamma != dstGamma ) and gl_radar7954721_workaround_mixed.GetInt() and m_caps.m_nv; // workaround for cross gamma blit problems on NV
 	// ^^ need to re-check this on some post-10.6.3 build on NV to see if it was fixed
 
-	if ( doPushPop ) { gGL->glPushAttrib( 0 ); }
+	if ( doPushPop ) {
+		gGL->glPushAttrib( 0 );
+	}
 
 	//----------------------------------------------------------------- figure out the plan
 
@@ -811,22 +860,24 @@ void GLMContext::Blit2( CGLMTex* srcTex, GLMRect* srcRect, int srcFace, int srcM
 	// there may be GL extensions or driver revisions which start doing these safely.
 	// ideally many blits internally resolve without scaling and can thus go direct without using the scratch tex.
 
-	if ( blitResolves && ( blitFlips || blitToBack ) ) // flips, blit to back, same thing (for now)
+	if ( blitResolves and ( blitFlips or blitToBack ) ) // flips, blit to back, same thing (for now)
 	{
-		if ( gl_cannot_resolve_flipped.GetInt() ) { blitTwoStep = true; } else if ( !gl_can_resolve_flipped.GetInt() ) {
-			blitTwoStep = blitTwoStep || m_caps.m_cantResolveFlipped; // if neither convar renders an opinion, fall back to the caps to decide if we have to two-step.
+		if ( gl_cannot_resolve_flipped.GetInt() ) {
+			blitTwoStep = true;
+		} else if ( not gl_can_resolve_flipped.GetInt() ) {
+			blitTwoStep = blitTwoStep or m_caps.m_cantResolveFlipped; // if neither convar renders an opinion, fall back to the caps to decide if we have to two-step.
 		}
 	}
 
 	// only consider trying to use the scaling resolve filter,
 	// if we are confident we are not headed for two step mode already.
-	if ( !blitTwoStep ) {
-		if ( blitResolves && blitScales ) {
+	if ( not blitTwoStep ) {
+		if ( blitResolves and blitScales ) {
 			if ( m_caps.m_cantResolveScaled ) {
 				// filter is unchanged, two step mode switches on
 				blitTwoStep = true;
 			} else {
-				bool blitScalesDown = ( ( srcRect->xmax - srcRect->xmin ) > ( dstRect->xmax - dstRect->xmin ) ) || ( ( srcRect->ymax - srcRect->ymin ) > ( dstRect->ymax - dstRect->ymin ) );
+				bool blitScalesDown = ( ( srcRect->xmax - srcRect->xmin ) > ( dstRect->xmax - dstRect->xmin ) ) or ( ( srcRect->ymax - srcRect->ymin ) > ( dstRect->ymax - dstRect->ymin ) );
 				int mode = ( blitScalesDown ) ? gl_minify_resolve_mode.GetInt() : gl_magnify_resolve_mode.GetInt();
 
 				// roughly speaking, resolve blits that minify represent setup for special effects ("copy framebuffer to me")
@@ -901,20 +952,28 @@ void GLMContext::Blit2( CGLMTex* srcTex, GLMRect* srcRect, int srcFace, int srcM
 		srcTex->ForceRBONonDirty();
 	} else {
 		#if 1
-		if ( srcTex->m_pBlitSrcFBO == NULL ) {
-			srcTex->m_pBlitSrcFBO = NewFBO();
-			BindFBOToCtx( srcTex->m_pBlitSrcFBO, GL_READ_FRAMEBUFFER_EXT );
-			if ( blitResolves ) { glAttachRBOtoFBO( GL_READ_FRAMEBUFFER_EXT, formatClass, srcTex->m_rboName ); } else { glAttachTex2DtoFBO( GL_READ_FRAMEBUFFER_EXT, formatClass, srcTex->m_texName, srcMip ); }
-		} else {
-			BindFBOToCtx( srcTex->m_pBlitSrcFBO, GL_READ_FRAMEBUFFER_EXT );
-			//                     GLMCheckError();
-		}
+			if ( srcTex->m_pBlitSrcFBO == nullptr ) {
+				srcTex->m_pBlitSrcFBO = NewFBO();
+				BindFBOToCtx( srcTex->m_pBlitSrcFBO, GL_READ_FRAMEBUFFER_EXT );
+				if ( blitResolves ) {
+					glAttachRBOtoFBO( GL_READ_FRAMEBUFFER_EXT, formatClass, srcTex->m_rboName );
+				} else {
+					glAttachTex2DtoFBO( GL_READ_FRAMEBUFFER_EXT, formatClass, srcTex->m_texName, srcMip );
+				}
+			} else {
+				BindFBOToCtx( srcTex->m_pBlitSrcFBO, GL_READ_FRAMEBUFFER_EXT );
+				// GLMCheckError();
+			}
 		#else
-		// arrange source surface on FBO1 for blit directly to dest (which could be FBO0 or BACK)
-		BindFBOToCtx( m_scratchFBO[ 1 ], GL_READ_FRAMEBUFFER_EXT );
-		glScrubFBO( GL_READ_FRAMEBUFFER_EXT );
-		GLMCheckError();
-		if ( blitResolves ) { glAttachRBOtoFBO( GL_READ_FRAMEBUFFER_EXT, formatClass, srcTex->m_rboName ); } else { glAttachTex2DtoFBO( GL_READ_FRAMEBUFFER_EXT, formatClass, srcTex->m_texName, srcMip ); }
+			// arrange source surface on FBO1 for blit directly to dest (which could be FBO0 or BACK)
+			BindFBOToCtx( m_scratchFBO[ 1 ], GL_READ_FRAMEBUFFER_EXT );
+			glScrubFBO( GL_READ_FRAMEBUFFER_EXT );
+			GLMCheckError();
+			if ( blitResolves ) {
+				glAttachRBOtoFBO( GL_READ_FRAMEBUFFER_EXT, formatClass, srcTex->m_rboName );
+			} else {
+				glAttachTex2DtoFBO( GL_READ_FRAMEBUFFER_EXT, formatClass, srcTex->m_texName, srcMip );
+			}
 		#endif
 
 		gGL->glReadBuffer( glAttachFromClass[ formatClass ] );
@@ -926,26 +985,36 @@ void GLMContext::Blit2( CGLMTex* srcTex, GLMRect* srcRect, int srcFace, int srcM
 	if ( blitToBack ) {
 		// backbuffer is special - FBO0 is left out (either scrubbed already, or not used)
 
-		BindFBOToCtx( NULL, GL_DRAW_FRAMEBUFFER_EXT );
+		BindFBOToCtx( nullptr, GL_DRAW_FRAMEBUFFER_EXT );
 		gGL->glDrawBuffer( GL_BACK );
 
 		yflip = true;
 	} else {
 		// not going to GL_BACK - use FBO0. set up dest tex or RBO on it.  i.e. it's OK to blit from MSAA to MSAA if needed, though unlikely.
-		Assert( dstTex != NULL );
+		Assert( dstTex != nullptr );
 		#if 1
-		if ( dstTex->m_pBlitDstFBO == NULL ) {
-			dstTex->m_pBlitDstFBO = NewFBO();
-			BindFBOToCtx( dstTex->m_pBlitDstFBO, GL_DRAW_FRAMEBUFFER_EXT );
-			if ( dstTex->m_rboName ) { glAttachRBOtoFBO( GL_DRAW_FRAMEBUFFER_EXT, formatClass, dstTex->m_rboName ); } else { glAttachTex2DtoFBO( GL_DRAW_FRAMEBUFFER_EXT, formatClass, dstTex->m_texName, dstMip ); }
-		} else { BindFBOToCtx( dstTex->m_pBlitDstFBO, GL_DRAW_FRAMEBUFFER_EXT ); }
+			if ( dstTex->m_pBlitDstFBO == nullptr ) {
+				dstTex->m_pBlitDstFBO = NewFBO();
+				BindFBOToCtx( dstTex->m_pBlitDstFBO, GL_DRAW_FRAMEBUFFER_EXT );
+				if ( dstTex->m_rboName ) {
+					glAttachRBOtoFBO( GL_DRAW_FRAMEBUFFER_EXT, formatClass, dstTex->m_rboName );
+				} else {
+					glAttachTex2DtoFBO( GL_DRAW_FRAMEBUFFER_EXT, formatClass, dstTex->m_texName, dstMip );
+				}
+			} else {
+				BindFBOToCtx( dstTex->m_pBlitDstFBO, GL_DRAW_FRAMEBUFFER_EXT );
+			}
 		#else
-		BindFBOToCtx( m_scratchFBO[ 0 ], GL_DRAW_FRAMEBUFFER_EXT ); GLMCheckError();
-		glScrubFBO( GL_DRAW_FRAMEBUFFER_EXT );
+			BindFBOToCtx( m_scratchFBO[ 0 ], GL_DRAW_FRAMEBUFFER_EXT ); GLMCheckError();
+			glScrubFBO( GL_DRAW_FRAMEBUFFER_EXT );
 
-		if ( dstTex->m_rboName ) { glAttachRBOtoFBO( GL_DRAW_FRAMEBUFFER_EXT, formatClass, dstTex->m_rboName ); } else { glAttachTex2DtoFBO( GL_DRAW_FRAMEBUFFER_EXT, formatClass, dstTex->m_texName, dstMip ); }
+			if ( dstTex->m_rboName ) {
+				glAttachRBOtoFBO( GL_DRAW_FRAMEBUFFER_EXT, formatClass, dstTex->m_rboName );
+			} else {
+				glAttachTex2DtoFBO( GL_DRAW_FRAMEBUFFER_EXT, formatClass, dstTex->m_texName, dstMip );
+			}
 
-		gGL->glDrawBuffer( glAttachFromClass[ formatClass ] ); GLMCheckError();
+			gGL->glDrawBuffer( glAttachFromClass[ formatClass ] ); GLMCheckError();
 		#endif
 	}
 
@@ -953,7 +1022,7 @@ void GLMContext::Blit2( CGLMTex* srcTex, GLMRect* srcRect, int srcFace, int srcM
 
 	// i think in general, if we are blitting same size, gl_nearest is the right filter to pass.
 	// this re-steering won't kick in if there is scaling or a special scaled resolve going on.
-	if ( !blitScales ) {
+	if ( not blitScales ) {
 		// steer it
 		filter = GL_NEAREST;
 	}
@@ -972,10 +1041,10 @@ void GLMContext::Blit2( CGLMTex* srcTex, GLMRect* srcRect, int srcFace, int srcM
 	//----------------------------------------------------------------- scrub READ and maybe DRAW FBO, and unbind
 
 	//	glScrubFBO			( GL_READ_FRAMEBUFFER_EXT );
-	BindFBOToCtx( NULL, GL_READ_FRAMEBUFFER_EXT );
-	if ( !blitToBack ) {
+	BindFBOToCtx( nullptr, GL_READ_FRAMEBUFFER_EXT );
+	if ( not blitToBack ) {
 		//		glScrubFBO			( GL_DRAW_FRAMEBUFFER_EXT );
-		BindFBOToCtx( NULL, GL_DRAW_FRAMEBUFFER_EXT );
+		BindFBOToCtx( nullptr, GL_DRAW_FRAMEBUFFER_EXT );
 	}
 
 	//----------------------------------------------------------------- restore GLM's drawing FBO
@@ -983,11 +1052,15 @@ void GLMContext::Blit2( CGLMTex* srcTex, GLMRect* srcRect, int srcFace, int srcM
 	//	restore GLM drawing FBO
 	BindFBOToCtx( m_drawingFBO, GL_FRAMEBUFFER_EXT );
 
-	if ( doPushPop ) { gGL->glPopAttrib(); }
+	if ( doPushPop ) {
+		gGL->glPopAttrib();
+	}
 
 
 	//----------------------------------------------------------------- restore old scissor state
-	if ( oldsciss.enable ) { m_ScissorEnable.Write( &oldsciss ); }
+	if ( oldsciss.enable ) {
+		m_ScissorEnable.Write( &oldsciss );
+	}
 
 	RestoreSavedColorMask();
 }
@@ -1008,7 +1081,9 @@ void GLMContext::BlitTex( CGLMTex* srcTex, GLMRect* srcRect, int srcFace, int sr
 		case GL_LUMINANCE:
 		case GL_LUMINANCE_ALPHA:
 			#if 0
-			if ( GLMKnob( "caps-key", NULL ) > 0.0 ) { useBlitFB = false; }
+			if ( GLMKnob( "caps-key", nullptr ) > 0.0 ) {
+				useBlitFB = false;
+			}
 			#endif
 
 			if ( m_caps.m_cantBlitReliably ) // this is referring to a problem with the x3100..
@@ -1284,7 +1359,7 @@ void GLMContext::ResolveTex( CGLMTex* tex, bool forceDirty ) {
 	#endif
 
 	// only run resolve if it's (a) possible and (b) dirty or force-dirtied
-	if ( ( tex->m_rboName ) && ( tex->IsRBODirty() || forceDirty ) ) {
+	if ( ( tex->m_rboName ) and ( tex->IsRBODirty() or forceDirty ) ) {
 		// state we need to save
 		//	current setting of scissor
 		//	current setting of the drawing fbo (no explicit save, it's in the context)
@@ -1378,7 +1453,9 @@ void GLMContext::ResolveTex( CGLMTex* tex, bool forceDirty ) {
 			gGL->glFramebufferTexture2DEXT( GL_DRAW_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT, GL_TEXTURE_2D, tex->m_texName, 0 );
 
 			gGL->glFramebufferTexture2DEXT( GL_DRAW_FRAMEBUFFER_EXT, GL_STENCIL_ATTACHMENT_EXT, GL_TEXTURE_2D, tex->m_texName, 0 );
-		} else { gGL->glFramebufferTexture2DEXT( GL_DRAW_FRAMEBUFFER_EXT, attachIndexGL, GL_TEXTURE_2D, tex->m_texName, 0 ); }
+		} else {
+			gGL->glFramebufferTexture2DEXT( GL_DRAW_FRAMEBUFFER_EXT, attachIndexGL, GL_TEXTURE_2D, tex->m_texName, 0 );
+		}
 
 		gGL->glDrawBuffer( attachIndexGL );
 
@@ -1403,7 +1480,9 @@ void GLMContext::ResolveTex( CGLMTex* tex, bool forceDirty ) {
 			gGL->glFramebufferRenderbufferEXT( GL_READ_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT, GL_RENDERBUFFER_EXT, 0 );
 
 			gGL->glFramebufferRenderbufferEXT( GL_READ_FRAMEBUFFER_EXT, GL_STENCIL_ATTACHMENT_EXT, GL_RENDERBUFFER_EXT, 0 );
-		} else { gGL->glFramebufferRenderbufferEXT( GL_READ_FRAMEBUFFER_EXT, attachIndexGL, GL_RENDERBUFFER_EXT, 0 ); }
+		} else {
+			gGL->glFramebufferRenderbufferEXT( GL_READ_FRAMEBUFFER_EXT, attachIndexGL, GL_RENDERBUFFER_EXT, 0 );
+		}
 
 		//-----------------------------------------------------------------------------------
 		//	unset the write fb and buffer, detach write tex
@@ -1413,7 +1492,9 @@ void GLMContext::ResolveTex( CGLMTex* tex, bool forceDirty ) {
 			gGL->glFramebufferTexture2DEXT( GL_DRAW_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT, GL_TEXTURE_2D, 0, 0 );
 
 			gGL->glFramebufferTexture2DEXT( GL_DRAW_FRAMEBUFFER_EXT, GL_STENCIL_ATTACHMENT_EXT, GL_TEXTURE_2D, 0, 0 );
-		} else { gGL->glFramebufferTexture2DEXT( GL_DRAW_FRAMEBUFFER_EXT, attachIndexGL, GL_TEXTURE_2D, 0, 0 ); }
+		} else {
+			gGL->glFramebufferTexture2DEXT( GL_DRAW_FRAMEBUFFER_EXT, attachIndexGL, GL_TEXTURE_2D, 0, 0 );
+		}
 
 		//	put the original FB back in place (both read and draw)
 		// this bind will hit both read and draw bindings
@@ -1434,11 +1515,11 @@ void GLMContext::PreloadTex( CGLMTex* tex, bool force ) {
 	// bind the texture on TMU 15
 	// set up a dummy program to sample it but not write (use 'discard')
 	// draw a teeny little triangle that won't generate a lot of fragments
-	if ( !m_pairCache ) return;
+	if ( not m_pairCache ) return;
 
-	if ( !m_drawingFBO ) return;
+	if ( not m_drawingFBO ) return;
 
-	if ( tex->m_texPreloaded && !force ) // only do one preload unless forced to re-do
+	if ( tex->m_texPreloaded and not force ) // only do one preload unless forced to re-do
 	{
 		//printf("\nnot-preloading %s", tex->m_debugLabel ? tex->m_debugLabel : "(unknown)");
 		return;
@@ -1447,7 +1528,7 @@ void GLMContext::PreloadTex( CGLMTex* tex, bool force ) {
 	//printf("\npreloading     %s", tex->m_debugLabel ? tex->m_debugLabel : "(unknown)");
 
 	CGLMProgram* vp = m_preloadTexVertexProgram;
-	CGLMProgram* fp = NULL;
+	CGLMProgram* fp = nullptr;
 	switch ( tex->m_layout->m_key.m_texGLTarget ) {
 		case GL_TEXTURE_2D:
 			fp = m_preload2DTexFragmentProgram;
@@ -1461,10 +1542,10 @@ void GLMContext::PreloadTex( CGLMTex* tex, bool force ) {
 			fp = m_preloadCubeTexFragmentProgram;
 			break;
 	}
-	if ( !fp ) return;
+	if ( not fp ) return;
 
 	CGLMShaderPair* preloadPair = m_pairCache->SelectShaderPair( vp, fp, 0 );
-	if ( !preloadPair ) return;
+	if ( not preloadPair ) return;
 
 	gGL->glUseProgram( (GLuint) preloadPair->m_program );
 
@@ -1483,18 +1564,22 @@ void GLMContext::PreloadTex( CGLMTex* tex, bool force ) {
 	// Force the next flush to reset the attributes.
 	ClearCurAttribs();
 
-	for ( int index = 0; index < kGLMVertexAttributeIndexMax; index++ ) { gGL->glDisableVertexAttribArray( index ); }
+	for ( int index = 0; index < kGLMVertexAttributeIndexMax; index++ ) {
+		gGL->glDisableVertexAttribArray( index );
+	}
 
 	// bind texture and sampling params
 	CGLMTex* pPrevTex = m_samplers[ 15 ].m_pBoundTex;
 
-	if ( m_bUseSamplerObjects ) { gGL->glBindSampler( 15, 0 ); }
+	if ( m_bUseSamplerObjects ) {
+		gGL->glBindSampler( 15, 0 );
+	}
 
 	BindTexToTMU( tex, 15 );
 
 	// unbind vertex/index buffers
-	BindBufferToCtx( kGLMVertexBuffer, NULL );
-	BindBufferToCtx( kGLMIndexBuffer, NULL );
+	BindBufferToCtx( kGLMVertexBuffer, nullptr );
+	BindBufferToCtx( kGLMIndexBuffer, nullptr );
 
 	// draw
 	static float posns[ ] = { 0.0f, 0.0f, 0.0f,
@@ -1520,7 +1605,7 @@ void GLMContext::PreloadTex( CGLMTex* tex, bool force ) {
 }
 
 
-CGLMFBO* GLMContext::NewFBO( void ) {
+CGLMFBO* GLMContext::NewFBO() {
 	GLM_FUNC;
 
 	CGLMFBO* fbo = new CGLMFBO( this );
@@ -1534,22 +1619,24 @@ void GLMContext::DelFBO( CGLMFBO* fbo ) {
 	GLM_FUNC;
 
 	if ( m_drawingFBO == fbo ) {
-		m_drawingFBO = NULL; //poof!
+		m_drawingFBO = nullptr; //poof!
 	}
 
 	if ( m_boundReadFBO == fbo ) {
-		BindFBOToCtx( NULL, GL_READ_FRAMEBUFFER_EXT );
-		m_boundReadFBO = NULL;
+		BindFBOToCtx( nullptr, GL_READ_FRAMEBUFFER_EXT );
+		m_boundReadFBO = nullptr;
 	}
 
 	if ( m_boundDrawFBO == fbo ) {
-		BindFBOToCtx( NULL, GL_DRAW_FRAMEBUFFER_EXT );
-		m_boundDrawFBO = NULL;
+		BindFBOToCtx( nullptr, GL_DRAW_FRAMEBUFFER_EXT );
+		m_boundDrawFBO = nullptr;
 	}
 
 	int idx = m_fboTable.Find( fbo );
 	Assert( idx >= 0 );
-	if ( idx >= 0 ) { m_fboTable.FastRemove( idx ); }
+	if ( idx >= 0 ) {
+		m_fboTable.FastRemove( idx );
+	}
 
 	delete fbo;
 }
@@ -1565,7 +1652,7 @@ CGLMProgram* GLMContext::NewProgram( EGLMProgramType type, char* progString, con
 	prog->SetShaderName( pShaderName );
 	bool compile_ok = prog->CompileActiveSources();
 	(void) compile_ok;
-	if ( !compile_ok ) {
+	if ( not compile_ok ) {
 		GLMDebugPrintf( "Compile of \"%s\" Failed:\n", pShaderName );
 		Plat_DebugString( progString );
 	}
@@ -1578,26 +1665,28 @@ CGLMProgram* GLMContext::NewProgram( EGLMProgramType type, char* progString, con
 void GLMContext::DelProgram( CGLMProgram* pProg ) {
 	GLM_FUNC;
 
-	if ( m_drawingProgram[ pProg->m_type ] == pProg ) { SetProgram( pProg->m_type, ( pProg->m_type == kGLMFragmentProgram ) ? m_pNullFragmentProgram : NULL ); }
+	if ( m_drawingProgram[ pProg->m_type ] == pProg ) {
+		SetProgram( pProg->m_type, ( pProg->m_type == kGLMFragmentProgram ) ? m_pNullFragmentProgram : nullptr );
+	}
 
 	// make sure to eliminate any cached pairs using this shader
 	bool purgeResult = m_pairCache->PurgePairsWithShader( pProg );
 	(void) purgeResult;
-	Assert( !purgeResult ); // very unlikely to trigger
+	Assert( not purgeResult ); // very unlikely to trigger
 
 	NullProgram();
 
 	delete pProg;
 }
 
-void GLMContext::NullProgram( void ) {
+void GLMContext::NullProgram() {
 	gGL->glUseProgram( 0 );
-	m_pBoundPair = NULL;
+	m_pBoundPair = nullptr;
 	m_bDirtyPrograms = true;
 }
 
 void GLMContext::SetDrawingLang( EGLMProgramLang lang, bool immediate ) {
-	if ( !m_caps.m_hasDualShaders ) return; // ignore attempts to change language when -glmdualshaders is not engaged
+	if ( not m_caps.m_hasDualShaders ) return; // ignore attempts to change language when -glmdualshaders is not engaged
 
 	m_drawingLangAtFrameStart = lang;
 	if ( immediate ) {
@@ -1608,17 +1697,17 @@ void GLMContext::SetDrawingLang( EGLMProgramLang lang, bool immediate ) {
 }
 
 void GLMContext::LinkShaderPair( CGLMProgram* vp, CGLMProgram* fp ) {
-	if ( ( m_pairCache ) && ( m_drawingLang == kGLMGLSL ) && ( vp && vp->m_descs[ kGLMGLSL ].m_valid ) && ( fp && fp->m_descs[ kGLMGLSL ].m_valid ) ) {
+	if ( ( m_pairCache ) and ( m_drawingLang == kGLMGLSL ) and ( vp and vp->m_descs[ kGLMGLSL ].m_valid ) and ( fp and fp->m_descs[ kGLMGLSL ].m_valid ) ) {
 		CGLMShaderPair* pair = m_pairCache->SelectShaderPair( vp, fp, 0 );
 		(void) pair;
 
-		Assert( pair != NULL );
+		Assert( pair != nullptr );
 
 		NullProgram(); // clear out any binds that were done - next draw will set it right
 	}
 }
 
-void GLMContext::ClearShaderPairCache( void ) {
+void GLMContext::ClearShaderPairCache() {
 	if ( m_pairCache ) {
 		NullProgram();
 		m_pairCache->Purge(); // bye bye all linked pairs
@@ -1627,7 +1716,9 @@ void GLMContext::ClearShaderPairCache( void ) {
 }
 
 void GLMContext::QueryShaderPair( int index, GLMShaderPairInfo* infoOut ) {
-	if ( m_pairCache ) { m_pairCache->QueryShaderPair( index, infoOut ); } else {
+	if ( m_pairCache ) {
+		m_pairCache->QueryShaderPair( index, infoOut );
+	} else {
 		memset( infoOut, 0, sizeof( *infoOut ) );
 		infoOut->m_status = -1;
 	}
@@ -1720,7 +1811,7 @@ void GLMContext::Clear( bool color, unsigned long colorValue, bool depth, float 
 		m_StencilWriteMask.Write( &newstenmask );
 	}
 
-	bool subrect = ( box != NULL );
+	bool subrect = ( box != nullptr );
 	GLScissorEnable_t scissorEnableSave;
 	GLScissorEnable_t scissorEnableNew = { true };
 
@@ -1784,7 +1875,7 @@ void GLMContext::Clear( bool color, unsigned long colorValue, bool depth, float 
 
 
 // stolen from glmgrbasics.cpp
-extern "C" uint GetCurrentKeyModifiers( void );
+extern "C" uint GetCurrentKeyModifiers();
 
 enum ECarbonModKeyIndex {
 	EcmdKeyBit     = 8, /* command key down?*/
@@ -1795,19 +1886,19 @@ enum ECarbonModKeyIndex {
 };
 
 enum ECarbonModKeyMask {
-	EcmdKey     = 1 << EcmdKeyBit,
-	EshiftKey   = 1 << EshiftKeyBit,
-	EalphaLock  = 1 << EalphaLockBit,
-	EoptionKey  = 1 << EoptionKeyBit,
-	EcontrolKey = 1 << EcontrolKeyBit
+	EcmdKey     = 1u << EcmdKeyBit,
+	EshiftKey   = 1u << EshiftKeyBit,
+	EalphaLock  = 1u << EalphaLockBit,
+	EoptionKey  = 1u << EoptionKeyBit,
+	EcontrolKey = 1u << EcontrolKeyBit
 };
 
-static ConVar gl_flushpaircache( "gl_flushpaircache", "0" );
-static ConVar gl_paircachestats( "gl_paircachestats", "0" );
-static ConVar gl_mtglflush_at_tof( "gl_mtglflush_at_tof", "0" );
-static ConVar gl_texlayoutstats( "gl_texlayoutstats", "0" );
+static ConVar gl_flushpaircache{ "gl_flushpaircache", "0" };
+static ConVar gl_paircachestats{ "gl_paircachestats", "0" };
+static ConVar gl_mtglflush_at_tof{ "gl_mtglflush_at_tof", "0" };
+static ConVar gl_texlayoutstats{ "gl_texlayoutstats", "0" };
 
-void GLMContext::BeginFrame( void ) {
+void GLMContext::BeginFrame() {
 	GLM_FUNC;
 
 	m_debugFrameIndex++;
@@ -1831,8 +1922,8 @@ void GLMContext::BeginFrame( void ) {
 
 	//FIXME should we also zap the m_lastKnownAttribs array ? (worst case it just sets them all again on first batch)
 
-	BindBufferToCtx( kGLMVertexBuffer, NULL, true );
-	BindBufferToCtx( kGLMIndexBuffer, NULL, true );
+	BindBufferToCtx( kGLMVertexBuffer, nullptr, true );
+	BindBufferToCtx( kGLMIndexBuffer, nullptr, true );
 
 	if ( gl_flushpaircache.GetInt() ) {
 		// do the flush and then set back to zero
@@ -1871,7 +1962,7 @@ void GLMContext::BeginFrame( void ) {
 
 }
 
-void GLMContext::EndFrame( void ) {
+void GLMContext::EndFrame() {
 	GLM_FUNC;
 
 	#if GLMDEBUG
@@ -1929,7 +2020,9 @@ void GLMContext::Present( CGLMTex* tex ) {
 		// old school, do the resolve, had the tex down to cocoamgr to actually blit.
 		// that way is required if you are not in one-context mode (10.5.8)
 
-		if ( ( gl_blitmode.GetInt() != 0 ) ) { newRefreshMode = true; }
+		if ( ( gl_blitmode.GetInt() != 0 ) ) {
+			newRefreshMode = true;
+		}
 
 		// this is the path whether full screen or windowed... we always blit.
 		CShowPixelsParams showparams;
@@ -1949,13 +2042,15 @@ void GLMContext::Present( CGLMTex* tex ) {
 
 		bool refresh = true;
 		#ifdef OSX
-		if ( ( glm_nullrefresh_capslock.GetInt() ) && ( GetCurrentKeyModifiers() & EalphaLock ) ) { refresh = false; }
+		if ( ( glm_nullrefresh_capslock.GetInt() ) and ( GetCurrentKeyModifiers() & EalphaLock ) ) {
+			refresh = false;
+		}
 		#endif
 		static int counter;
 		counter++;
 
 		#ifdef OSX
-		if ( ( glm_literefresh_capslock.GetInt() ) && ( GetCurrentKeyModifiers() & EalphaLock ) && ( counter & 127 ) ) {
+		if ( ( glm_literefresh_capslock.GetInt() ) and ( GetCurrentKeyModifiers() & EalphaLock ) and ( counter & 127 ) ) {
 			// just show every 128th frame
 			refresh = false;
 		}
@@ -1981,20 +2076,20 @@ void GLMContext::Present( CGLMTex* tex ) {
 				dstRect.ymax = dstHeight;
 
 				// do not ask for LINEAR if blit is unscaled
-				// NULL means targeting GL_BACK.  Blit2 will break it down into two steps if needed, and will handle resolve, scale, flip.
-				bool blitScales = ( showparams.m_width != static_cast<int>(dstWidth) ) || ( showparams.m_height != static_cast<int>(dstHeight) );
+				// nullptr means targeting GL_BACK.  Blit2 will break it down into two steps if needed, and will handle resolve, scale, flip.
+				bool blitScales = ( showparams.m_width != static_cast<int>(dstWidth) ) or ( showparams.m_height != static_cast<int>(dstHeight) );
 				Blit2( tex, &srcRect, 0, 0,
-				       NULL, &dstRect, 0, 0,
+				       nullptr, &dstRect, 0, 0,
 				       blitScales ? GL_LINEAR : GL_NEAREST );
 
 				// we set showparams.m_noBlit, and just let CocoaMgr handle the swap (flushbuffer / page flip)
 				showparams.m_noBlit = true;
 
-				BindFBOToCtx( NULL, GL_FRAMEBUFFER_EXT );
+				BindFBOToCtx( nullptr, GL_FRAMEBUFFER_EXT );
 			} else {
 				ResolveTex( tex, true ); // dxabstract used to do this unconditionally.we still do if new refresh mode doesn't engage.
 
-				BindFBOToCtx( NULL, GL_FRAMEBUFFER_EXT );
+				BindFBOToCtx( nullptr, GL_FRAMEBUFFER_EXT );
 
 				// showparams.m_noBlit is left set to 0.  CocoaMgr does the blit.
 			}
@@ -2066,7 +2161,9 @@ GLMContext::GLMContext( IDirect3DDevice9* pDevice, GLMDisplayParams* params ) {
 	// really use them in this codebase anyhow, except to preload textures.
 	m_bUseSamplerObjects = false;
 
-	if ( CommandLine()->CheckParm( "-gl_enablesamplerobjects" ) ) { m_bUseSamplerObjects = true; }
+	if ( CommandLine()->CheckParm( "-gl_enablesamplerobjects" ) ) {
+		m_bUseSamplerObjects = true;
+	}
 
 	char buf[ 256 ];
 	V_snprintf( buf, sizeof( buf ), "GL sampler object usage: %s\n", m_bUseSamplerObjects ? "ENABLED" : "DISABLED" );
@@ -2083,13 +2180,17 @@ GLMContext::GLMContext( IDirect3DDevice9* pDevice, GLMDisplayParams* params ) {
 
 	m_nCurPinnedMemoryBuffer = 0;
 	if ( gGL->m_bHave_GL_AMD_pinned_memory ) {
-		for ( uint t = 0; t < cNumPinnedMemoryBuffers; t++ ) { m_PinnedMemoryBuffers[ t ].Init( GLMGR_PINNED_MEMORY_BUFFER_SIZE ); }
+		for ( uint t = 0; t < cNumPinnedMemoryBuffers; t++ ) {
+			m_PinnedMemoryBuffers[ t ].Init( GLMGR_PINNED_MEMORY_BUFFER_SIZE );
+		}
 
 		gGL->glBindBufferARB( GL_EXTERNAL_VIRTUAL_MEMORY_BUFFER_AMD, m_PinnedMemoryBuffers[ m_nCurPinnedMemoryBuffer ].GetHandle() );
 	}
 
 	m_bUseBoneUniformBuffers = true;
-	if ( CommandLine()->CheckParm( "-disableboneuniformbuffers" ) ) { m_bUseBoneUniformBuffers = false; }
+	if ( CommandLine()->CheckParm( "-disableboneuniformbuffers" ) ) {
+		m_bUseBoneUniformBuffers = false;
+	}
 
 	m_nMaxUsedVertexProgramConstantsHint = 256;
 
@@ -2100,41 +2201,44 @@ GLMContext::GLMContext( IDirect3DDevice9* pDevice, GLMDisplayParams* params ) {
 	m_slowAssertEnable = CommandLine()->FindParm( "-glmassertslow" ) != 0;
 	m_slowSpewEnable = CommandLine()->FindParm( "-glmspewslow" ) != 0;
 	m_checkglErrorsAfterEveryBatch = CommandLine()->FindParm( "-glcheckerrors" ) != 0;
-	m_slowCheckEnable = m_slowAssertEnable || m_slowSpewEnable || m_checkglErrorsAfterEveryBatch;
+	m_slowCheckEnable = m_slowAssertEnable or m_slowSpewEnable or m_checkglErrorsAfterEveryBatch;
 
 	m_drawingLangAtFrameStart = m_drawingLang = kGLMGLSL; // default to GLSL
 
 	// this affects FlushDrawStates which will route program bindings, uniform delivery, sampler setup, and enables accordingly.
 
-	if ( CommandLine()->FindParm( "-glslmode" ) ) { m_drawingLangAtFrameStart = m_drawingLang = kGLMGLSL; }
-	if ( CommandLine()->FindParm( "-arbmode" ) && !CommandLine()->FindParm( "-glslcontrolflow" ) ) { m_drawingLangAtFrameStart = m_drawingLang = kGLMARB; }
+	if ( CommandLine()->FindParm( "-glslmode" ) ) {
+		m_drawingLangAtFrameStart = m_drawingLang = kGLMGLSL;
+	}
+	if ( CommandLine()->FindParm( "-arbmode" ) and not CommandLine()->FindParm( "-glslcontrolflow" ) ) {
+		m_drawingLangAtFrameStart = m_drawingLang = kGLMARB;
+	}
 
 	// proceed with rest of init
 
 	m_dwRenderThreadId = 0;
 	m_bIsThreading = false;
 
-	m_nsctx = NULL;
-	m_ctx = NULL;
+	m_nsctx = nullptr;
+	m_ctx = nullptr;
 
-	int* selAttribs = NULL;
+	int* selAttribs = nullptr;
 	uint selWords = 0;
 
 	memset( &m_caps, 0, sizeof( m_caps ) );
 	GetDesiredPixelFormatAttribsAndRendererInfo( (uint**) &selAttribs, &selWords, &m_caps );
 	uint selBytes = selWords * sizeof( uint );
-	selBytes;
 
 	#if defined( USE_SDL )
-	m_ctx = (SDL_GLContext) GetGLContextForWindow( params ? (void*) params->m_focusWindow : NULL );
-	MakeCurrent( true );
+		m_ctx = static_cast<SDL_GLContext>( GetGLContextForWindow( params ? params->m_focusWindow : nullptr ) );
+		MakeCurrent( true );
 	#else
-	#error
+		#error
 	#endif
 	IncrementWindowRefCount();
 
 	// If we're using GL_ARB_debug_output, go ahead and setup the callback here.
-	if ( gGL->m_bHave_GL_ARB_debug_output && CommandLine()->FindParm( "-gl_debug" ) ) {
+	if ( gGL->m_bHave_GL_ARB_debug_output and CommandLine()->FindParm( "-gl_debug" ) ) {
 		#if GLMDEBUG
 		// Turning this on is a perf loss, but it ensures that you can (at least) swap to the other
 		// threads to see what call is currently being made.
@@ -2152,17 +2256,19 @@ GLMContext::GLMContext( IDirect3DDevice9* pDevice, GLMDisplayParams* params ) {
 		#endif
 		// This should be there if we get in here--make sure.
 		Assert( gGL->glDebugMessageControlARB );
-		gGL->glDebugMessageControlARB( GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, (const GLuint*) NULL, GL_TRUE );
+		gGL->glDebugMessageControlARB( GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, (const GLuint*) nullptr, GL_TRUE );
 
 		// Gonna filter these out, they're "chatty".
-		gGL->glDebugMessageControlARB( GL_DEBUG_SOURCE_API_ARB, GL_DEBUG_TYPE_OTHER_ARB, GL_DEBUG_SEVERITY_LOW_ARB, 0, (const GLuint*) NULL, GL_FALSE );
-		gGL->glDebugMessageCallbackARB( GL_Debug_Output_Callback, (void*) NULL );
+		gGL->glDebugMessageControlARB( GL_DEBUG_SOURCE_API_ARB, GL_DEBUG_TYPE_OTHER_ARB, GL_DEBUG_SEVERITY_LOW_ARB, 0, (const GLuint*) nullptr, GL_FALSE );
+		gGL->glDebugMessageCallbackARB( GL_Debug_Output_Callback, (void*) nullptr );
 
 		Plat_DebugString( "GLMContext::GLMContext: Debug output (gl_arb_debug_output) enabled!\n" );
 	}
 
 
-	if ( CommandLine()->FindParm( "-glmspewcaps" ) ) { DumpCaps(); }
+	if ( CommandLine()->FindParm( "-glmspewcaps" ) ) {
+		DumpCaps();
+	}
 
 	SetDisplayParams( params );
 
@@ -2171,7 +2277,9 @@ GLMContext::GLMContext( IDirect3DDevice9* pDevice, GLMDisplayParams* params ) {
 	memset( m_samplerObjectHash, 0, sizeof( m_samplerObjectHash ) );
 	m_nSamplerObjectHashNumEntries = 0;
 
-	for ( uint i = 0; i < cSamplerObjectHashSize; ++i ) { gGL->glGenSamplers( 1, &m_samplerObjectHash[ i ].m_samplerObject ); }
+	for ( uint i = 0; i < cSamplerObjectHashSize; ++i ) {
+		gGL->glGenSamplers( 1, &m_samplerObjectHash[ i ].m_samplerObject );
+	}
 
 	memset( m_samplers, 0, sizeof( m_samplers ) );
 	for ( int i = 0; i < GLM_SAMPLER_COUNT; i++ ) {
@@ -2195,9 +2303,9 @@ GLMContext::GLMContext( IDirect3DDevice9* pDevice, GLMDisplayParams* params ) {
 
 	// FIXME need a texture tracking table so we can reliably delete CGLMTex objects at context teardown
 
-	m_boundReadFBO = NULL;
-	m_boundDrawFBO = NULL;
-	m_drawingFBO = NULL;
+	m_boundReadFBO = nullptr;
+	m_boundDrawFBO = nullptr;
+	m_drawingFBO = nullptr;
 
 	memset( m_drawingProgram, 0, sizeof( m_drawingProgram ) );
 	m_bDirtyPrograms = true;
@@ -2225,7 +2333,7 @@ GLMContext::GLMContext( IDirect3DDevice9* pDevice, GLMDisplayParams* params ) {
 	if ( CommandLine()->FindParm( "-glmwritedirtyattribs" ) ) m_attribWriteMode = eAttribWriteDirty;
 
 	m_pairCache = new CGLMShaderPairCache( this );
-	m_pBoundPair = NULL;
+	m_pBoundPair = nullptr;
 
 	m_fragDataMask = 0;
 
@@ -2235,7 +2343,7 @@ GLMContext::GLMContext( IDirect3DDevice9* pDevice, GLMDisplayParams* params ) {
 	m_lastKnownVertexAttribMask = 0;
 	m_nNumSetVertexAttributes = 16;
 
-	// make a null program for use when client asks for NULL FP
+	// make a null program for use when client asks for nullptr FP
 	m_pNullFragmentProgram = NewProgram( kGLMFragmentProgram, g_nullFragmentProgramText, "null" );
 	SetProgram( kGLMFragmentProgram, m_pNullFragmentProgram );
 
@@ -2246,9 +2354,9 @@ GLMContext::GLMContext( IDirect3DDevice9* pDevice, GLMDisplayParams* params ) {
 	m_preloadCubeTexFragmentProgram = NewProgram( kGLMFragmentProgram, g_preloadCubeTexFragmentProgramText, "preloadCube" );
 
 	//memset( &m_drawVertexSetup, 0, sizeof(m_drawVertexSetup) );
-	SetVertexAttributes( NULL ); // will set up all the entries in m_drawVertexSetup
+	SetVertexAttributes( nullptr ); // will set up all the entries in m_drawVertexSetup
 
-	m_debugFontTex = NULL;
+	m_debugFontTex = nullptr;
 
 	// debug state
 	m_debugFrameIndex = -1;
@@ -2284,19 +2392,29 @@ GLMContext::GLMContext( IDirect3DDevice9* pDevice, GLMDisplayParams* params ) {
 	m_blitReadFBO = NewFBO();
 	m_blitDrawFBO = NewFBO();
 
-	for ( int i = 0; i < kGLMScratchFBOCount; i++ ) { m_scratchFBO[ i ] = NewFBO(); }
+	for ( int i = 0; i < kGLMScratchFBOCount; i++ ) {
+		m_scratchFBO[ i ] = NewFBO();
+	}
 
 	#ifdef OSX
 	bool new_mtgl = m_caps.m_hasPerfPackage1; // i.e. 10.6.4 plus new driver
 
-	if ( CommandLine()->FindParm( "-glmenablemtgl2" ) ) { new_mtgl = true; }
+	if ( CommandLine()->FindParm( "-glmenablemtgl2" ) ) {
+		new_mtgl = true;
+	}
 
-	if ( CommandLine()->FindParm( "-glmdisablemtgl2" ) ) { new_mtgl = false; }
+	if ( CommandLine()->FindParm( "-glmdisablemtgl2" ) ) {
+		new_mtgl = false;
+	}
 
 	bool mtgl_on = params->m_mtgl;
-	if ( CommandLine()->FindParm( "-glmenablemtgl" ) ) { mtgl_on = true; }
+	if ( CommandLine()->FindParm( "-glmenablemtgl" ) ) {
+		mtgl_on = true;
+	}
 
-	if ( CommandLine()->FindParm( "-glmdisablemtgl" ) ) { mtgl_on = false; }
+	if ( CommandLine()->FindParm( "-glmdisablemtgl" ) ) {
+		mtgl_on = false;
+	}
 
 	CGLError result = (CGLError) 0;
 	if ( mtgl_on ) {
@@ -2306,16 +2424,18 @@ GLMContext::GLMContext( IDirect3DDevice9* pDevice, GLMDisplayParams* params ) {
 			// afterburner
 			CGLContextEnable kCGLCPGCDMPEngine = ( (CGLContextEnable) 1314 );
 			result = CGLEnable( context, kCGLCPGCDMPEngine );
-			if ( !result ) {
+			if ( not result ) {
 				ready = true; // succeeded - no need to try non-MTGL
 				printf( "\nMTGL detected.\n" );
-			} else { printf( "\nMTGL *not* detected, falling back.\n" ); }
+			} else {
+				printf( "\nMTGL *not* detected, falling back.\n" );
+			}
 		}
 
-		if ( !ready ) {
+		if ( not ready ) {
 			// try old MTGL
 			result = CGLEnable( context, kCGLCEMPEngine );
-			if ( !result ) {
+			if ( not result ) {
 				printf( "\nMTGL has been detected.\n" );
 				ready = true; // succeeded - no need to try non-MTGL
 			}
@@ -2325,7 +2445,9 @@ GLMContext::GLMContext( IDirect3DDevice9* pDevice, GLMDisplayParams* params ) {
 	if ( m_caps.m_badDriver108Intel ) {
 		// this way we have something to look for in terminal spew if users report issues related to this in the future.
 		printf( "\nEnabling GLSL compiler `malloc' workaround.\n" );
-		if ( !IntelGLMallocWorkaround::Get()->Enable() ) { Warning( "Unable to enable OSX 10.8 / Intel HD4000 workaround, there might be crashes.\n" ); }
+		if ( not IntelGLMallocWorkaround::Get()->Enable() ) {
+			Warning( "Unable to enable OSX 10.8 / Intel HD4000 workaround, there might be crashes.\n" );
+		}
 	}
 
 	#endif
@@ -2347,9 +2469,15 @@ void GLMContext::Reset() { }
 GLMContext::~GLMContext() {
 	GLMGPUTimestampManagerDeinit();
 
-	for ( uint t = 0; t < cNumPinnedMemoryBuffers; t++ ) { m_PinnedMemoryBuffers[ t ].Deinit(); }
+	for ( uint t = 0; t < cNumPinnedMemoryBuffers; t++ ) {
+		m_PinnedMemoryBuffers[ t ].Deinit();
+	}
 
-	if ( m_bUseSamplerObjects ) { for ( int i = 0; i < GLM_SAMPLER_COUNT; i++ ) { gGL->glBindSampler( i, 0 ); } }
+	if ( m_bUseSamplerObjects ) {
+		for ( int i = 0; i < GLM_SAMPLER_COUNT; i++ ) {
+			gGL->glBindSampler( i, 0 );
+		}
+	}
 
 	for ( int i = 0; i < cSamplerObjectHashSize; i++ ) {
 		gGL->glDeleteSamplers( 1, &m_samplerObjectHash[ i ].m_samplerObject );
@@ -2358,12 +2486,12 @@ GLMContext::~GLMContext() {
 
 	if ( m_debugFontTex ) {
 		DelTex( m_debugFontTex );
-		m_debugFontTex = NULL;
+		m_debugFontTex = nullptr;
 	}
 
 	if ( m_pNullFragmentProgram ) {
 		DelProgram( m_pNullFragmentProgram );
-		m_pNullFragmentProgram = NULL;
+		m_pNullFragmentProgram = nullptr;
 	}
 
 	// walk m_fboTable and free them up..
@@ -2375,7 +2503,7 @@ GLMContext::~GLMContext() {
 
 	if ( m_pairCache ) {
 		delete m_pairCache;
-		m_pairCache = NULL;
+		m_pairCache = nullptr;
 	}
 
 	// we need a m_texTable I think..
@@ -2398,7 +2526,7 @@ void GLMContext::BindTexToTMU( CGLMTex* pTex, int tmu ) {
 
 	SelectTMU( tmu );
 
-	if ( !pTex ) {
+	if ( not pTex ) {
 		gGL->glBindTexture( GL_TEXTURE_1D, 0 );
 		gGL->glBindTexture( GL_TEXTURE_2D, 0 );
 		gGL->glBindTexture( GL_TEXTURE_3D, 0 );
@@ -2434,7 +2562,7 @@ void GLMContext::BindFBOToCtx( CGLMFBO* fbo, GLenum bindPoint ) {
 	bool targetDraw = ( bindPoint == GL_DRAW_FRAMEBUFFER_EXT );
 
 	if ( targetRead ) {
-		if ( fbo ) // you can pass NULL to go back to no-FBO
+		if ( fbo ) // you can pass nullptr to go back to no-FBO
 		{
 			gGL->glBindFramebufferEXT( GL_READ_FRAMEBUFFER_EXT, fbo->m_name );
 
@@ -2443,12 +2571,12 @@ void GLMContext::BindFBOToCtx( CGLMFBO* fbo, GLenum bindPoint ) {
 		} else {
 			gGL->glBindFramebufferEXT( GL_READ_FRAMEBUFFER_EXT, 0 );
 
-			m_boundReadFBO = NULL;
+			m_boundReadFBO = nullptr;
 		}
 	}
 
 	if ( targetDraw ) {
-		if ( fbo ) // you can pass NULL to go back to no-FBO
+		if ( fbo ) // you can pass nullptr to go back to no-FBO
 		{
 			gGL->glBindFramebufferEXT( GL_DRAW_FRAMEBUFFER_EXT, fbo->m_name );
 
@@ -2457,7 +2585,7 @@ void GLMContext::BindFBOToCtx( CGLMFBO* fbo, GLenum bindPoint ) {
 		} else {
 			gGL->glBindFramebufferEXT( GL_DRAW_FRAMEBUFFER_EXT, 0 );
 
-			m_boundDrawFBO = NULL;
+			m_boundDrawFBO = nullptr;
 		}
 	}
 }
@@ -2471,7 +2599,11 @@ void GLMContext::BindBufferToCtx( EGLMBufferType type, CGLMBuffer* pBuff, bool b
 	CheckCurrent();
 
 	GLuint nGLName = pBuff ? pBuff->m_nHandle : 0;
-	if ( !bForce ) { if ( m_nBoundGLBuffer[ type ] == nGLName ) return; }
+	if ( not bForce ) {
+		if ( m_nBoundGLBuffer[ type ] == nGLName ) {
+			return;
+		}
+	}
 
 	GLenum target = 0;
 	switch ( type ) {
@@ -2490,7 +2622,7 @@ void GLMContext::BindBufferToCtx( EGLMBufferType type, CGLMBuffer* pBuff, bool b
 		default: Assert( !"Unknown buffer type" );
 	}
 
-	Assert( !pBuff || ( pBuff->m_buffGLTarget == target ) );
+	Assert( not pBuff or ( pBuff->m_buffGLTarget == target ) );
 
 	m_nBoundGLBuffer[ type ] = nGLName;
 	gGL->glBindBufferARB( target, nGLName );
@@ -2513,7 +2645,7 @@ void GLMContext::MarkAllSamplersDirty() {
 }
 
 void GLMContext::FlushDrawStatesNoShaders() {
-	Assert( ( m_drawingFBO == m_boundDrawFBO ) && ( m_drawingFBO == m_boundReadFBO ) ); // this check MUST succeed
+	Assert( ( m_drawingFBO == m_boundDrawFBO ) and ( m_drawingFBO == m_boundReadFBO ) ); // this check MUST succeed
 
 	GLM_FUNC;
 
@@ -2560,7 +2692,7 @@ static void CopyTilEOL( char* dst, char* src, int dstSize ) {
 	dstSize--;
 
 	int i = 0;
-	while ( ( i < dstSize ) && ( src[ i ] != 0 ) && ( src[ i ] != '\n' ) && ( src[ i ] != '\r' ) ) {
+	while ( ( i < dstSize ) and ( src[ i ] != 0 ) and ( src[ i ] != '\n' ) and ( src[ i ] != '\r' ) ) {
 		dst[ i ] = src[ i ];
 		i++;
 	}
@@ -2585,7 +2717,9 @@ void GLMContext::DebugDump( GLMDebugHookInfo* info, uint options, uint vertDumpM
 	bool is_draw = ( info->m_caller == eDrawElements );
 	const char* batchtype = is_draw ? "draw" : "clear";
 
-	if ( options & ( 1 << eDumpBatchInfo ) ) { GLMPRINTF( ( "-D- %s === %s %d ======================================================== %s %d  frame %d", sg_pPIXName, batchtype, m_nBatchCounter, batchtype, m_nBatchCounter, m_debugFrameIndex ) ); }
+	if ( options & ( 1 << eDumpBatchInfo ) ) {
+		GLMPRINTF( ( "-D- %s === %s %d ======================================================== %s %d  frame %d", sg_pPIXName, batchtype, m_nBatchCounter, batchtype, m_nBatchCounter, m_debugFrameIndex ) );
+	}
 
 	if ( options & ( 1 << eDumpSurfaceInfo ) ) {
 		GLMPRINTF( ( "-D-" ) );
@@ -2595,13 +2729,15 @@ void GLMContext::DebugDump( GLMDebugHookInfo* info, uint options, uint vertDumpM
 		CGLMFBO* fbo = m_boundDrawFBO;
 		for ( int i = 0; i < kAttCount; i++ ) {
 			CGLMTex* tex = fbo->m_attach[ i ].m_tex;
-			if ( tex ) { GLMPRINTF( ( "-D-    bound FBO (%8x)  attachment %d = tex %8x (GL %d) (%s)", fbo, i, tex, tex->m_texName, tex->m_layout->m_layoutSummary ) ); } else {
+			if ( tex ) {
+				GLMPRINTF( ( "-D-    bound FBO (%8x)  attachment %d = tex %8x (GL %d) (%s)", fbo, i, tex, tex->m_texName, tex->m_layout->m_layoutSummary ) );
+			} else {
 				// warning if no depthstencil attachment
 				switch ( i ) {
 					case kAttDepth:
 					case kAttStencil:
 					case kAttDepthStencil:
-						GLMPRINTF( ( "-D-    bound FBO (%8x)  attachment %d = NULL, warning!", fbo, i ) );
+						GLMPRINTF( ( "-D-    bound FBO (%8x)  attachment %d = nullptr, warning!", fbo, i ) );
 						break;
 				}
 			}
@@ -2617,10 +2753,12 @@ void GLMContext::DebugDump( GLMDebugHookInfo* info, uint options, uint vertDumpM
 
 		GLMPRINTF( ( "-D-" ) );
 		GLMPRINTF( ( "-D- stack crawl" ) );
-		for ( uint i = 0; i < cp.m_frameCount; i++ ) { GLMPRINTF( ( "-D-\t%s", cp.m_crawlNames[ i ] ) ); }
+		for ( uint i = 0; i < cp.m_frameCount; i++ ) {
+			GLMPRINTF( ( "-D-\t%s", cp.m_crawlNames[ i ] ) );
+		}
 	}
 
-	if ( ( options & ( 1 << eDumpShaderLinks ) ) && is_draw ) {
+	if ( ( options & ( 1 << eDumpShaderLinks ) ) and is_draw ) {
 		// we want to print out - GL name, pathname to disk copy if editable, extra credit would include the summary translation line
 		// so grep for "#// trans#"
 		char attribtemp[ 1000 ];
@@ -2628,67 +2766,72 @@ void GLMContext::DebugDump( GLMDebugHookInfo* info, uint options, uint vertDumpM
 
 		if ( vp ) {
 			char* attribmap = strstr( vp->m_text, "#//ATTRIBMAP" );
-			if ( attribmap ) { CopyTilEOL( attribtemp, attribmap, sizeof( attribtemp ) ); } else { strcpy( attribtemp, "no attrib map" ); }
+			if ( attribmap ) {
+				CopyTilEOL( attribtemp, attribmap, sizeof( attribtemp ) );
+			} else {
+				strcpy( attribtemp, "no attrib map" );
+			}
 
 			char* trans = strstr( vp->m_text, "#// trans#" );
-			if ( trans ) { CopyTilEOL( transtemp, trans, sizeof( transtemp ) ); } else { strcpy( transtemp, "no translation info" ); }
+			if ( trans ) {
+				CopyTilEOL( transtemp, trans, sizeof( transtemp ) );
+			} else {
+				strcpy( transtemp, "no translation info" );
+			}
 
 			char* linkpath = "no file link";
 
-#if GLMDEBUG
-linkpath= vp->m_editable->m_mirror->m_path;
-#endif
+			#if GLMDEBUG
+				linkpath= vp->m_editable->m_mirror->m_path;
+			#endif
 
-GLMPRINTF ( ( "-D-"));
-GLMPRINTF ( ( "-D- ARBVP ||  GL %d || Path %s ", vp->m_descs [ kGLMARB ].m_object.arb, linkpath));
-GLMPRINTF ( ( "-D-   Attribs %s", attribtemp));
-GLMPRINTF ( ( "-D-   Trans %s", transtemp));
+			GLMPRINTF( ("-D-") );
+			GLMPRINTF( ("-D- ARBVP or  GL %d or Path %s ", vp->m_descs [ kGLMARB ].m_object.arb, linkpath) );
+			GLMPRINTF( ("-D-   Attribs %s", attribtemp) );
+			GLMPRINTF( ("-D-   Trans %s", transtemp) );
 
-/*
-if ( (options & (1<<eDumpShaderText)) && is_draw )
-{
-	GLMPRINTF(("-D-"));
-	GLMPRINTF(("-D- VP text " ));
-	GLMPRINTTEXT(vp->m_string, eDebugDump ));
-}
-*/
-		}
-		else
-		{
+			/*
+			if ( (options & (1<<eDumpShaderText)) and is_draw ) {
+				GLMPRINTF(("-D-"));
+				GLMPRINTF(("-D- VP text " ));
+				GLMPRINTTEXT(vp->m_string, eDebugDump ));
+			}
+			*/
+		} else {
 			GLMPRINTF(("-D- VP (none)" ));
 		}
 
 		if ( fp ) {
-	char* trans = strstr( fp->m_text, "#// trans#" );
-	if ( trans ) { CopyTilEOL( transtemp, trans, sizeof( transtemp ) ); } else { strcpy( transtemp, "no translation info" ); }
+			char* trans = strstr( fp->m_text, "#// trans#" );
+			if ( trans ) {
+				CopyTilEOL( transtemp, trans, sizeof( transtemp ) );
+			} else {
+				strcpy( transtemp, "no translation info" );
+			}
 
-	char* linkpath = "no file link";
+			char* linkpath = "no file link";
 
-#if GLMDEBUG
-linkpath= fp->m_editable->m_mirror->m_path;
-#endif
+			#if GLMDEBUG
+				linkpath= fp->m_editable->m_mirror->m_path;
+			#endif
 
-GLMPRINTF ( ( "-D-"));
-GLMPRINTF ( ( "-D- FP ||  GL %d || Path %s ", fp->m_descs [ kGLMARB ].m_object.arb, linkpath));
-GLMPRINTF ( ( "-D-   Trans %s", transtemp));
+			GLMPRINTF( ( "-D-") );
+			GLMPRINTF( ( "-D- FP or  GL %d or Path %s ", fp->m_descs [ kGLMARB ].m_object.arb, linkpath) );
+			GLMPRINTF( ( "-D-   Trans %s", transtemp) );
 
-/*
-if ( (options & (1<<eDumpShaderText)) && is_draw )
-{
-	GLMPRINTF(("-D-"));
-	GLMPRINTF(("-D- FP text " ));
-	GLMPRINTTEXT((fp->m_string, eDebugDump));
-}
-*/
-		}
-		else
-		{
+			/*
+			if ( (options & (1<<eDumpShaderText)) and is_draw ) {
+				GLMPRINTF(("-D-"));
+				GLMPRINTF(("-D- FP text " ));
+				GLMPRINTTEXT((fp->m_string, eDebugDump));
+			}
+			*/
+		} else {
 			GLMPRINTF(("-D- FP (none)" ));
 		}
 	}
 
-	if ( ( options &( 1<<eDumpShaderParameters)) && is_draw)
-	{
+	if ( ( options &( 1<<eDumpShaderParameters)) and is_draw) {
 		GLMPRINTF(("-D-"));
 		GLMPRINTF(("-D- VP parameters" ));
 		char *label = "";
@@ -2703,47 +2846,39 @@ if ( (options & (1<<eDumpShaderText)) && is_draw )
 			// take a peek at the vertex attrib setup.  If it has an attribute for bone weights, then raise the shader param dump limit to 256.
 		bool usesSkinning = false;
 		GLMVertexSetup *pSetup = &m_drawVertexSetup;
-		for( int index=0; index < kGLMVertexAttributeIndexMax; index++ )
-		{
-			usesSkinning |= (pSetup->m_attrMask & (1<<index)) && ((pSetup->m_vtxAttribMap[index]>>4)== D3DDECLUSAGE_BLENDWEIGHT);
+		for( int index=0; index < kGLMVertexAttributeIndexMax; index++ ) {
+			usesSkinning |= (pSetup->m_attrMask & (1<<index)) and ((pSetup->m_vtxAttribMap[index]>>4)== D3DDECLUSAGE_BLENDWEIGHT);
 		}
-		if (usesSkinning)
-		{
+		if (usesSkinning) {
 			upperSlotLimit = 256;
 		}
 
-		while( slotIndex < upperSlotLimit )
-		{
+		while( slotIndex < upperSlotLimit ) {
 			// if slot index is in a masked range, skip it
 			// if slot index is the start of a matrix, label it, print it, skip ahead 4 slots
-			for( int maski=0; vmaskranges[maski] >=0; maski+=2)
-			{
-				if ( (slotIndex >= vmaskranges[maski]) && (slotIndex <= vmaskranges[maski+1]) )
-				{
+			for( int maski=0; vmaskranges[maski] >=0; maski+=2) {
+				if ( (slotIndex >= vmaskranges[maski]) and (slotIndex <= vmaskranges[maski+1]) ) {
 					// that index is masked. set to one past end of range, print a blank line for clarity
 					slotIndex = vmaskranges[maski+1]+1;
 					GLMPrintStr("-D-     .....");
 				}
 			}
 
-			if (slotIndex < upperSlotLimit)
-			{
+			if (slotIndex < upperSlotLimit) {
 				float *values = &m_programParamsF[ kGLMVertexProgram ].m_values[slotIndex][0];
-				switch( slotIndex )
-				{
-					case	4:
+				switch( slotIndex ) {
+					case 4:
 						printmat( "MODELVIEWPROJ", slotIndex, 4, values );
 						slotIndex += 4;
-					break;
+						break;
 
-					case	8:
+					case 8:
 						printmat( "VIEWPROJ", slotIndex, 4, values );
 						slotIndex += 4;
 						break;
 
 					default:
-						if (slotIndex>=58)
-						{
+						if (slotIndex>=58) {
 							// bone
 							char bonelabel[100];
 
@@ -2751,48 +2886,45 @@ if ( (options & (1<<eDumpShaderText)) && is_draw )
 							printmat( bonelabel, slotIndex, 3, values );
 
 							slotIndex += 3;
-						}
-						else
-						{
+						} else {
 							// just print the one slot
 							GLMPRINTF(("-D-    %03d: [ %10.5f %10.5f %10.5f %10.5f ]  %s",  slotIndex, values[0], values[1], values[2], values[3], label ));
 							slotIndex++;
 						}
-					break;
+						break;
 				}
 			}
 		}
 
 		// VP stage still, if in GLSL mode, find the bound pair and see if it has live i0, b0-b3 uniforms
-		if (m_pBoundPair)	// should only be non-NULL in GLSL mode
-		{
-#if 0
-if ( m_pBoundPair->m_locVertexBool0>=0)
-			{
-				GLMPRINTF(("-D- GLSL 'b0': %d",  m_programParamsB[kGLMVertexProgram].m_values[0] ));
-			}
+		if (m_pBoundPair) { // should only be non-nullptr in GLSL mode
+			#if 0
+				if ( m_pBoundPair->m_locVertexBool0>=0)
+					{
+						GLMPRINTF(("-D- GLSL 'b0': %d",  m_programParamsB[kGLMVertexProgram].m_values[0] ));
+					}
 
-			if ( m_pBoundPair->m_locVertexBool1>=0)
-			{
-				GLMPRINTF(("-D- GLSL 'b1': %d",  m_programParamsB[kGLMVertexProgram].m_values[1] ));
-			}
+					if ( m_pBoundPair->m_locVertexBool1>=0)
+					{
+						GLMPRINTF(("-D- GLSL 'b1': %d",  m_programParamsB[kGLMVertexProgram].m_values[1] ));
+					}
 
-			if ( m_pBoundPair->m_locVertexBool2>=0)
-			{
-				GLMPRINTF(("-D- GLSL 'b2': %d",  m_programParamsB[kGLMVertexProgram].m_values[2] ));
-			}
+					if ( m_pBoundPair->m_locVertexBool2>=0)
+					{
+						GLMPRINTF(("-D- GLSL 'b2': %d",  m_programParamsB[kGLMVertexProgram].m_values[2] ));
+					}
 
-			if ( m_pBoundPair->m_locVertexBool3>=0)
-			{
-				GLMPRINTF(("-D- GLSL 'b3': %d",  m_programParamsB[kGLMVertexProgram].m_values[3] ));
-			}
+					if ( m_pBoundPair->m_locVertexBool3>=0)
+					{
+						GLMPRINTF(("-D- GLSL 'b3': %d",  m_programParamsB[kGLMVertexProgram].m_values[3] ));
+					}
 
-			if ( m_pBoundPair->m_locVertexInteger0>=0)
-			{
-				GLMPRINTF(("-D- GLSL 'i0': %d",  m_programParamsI[kGLMVertexProgram].m_values[0][0] ));
-			}
-#endif
-}
+					if ( m_pBoundPair->m_locVertexInteger0>=0)
+					{
+						GLMPRINTF(("-D- GLSL 'i0': %d",  m_programParamsI[kGLMVertexProgram].m_values[0][0] ));
+					}
+			#endif
+		}
 
 GLMPRINTF ( ( "-D-"));
 GLMPRINTF ( ( "-D- FP parameters " ));
@@ -2805,7 +2937,7 @@ label="";
 	// if slot index is in a masked range, skip it
 	// if slot index is the start of a matrix, label it, print it, skip ahead 4 slots
 	for ( int maski = 0; fmaskranges[ maski ] >= 0; maski += 2 ) {
-		if ( ( slotIndex >= fmaskranges[ maski ] ) && ( slotIndex <= fmaskranges[ maski + 1 ] ) ) {
+		if ( ( slotIndex >= fmaskranges[ maski ] ) and ( slotIndex <= fmaskranges[ maski + 1 ] ) ) {
 			// that index is masked. set to one past end of range, print a blank line for clarity
 			slotIndex = fmaskranges[ maski + 1 ] + 1;
 			GLMPrintStr( "-D-     ....." );
@@ -2884,7 +3016,7 @@ label="";
 		}
 	}
 
-	if ( ( options &( 1<<eDumpTextureSetup)) && is_draw)
+	if ( ( options &( 1<<eDumpTextureSetup)) and is_draw)
 	{
 		GLMPRINTF(( "-D-" ));
 		GLMPRINTF(( "-D- Texture / Sampler setup" ));
@@ -2915,7 +3047,7 @@ for( int i = 0; i<GLM_SAMPLER_COUNT; i++ )
 #endif
 }
 
-	if ( ( options &( 1<<eDumpVertexAttribSetup)) && is_draw)
+	if ( ( options &( 1<<eDumpVertexAttribSetup)) and is_draw)
 	{
 		GLMVertexSetup *pSetup = &m_drawVertexSetup;
 
@@ -2960,7 +3092,7 @@ for( int i = 0; i<GLM_SAMPLER_COUNT; i++ )
 		}
 	}
 
-	if ( ( options &( 1<<eDumpVertexData)) && is_draw)
+	if ( ( options &( 1<<eDumpVertexData)) and is_draw)
 	{
 		GLMVertexSetup *pSetup = &m_drawVertexSetup;
 		int start = info->m_drawStart;
@@ -3116,7 +3248,7 @@ for( int i = 0; i<GLM_SAMPLER_COUNT; i++ )
 			{
 				// if transform dumping requested, and we've reached the actual vert dump phase, do it
 				float	vtxout[4];
-				char	*translabel = NULL;   // NULL means no print...
+				char	*translabel = nullptr;   // nullptr means no print...
 
 				switch( g_vertDumpMode )
 				{
@@ -3270,7 +3402,7 @@ void GLMContext::DebugHook( GLMDebugHookInfo* info ) {
 	switch ( info->m_caller ) {
 		case eBeginFrame:
 			if ( debughook ) GLMPRINTF( ( "-D- Caller: BeginFrame" ) );
-			if ( ( m_holdFrameBegin >= 0 ) && ( m_holdFrameBegin == m_debugFrameIndex ) ) // did we hit a frame breakpoint?
+			if ( ( m_holdFrameBegin >= 0 ) and ( m_holdFrameBegin == m_debugFrameIndex ) ) // did we hit a frame breakpoint?
 			{
 				if ( debughook ) GLMPRINTF( ( "-D-         BeginFrame trigger match, clearing m_holdFrameBegin, hold=true" ) );
 
@@ -3282,7 +3414,7 @@ void GLMContext::DebugHook( GLMDebugHookInfo* info ) {
 
 		case eClear:
 			if ( debughook ) GLMPRINTF( ( "-D- Caller: Clear" ) );
-			if ( ( m_holdBatch >= 0 ) && ( m_holdBatchFrame >= 0 ) && ( (int) m_holdBatch == (int) m_nBatchCounter ) && ( (int) m_holdBatchFrame == (int) m_debugFrameIndex ) ) {
+			if ( ( m_holdBatch >= 0 ) and ( m_holdBatchFrame >= 0 ) and ( (int) m_holdBatch == (int) m_nBatchCounter ) and ( (int) m_holdBatchFrame == (int) m_debugFrameIndex ) ) {
 				if ( debughook ) GLMPRINTF( ( "-D-         Clear trigger match, clearing m_holdBatch&Frame, hold=true" ) );
 
 				m_holdBatch = m_holdBatchFrame = -1;
@@ -3293,7 +3425,7 @@ void GLMContext::DebugHook( GLMDebugHookInfo* info ) {
 
 		case eDrawElements:
 			if ( debughook ) GLMPRINTF( ( ( info->m_caller == eClear ) ? "-D- Caller: Clear" : "-D- Caller: Draw" ) );
-			if ( ( m_holdBatch >= 0 ) && ( m_holdBatchFrame >= 0 ) && ( (int) m_holdBatch == (int) m_nBatchCounter ) && ( (int) m_holdBatchFrame == (int) m_debugFrameIndex ) ) {
+			if ( ( m_holdBatch >= 0 ) and ( m_holdBatchFrame >= 0 ) and ( (int) m_holdBatch == (int) m_nBatchCounter ) and ( (int) m_holdBatchFrame == (int) m_debugFrameIndex ) ) {
 				if ( debughook ) GLMPRINTF( ( "-D-         Draw trigger match, clearing m_holdBatch&Frame, hold=true" ) );
 
 				m_holdBatch = m_holdBatchFrame = -1;
@@ -3306,7 +3438,7 @@ void GLMContext::DebugHook( GLMDebugHookInfo* info ) {
 			if ( debughook ) GLMPRINTF( ( "-D- Caller: EndFrame" ) );
 
 			// check for any expired batch hold req
-			if ( ( m_holdBatch >= 0 ) && ( m_holdBatchFrame >= 0 ) && ( m_holdBatchFrame == m_debugFrameIndex ) ) {
+			if ( ( m_holdBatch >= 0 ) and ( m_holdBatchFrame >= 0 ) and ( m_holdBatchFrame == m_debugFrameIndex ) ) {
 				// you tried to say 'next batch', but there wasn't one in this frame.
 				// target first batch of next frame instead
 				if ( debughook ) GLMPRINTF( ( "-D-         EndFrame noticed an expired draw hold trigger, rolling to next frame, hold=false" ) );
@@ -3318,7 +3450,7 @@ void GLMContext::DebugHook( GLMDebugHookInfo* info ) {
 			}
 
 			// now check for an explicit hold on end of this frame..
-			if ( ( m_holdFrameEnd >= 0 ) && ( m_holdFrameEnd == m_debugFrameIndex ) ) {
+			if ( ( m_holdFrameEnd >= 0 ) and ( m_holdFrameEnd == m_debugFrameIndex ) ) {
 				if ( debughook ) GLMPRINTF( ( "-D-         EndFrame trigger match, clearing m_holdFrameEnd, hold=true" ) );
 
 				m_holdFrameEnd = -1;
@@ -3332,7 +3464,7 @@ void GLMContext::DebugHook( GLMDebugHookInfo* info ) {
 
 	int evtcount = 0;
 
-	bool refresh = info->m_holding || m_debugDelayEnable; // only refresh once per initial visit (if paused!) or follow up event input
+	bool refresh = info->m_holding or m_debugDelayEnable; // only refresh once per initial visit (if paused!) or follow up event input
 	int breakToDebugger = 0;
 	// 1 = break to GDB
 	// 2 = break to OpenGL Profiler if attached
@@ -3401,9 +3533,9 @@ if( eventCheck ) {
 			case ' ': // toggle pause
 				// clear all the holds to be sure
 				m_holdFrameBegin = m_holdFrameEnd = m_holdBatch = m_holdBatchFrame = -1;
-				info->m_holding = !info->m_holding;
+				info->m_holding = not info->m_holding;
 
-				if ( !info->m_holding ) {
+				if ( not info->m_holding ) {
 					m_debugDelayEnable = false; // coming out of pause means no slow mo
 				}
 
@@ -3454,17 +3586,17 @@ if( eventCheck ) {
 				break;
 
 			case 'c': // toggle auto color clear
-				m_autoClearColor = !m_autoClearColor;
+				m_autoClearColor = not m_autoClearColor;
 				GLMPRINTF( ( m_autoClearColor ? "-D- Auto color clear ON" : "-D- Auto color clear OFF" ) );
 				break;
 
 			case 's': // toggle auto stencil clear
-				m_autoClearStencil = !m_autoClearStencil;
+				m_autoClearStencil = not m_autoClearStencil;
 				GLMPRINTF( ( m_autoClearStencil ? "-D- Auto stencil clear ON" : "-D- Auto stencil clear OFF" ) );
 				break;
 
 			case 'd': // toggle auto depth clear
-				m_autoClearDepth = !m_autoClearDepth;
+				m_autoClearDepth = not m_autoClearDepth;
 				GLMPRINTF( ( m_autoClearDepth ? "-D- Auto depth clear ON" : "-D- Auto depth clear OFF" ) );
 				break;
 
@@ -3497,7 +3629,7 @@ if( eventCheck ) {
 				break;
 
 			case '_': // toggle slow mo
-				m_debugDelayEnable = !m_debugDelayEnable;
+				m_debugDelayEnable = not m_debugDelayEnable;
 				break;
 
 			case '-': // go slower
@@ -3627,7 +3759,7 @@ DebugDump( info, 0xFFFFFFFF, g_vertDumpMode );
 							// '0' toggles the all-channels on or off
 							int flavorSelect = evt.m_UnicodeKeyUnmodified - '0';
 
-							if ( (flavorSelect >=0) && (flavorSelect<eFlavorCount) )
+							if ( (flavorSelect >=0) and (flavorSelect<eFlavorCount) )
 							{
 								uint mask = GLMDebugFlavorMask();
 
@@ -3666,7 +3798,7 @@ DebugDump( info, 0xFFFFFFFF, g_vertDumpMode );
 					{
 						if (m_selKnobIndex < g_knobcount)
 						{
-							float val = GLMKnob( g_knobnames[ m_selKnobIndex ], NULL );
+							float val = GLMKnob( g_knobnames[ m_selKnobIndex ], nullptr );
 
 							if (evt.m_UnicodeKeyUnmodified == 'l')
 							{
@@ -3713,7 +3845,7 @@ DebugDump( info, 0xFFFFFFFF, g_vertDumpMode );
 				}
 			}
 		}
-	}	while( ( ( evtcount>0) || info->m_holding) && ( !breakToDebugger) );
+	}	while( ( ( evtcount>0) or info->m_holding) and ( not breakToDebugger) );
 
 	if ( m_debugDelayEnable ) { ThreadSleep( m_debugDelay / 1000 ); }
 
@@ -3733,13 +3865,13 @@ DebugDump( info, 0xFFFFFFFF, g_vertDumpMode );
 }
 }
 
-void GLMContext::DebugPresent( void ) {
+void GLMContext::DebugPresent() {
 	CGLMTex* drawBufferTex = m_drawingFBO->m_attach[ kAttColor0 ].m_tex;
 	gGL->glFinish();
 	Present( drawBufferTex );
 }
 
-void GLMContext::DebugClear( void ) {
+void GLMContext::DebugClear() {
 	// get old clear color
 	GLClearColor_t clearcol_orig;
 	m_ClearColor.Read( &clearcol_orig, 0 );
@@ -3767,7 +3899,7 @@ void GLMContext::DebugClear( void ) {
 
 #endif
 
-void GLMContext::CheckNative( void ) {
+void GLMContext::CheckNative() {
 	// note that this is available in release.  We don't use GLMPRINTF for that reason.
 	// note we do not get called unless either slow-batch asserting or logging is enabled.
 	#ifdef OSX
@@ -3780,11 +3912,11 @@ void GLMContext::CheckNative( void ) {
 	// spews then asserts.
 	// that way you can enable both, get log output on a pair if it's slow, and then the debugger will pop.
 	if ( m_slowSpewEnable ) {
-		if ( !vertexGPUProcessing ) { m_drawingProgram[ kGLMVertexProgram ]->LogSlow( m_drawingLang ); }
-		if ( !fragmentGPUProcessing ) { m_drawingProgram[ kGLMFragmentProgram ]->LogSlow( m_drawingLang ); }
+		if ( not vertexGPUProcessing ) { m_drawingProgram[ kGLMVertexProgram ]->LogSlow( m_drawingLang ); }
+		if ( not fragmentGPUProcessing ) { m_drawingProgram[ kGLMFragmentProgram ]->LogSlow( m_drawingLang ); }
 	}
 
-	if ( m_slowAssertEnable ) { if ( !vertexGPUProcessing || !fragmentGPUProcessing ) { Assert( !"slow batch" ); } }
+	if ( m_slowAssertEnable ) { if ( not vertexGPUProcessing or not fragmentGPUProcessing ) { Assert( !"slow batch" ); } }
 	#else
 	//Assert( !"impl GLMContext::CheckNative()" );
 
@@ -3814,8 +3946,8 @@ void GLMContext::CheckNative( void ) {
 
 
 // debug font
-void GLMContext::GenDebugFontTex( void ) {
-	if ( !m_debugFontTex ) {
+void GLMContext::GenDebugFontTex() {
+	if ( not m_debugFontTex ) {
 		// make a 128x128 RGBA texture
 		GLMTexLayoutKey key;
 		memset( &key, 0, sizeof( key ) );
@@ -3888,7 +4020,7 @@ void GLMContext::GenDebugFontTex( void ) {
 		//-----------------------------------------------------
 
 		// don't leave texture bound on the TMU
-		BindTexToTMU( NULL, 0 );
+		BindTexToTMU( nullptr, 0 );
 
 		// also make the index and vertex buffers for use - up to 1K indices and 1K verts
 
@@ -3897,7 +4029,7 @@ void GLMContext::GenDebugFontTex( void ) {
 		m_debugFontIndices = NewBuffer( kGLMIndexBuffer, indexBufferSize, 0 ); // two byte indices
 
 		// we go ahead and lock it now, and fill it with indices 0-1023.
-		char* indices = NULL;
+		char* indices = nullptr;
 		GLMBuffLockParams idxLock;
 		idxLock.m_nOffset = 0;
 		idxLock.m_nSize = indexBufferSize;
@@ -3923,7 +4055,7 @@ struct GLMDebugTextVertex {
 };
 
 void GLMContext::DrawDebugText( float x, float y, float z, float drawCharWidth, float drawCharHeight, char* string ) {
-	if ( !m_debugFontTex ) { GenDebugFontTex(); }
+	if ( not m_debugFontTex ) { GenDebugFontTex(); }
 
 	// setup needed to draw text
 
@@ -3950,7 +4082,7 @@ void GLMContext::DrawDebugText( float x, float y, float z, float drawCharWidth, 
 	if ( stringlen > MAX_DEBUG_CHARS ) { stringlen = MAX_DEBUG_CHARS; }
 
 	// lock
-	char* vertices = NULL;
+	char* vertices = nullptr;
 	GLMBuffLockParams vtxLock;
 	vtxLock.m_nOffset = 0;
 	vtxLock.m_nSize = 1024 * stringlen;
@@ -3966,7 +4098,7 @@ void GLMContext::DrawDebugText( float x, float y, float z, float drawCharWidth, 
 
 		int character = (int) string[ charindex ];
 		character -= 0x20;
-		if ( ( character < 0 ) || ( character > 0x7F ) ) { character = '*' - 0x20; }
+		if ( ( character < 0 ) or ( character > 0x7F ) ) { character = '*' - 0x20; }
 
 		leftU = ( ( character & 0x0F ) * 6.0f ) / 128.0f;
 		rightU = leftU + ( 6.0f / 128.0f );
@@ -4059,7 +4191,7 @@ void GLMContext::DrawDebugText( float x, float y, float z, float drawCharWidth, 
 		gGL->glDisableClientState( GL_VERTEX_ARRAY );
 
 		gGL->glDisableClientState( GL_TEXTURE_COORD_ARRAY );
-	} else { SetVertexAttributes( NULL ); }
+	} else { SetVertexAttributes( nullptr ); }
 
 	gGL->glDisable( GL_TEXTURE_2D );
 
@@ -4068,29 +4200,30 @@ void GLMContext::DrawDebugText( float x, float y, float z, float drawCharWidth, 
 
 //===============================================================================
 
-void GLMgrSelfTests( void ) {
+void GLMgrSelfTests() {
 	return; // until such time as the tests are revised or axed
 
-	GLMDisplayParams glmParams;
-	glmParams.m_fsEnable = false;
+	GLMDisplayParams glmParams{
+		.m_focusWindow = nullptr,
+		.m_fsEnable = false,
 
-	glmParams.m_vsyncEnable = false; // "The runtime updates the window client area immediately and might do so more
-	glmParams.m_backBufferWidth = 1024;
-	glmParams.m_backBufferHeight = 768;
-	glmParams.m_backBufferFormat = D3DFMT_A8R8G8B8;
-	glmParams.m_multiSampleCount = 2;
+		.m_vsyncEnable = false,   // "The runtime updates the window client area immediately and might do so more
+		.m_backBufferWidth = 1024,
+		.m_backBufferHeight = 768,
+		.m_backBufferFormat = D3DFMT_A8R8G8B8,
+		.m_multiSampleCount = 2,
 
-	glmParams.m_enableAutoDepthStencil = true;
-	glmParams.m_autoDepthStencilFormat = D3DFMT_D24S8;
+		.m_enableAutoDepthStencil = true,
+		.m_autoDepthStencilFormat = D3DFMT_D24S8,
 
-	glmParams.m_fsRefreshHz = 60;
+		.m_fsRefreshHz = 60,
 
-	glmParams.m_mtgl = true;
-	glmParams.m_focusWindow = 0;
+		.m_mtgl = true,
+	};
 
 	// make a new context on renderer 0.
-	GLMContext* ctx = GLMgr::aGLMgr()->NewContext( NULL, &glmParams ); ////FIXME you can't make contexts this way any more.
-	if ( !ctx ) {
+	GLMContext* ctx = GLMgr::aGLMgr()->NewContext( nullptr, &glmParams ); ////FIXME you can't make contexts this way any more.
+	if ( not ctx ) {
 		DebuggerBreak(); // no go
 		return;
 	}
@@ -4103,8 +4236,7 @@ void GLMgrSelfTests( void ) {
 
 	int* testlist = twotests;
 
-	GLMTestParams params;
-	memset( &params, 0, sizeof( params ) );
+	GLMTestParams params{};
 
 	params.m_ctx = ctx;
 	params.m_testList = testlist;
@@ -4124,7 +4256,7 @@ void GLMgrSelfTests( void ) {
 	GLMgr::aGLMgr()->DelContext( ctx );
 }
 
-void GLMContext::SetDefaultStates( void ) {
+void GLMContext::SetDefaultStates() {
 	GLM_FUNC;
 	CheckCurrent();
 
@@ -4171,7 +4303,7 @@ void GLMContext::SetDefaultStates( void ) {
 	m_ClearStencil.Default();
 }
 
-void GLMContext::VerifyStates( void ) {
+void GLMContext::VerifyStates() {
 	GLM_FUNC;
 	CheckCurrent();
 
@@ -4245,9 +4377,9 @@ static inline uint GetDataTypeSizeInBytes( GLenum dataType ) {
 
 void GLMContext::DrawRangeElementsNonInline( GLenum mode, GLuint start, GLuint end, GLsizei count, GLenum type, const GLvoid* indices, uint baseVertex, CGLMBuffer* pIndexBuf ) {
 	#if GLMDEBUG
-	GLM_FUNC;
+		GLM_FUNC;
 	#else
-	//tmZone( TELEMETRY_LEVEL0, TMZF_NONE, "%s %d-%d count:%d mode:%d type:%d", __FUNCTION__, start, end, count, mode, type );
+		//tmZone( TELEMETRY_LEVEL0, TMZF_NONE, "%s %d-%d count:%d mode:%d type:%d", __FUNCTION__, start, end, count, mode, type );
 	#endif
 
 	++m_nBatchCounter;
@@ -4263,16 +4395,16 @@ void GLMContext::DrawRangeElementsNonInline( GLenum mode, GLuint start, GLuint e
 
 	#if GL_ENABLE_INDEX_VERIFICATION
 	// Obviously only for debugging.
-	if ( !pIndexBuf->IsSpanValid( (uint) indices, count * GetDataTypeSizeInBytes( type ) ) ) {
+	if ( not pIndexBuf->IsSpanValid( (uint) indices, count * GetDataTypeSizeInBytes( type ) ) ) {
 		// The consumption range crosses more than one lock span, or the lock is trying to consume a bad IB range.
 		DXABSTRACT_BREAK_ON_ERROR();
 	}
 
-	if ( ( type == GL_UNSIGNED_SHORT ) && ( pIndexBuf->m_bPseudo ) ) {
+	if ( ( type == GL_UNSIGNED_SHORT ) and ( pIndexBuf->m_bPseudo ) ) {
 		Assert( start <= end );
 		for ( int i = 0; i < count; i++ ) {
 			uint n = ( (const uint16*) indicesActual )[ i ];
-			if ( ( n < start ) || ( n > end ) ) { DXABSTRACT_BREAK_ON_ERROR(); }
+			if ( ( n < start ) or ( n > end ) ) { DXABSTRACT_BREAK_ON_ERROR(); }
 		}
 
 		unsigned char* pVertexShaderAttribMap = m_pDevice->m_vertexShader->m_vtxAttribMap;
@@ -4290,7 +4422,7 @@ void GLMContext::DrawRangeElementsNonInline( GLenum mode, GLuint start, GLuint e
 
 			D3DVERTEXELEMENT9_GL* pDeclElem = &pVertDecl->m_elements[ nDeclIndex ];
 
-			Assert( ( ( vertexShaderAttrib >> 4 ) == pDeclElem->m_dxdecl.Usage ) && ( ( vertexShaderAttrib & 0x0F ) == pDeclElem->m_dxdecl.UsageIndex ) );
+			Assert( ( ( vertexShaderAttrib >> 4 ) == pDeclElem->m_dxdecl.Usage ) and ( ( vertexShaderAttrib & 0x0F ) == pDeclElem->m_dxdecl.UsageIndex ) );
 
 			const uint nStreamIndex = pDeclElem->m_dxdecl.Stream;
 			const D3DStreamDesc* pStream = &m_pDevice->m_streams[ nStreamIndex ];
@@ -4312,7 +4444,7 @@ void GLMContext::DrawRangeElementsNonInline( GLenum mode, GLuint start, GLuint e
 
 			if ( nEnd > nBufSize ) { DXABSTRACT_BREAK_ON_ERROR(); }
 
-			if ( !pStream->m_vtxBuffer->m_vtxBuffer->IsSpanValid( nStart, nEnd - nStart ) ) {
+			if ( not pStream->m_vtxBuffer->m_vtxBuffer->IsSpanValid( nStart, nEnd - nStart ) ) {
 				// The draw is trying to consume a range of the bound VB that hasn't been set to valid data!
 				DXABSTRACT_BREAK_ON_ERROR();
 			}
@@ -4326,7 +4458,9 @@ void GLMContext::DrawRangeElementsNonInline( GLenum mode, GLuint start, GLuint e
 		gGL->glDrawRangeElementsBaseVertex( mode, start, end, count, type, indicesActual, baseVertex );
 
 		#if GLMDEBUG
-		if ( m_slowCheckEnable ) { CheckNative(); }
+			if ( m_slowCheckEnable ) {
+				CheckNative();
+			}
 		#endif
 	}
 }
@@ -4339,7 +4473,9 @@ void glSetEnable( GLenum which, bool enable ) {
 }
 
 // helper function for int vs enum clarity
-void glGetEnumv( GLenum which, GLenum* dst ) { gGL->glGetIntegerv( which, (int*) dst ); }
+void glGetEnumv( GLenum which, GLenum* dst ) {
+	gGL->glGetIntegerv( which, (int*) dst );
+}
 #endif
 
 //===============================================================================
@@ -4348,14 +4484,14 @@ void glGetEnumv( GLenum which, GLenum* dst ) { gGL->glGetIntegerv( which, (int*)
 GLMTester::GLMTester( GLMTestParams* params ) {
 	m_params = *params;
 
-	m_drawFBO = NULL;
-	m_drawColorTex = NULL;
-	m_drawDepthTex = NULL;
+	m_drawFBO = nullptr;
+	m_drawColorTex = nullptr;
+	m_drawDepthTex = nullptr;
 }
 
 GLMTester::~GLMTester() { }
 
-void GLMTester::StdSetup( void ) {
+void GLMTester::StdSetup() {
 	GLMContext* ctx = m_params.m_ctx;
 
 	m_drawWidth = 1024;
@@ -4381,7 +4517,7 @@ void GLMTester::StdSetup( void ) {
 	m_drawColorTex = ctx->NewTex( &colorkey );
 
 	// do not leave that texture bound on the TMU
-	ctx->BindTexToTMU( NULL, 0 );
+	ctx->BindTexToTMU( nullptr, 0 );
 
 
 	// attach color to FBO
@@ -4397,7 +4533,7 @@ void GLMTester::StdSetup( void ) {
 
 	// check it.
 	bool ready = m_drawFBO->IsReady();
-	InternalError( !ready, "drawing FBO no go" );
+	InternalError( not ready, "drawing FBO no go" );
 
 	// bind it
 	ctx->BindFBOToCtx( m_drawFBO, GL_FRAMEBUFFER_EXT );
@@ -4415,32 +4551,32 @@ void GLMTester::StdSetup( void ) {
 	ctx->GenDebugFontTex();
 }
 
-void GLMTester::StdCleanup( void ) {
+void GLMTester::StdCleanup() {
 	GLMContext* ctx = m_params.m_ctx;
 
 	// unbind
-	ctx->BindFBOToCtx( NULL, GL_FRAMEBUFFER_EXT );
+	ctx->BindFBOToCtx( nullptr, GL_FRAMEBUFFER_EXT );
 
 	// del FBO
 	if ( m_drawFBO ) {
 		ctx->DelFBO( m_drawFBO );
-		m_drawFBO = NULL;
+		m_drawFBO = nullptr;
 	}
 
 	// del tex
 	if ( m_drawColorTex ) {
 		ctx->DelTex( m_drawColorTex );
-		m_drawColorTex = NULL;
+		m_drawColorTex = nullptr;
 	}
 
 	if ( m_drawDepthTex ) {
 		ctx->DelTex( m_drawDepthTex );
-		m_drawDepthTex = NULL;
+		m_drawDepthTex = nullptr;
 	}
 }
 
 
-void GLMTester::Clear( void ) {
+void GLMTester::Clear() {
 	GLMContext* ctx = m_params.m_ctx;
 	ctx->MakeCurrent();
 
@@ -4471,7 +4607,9 @@ void GLMTester::CheckGLError( const char* comment ) {
 
 	//borrowed from GLMCheckError.. slightly different
 
-	if ( !comment ) { comment = ""; }
+	if ( not comment ) {
+		comment = "";
+	}
 
 	GLenum errorcode = (GLenum) gGL->glGetError();
 	GLenum errorcode2 = 0;
@@ -4503,10 +4641,10 @@ void GLMTester::InternalError( int errcode, const char* comment ) {
 }
 
 
-void GLMTester::RunTests( void ) {
+void GLMTester::RunTests() {
 	int* testList = m_params.m_testList;
 
-	while ( ( *testList >= 0 ) && ( *testList < 20 ) ) { RunOneTest( *testList++ ); }
+	while ( ( *testList >= 0 ) and ( *testList < 20 ) ) { RunOneTest( *testList++ ); }
 }
 
 void GLMTester::RunOneTest( int testindex ) {
@@ -4534,8 +4672,7 @@ void GLMTester::RunOneTest( int testindex ) {
 
 // some fixed lists which may be useful to all tests
 
-D3DFORMAT g_drawTexFormatsGLMT[ ] = // -1 terminated
-{
+D3DFORMAT g_drawTexFormatsGLMT[] { // -1 terminated
 	D3DFMT_A8R8G8B8,
 	D3DFMT_A4R4G4B4,
 	D3DFMT_X8R8G8B8,
@@ -4555,8 +4692,7 @@ D3DFORMAT g_drawTexFormatsGLMT[ ] = // -1 terminated
 	(D3DFORMAT) -1
 };
 
-D3DFORMAT g_fboColorTexFormatsGLMT[ ] = // -1 terminated
-{
+D3DFORMAT g_fboColorTexFormatsGLMT[] { // -1 terminated
 	D3DFMT_A8R8G8B8,
 	//D3DFMT_A4R4G4B4,			//unsupported
 	D3DFMT_X8R8G8B8,
@@ -4569,8 +4705,7 @@ D3DFORMAT g_fboColorTexFormatsGLMT[ ] = // -1 terminated
 	(D3DFORMAT) -1
 };
 
-D3DFORMAT g_fboDepthTexFormatsGLMT[ ] = // -1 terminated, but note 0 for "no depth" mode
-{
+D3DFORMAT g_fboDepthTexFormatsGLMT[] { // -1 terminated, but note 0 for "no depth" mode
 	(D3DFORMAT) 0,
 	D3DFMT_D16,
 	D3DFMT_D24X8,
@@ -4582,7 +4717,7 @@ D3DFORMAT g_fboDepthTexFormatsGLMT[ ] = // -1 terminated, but note 0 for "no dep
 
 // #####################################################################################################################
 
-void GLMTester::Test0( void ) {
+void GLMTester::Test0() {
 	// make and delete a bunch of textures.
 	// lock and unlock them.
 	// use various combos of -
@@ -4663,12 +4798,12 @@ void GLMTester::Test0( void ) {
 								} else {
 									// 3D: knock down Z quite a bit so our test case does not run out of RAM
 									key.m_zSize >>= 3;
-									if ( !key.m_zSize ) { key.m_zSize = 1; }
+									if ( not key.m_zSize ) { key.m_zSize = 1; }
 								}
 
 								CGLMTex* newtex = ctx->NewTex( &key );
 								CheckGLError( "tex create test" );
-								InternalError( newtex == NULL, "tex create test" );
+								InternalError( newtex == nullptr, "tex create test" );
 
 								testTextures.AddToTail( newtex );
 								printf( "\n[%5d] created tex %s", innerindex, newtex->m_layout->m_layoutSummary );
@@ -4699,7 +4834,7 @@ void GLMTester::Test0( void ) {
 
 										ptex->Lock( &lockreq, &lockAddress, &yStride, &zStride );
 										CheckGLError( "tex lock test" );
-										InternalError( lockAddress == NULL, "null lock address" );
+										InternalError( lockAddress == nullptr, "null lock address" );
 
 										// write some texels of this flavor:
 										//	red 75%  green 40%  blue 15%  alpha 80%
@@ -4764,7 +4899,7 @@ void GLMTester::Test0( void ) {
 }
 
 // #####################################################################################################################
-void GLMTester::Test1( void ) {
+void GLMTester::Test1() {
 	// FBO exercises
 	GLMContext* ctx = m_params.m_ctx;
 	ctx->MakeCurrent();
@@ -4833,7 +4968,7 @@ void GLMTester::Test1( void ) {
 
 
 					//=============================================== optional depth tex
-					CGLMTex* depthTex = NULL;
+					CGLMTex* depthTex = nullptr;
 
 					if ( *depthFmtPtr > 0 ) {
 						GLMTexLayoutKey depthkey;
@@ -4875,7 +5010,7 @@ void GLMTester::Test1( void ) {
 					printf( "\n   -> %s\n", ready ? "pass" : "fail" );
 
 					// unbind
-					ctx->BindFBOToCtx( NULL, GL_FRAMEBUFFER_EXT );
+					ctx->BindFBOToCtx( nullptr, GL_FRAMEBUFFER_EXT );
 
 					// del FBO
 					ctx->DelFBO( fbo );
@@ -4892,7 +5027,7 @@ void GLMTester::Test1( void ) {
 // #####################################################################################################################
 
 static int selftest2_seed = 0; // inc this every run to force main thread to teardown/reset display view
-void GLMTester::Test2( void ) {
+void GLMTester::Test2() {
 	GLMContext* ctx = m_params.m_ctx;
 	ctx->MakeCurrent();
 
@@ -4936,8 +5071,7 @@ void GLMTester::Test2( void ) {
 
 // #####################################################################################################################
 
-static char g_testVertexProgram01[ ] =
-{
+static char g_testVertexProgram01[] {
 	"!!ARBvp1.0  \n"
 	"TEMP vertexClip;  \n"
 	"DP4 vertexClip.x, state.matrix.mvp.row[0], vertex.position;  \n"
@@ -4951,8 +5085,7 @@ static char g_testVertexProgram01[ ] =
 	"END  \n"
 };
 
-static char g_testFragmentProgram01[ ] =
-{
+static char g_testFragmentProgram01[] {
 	"!!ARBfp1.0  \n"
 	"TEMP color;  \n"
 	"MUL color, fragment.texcoord[0].y, 2.0;  \n"
@@ -4966,8 +5099,7 @@ static char g_testFragmentProgram01[ ] =
 
 // generic attrib versions..
 
-static char g_testVertexProgram01_GA[ ] =
-{
+static char g_testVertexProgram01_GA[] {
 	"!!ARBvp1.0  \n"
 	"TEMP vertexClip;  \n"
 	"DP4 vertexClip.x, state.matrix.mvp.row[0], vertex.attrib[0];  \n"
@@ -4981,8 +5113,7 @@ static char g_testVertexProgram01_GA[ ] =
 	"END  \n"
 };
 
-static char g_testFragmentProgram01_GA[ ] =
-{
+static char g_testFragmentProgram01_GA[] {
 	"!!ARBfp1.0  \n"
 	"TEMP color;  \n"
 	"TEX color, fragment.texcoord[0], texture[0], 2D;"
@@ -4996,7 +5127,7 @@ static char g_testFragmentProgram01_GA[ ] =
 };
 
 
-void GLMTester::Test3( void ) {
+void GLMTester::Test3() {
 	/**************************
 	XXXXXXXXXXXXXXXXXXXXXX	stale test code until we revise the program interface
 

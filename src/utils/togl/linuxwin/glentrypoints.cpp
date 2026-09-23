@@ -130,7 +130,7 @@
 #endif
 
 COpenGLEntryPoints* gGL = nullptr;
-GL_GetProcAddressCallbackFunc_t gGL_GetProcAddressCallback = nullptr;
+static GL_GetProcAddressCallbackFunc_t gGL_GetProcAddressCallback = nullptr;
 
 void* VoidFnPtrLookup_GlMgr( const char* fn, bool& okay, const bool bRequired, void* fallback ) {
 	void* retval = nullptr;

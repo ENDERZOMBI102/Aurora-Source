@@ -110,7 +110,9 @@ DLL_IMPORT const char* GLMDecode( GLMThing_t type, unsigned long value );  // de
 const char* GLMDecodeMask( GLMThing_t type, unsigned long value );  // decode a bitmask
 
 ALWAYS_INLINE
-void GLMStop() { DXABSTRACT_BREAK_ON_ERROR(); }
+void GLMStop() {
+	DXABSTRACT_BREAK_ON_ERROR();
+}
 
 void GLMEnableTrace( bool on );
 
