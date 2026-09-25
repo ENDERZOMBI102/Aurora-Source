@@ -26,28 +26,26 @@ public:
 	CUtlString( const char* pString, int length );
 	CUtlString( const CUtlString& string );
 
-#ifdef MOVE_CONSTRUCTOR_SUPPORT
 	// Support moving of CUtlString objects. Long live C++11
 	// This move constructor will get called when appropriate, such as when
 	// returning objects from functions, or otherwise copying from temporaries
 	// which are about to be destroyed. It can also be explicitly invoked with
 	// std::move().
 	// Move constructor:
-	CUtlString( CUtlString&& rhs ) {
+	CUtlString( CUtlString&& rhs ) noexcept {
 		// Move the string pointer from the source to this -- be sure to
 		// zero out the source to avoid double frees.
 		m_pString = rhs.m_pString;
-		rhs.m_pString = 0;
+		rhs.m_pString = nullptr;
 	}
 	// Move assignment operator:
-	CUtlString& operator=( CUtlString&& rhs ) {
+	CUtlString& operator=( CUtlString&& rhs ) noexcept {
 		// Move the string pointer from the source to this -- be sure to
 		// zero out the source to avoid double frees.
 		m_pString = rhs.m_pString;
-		rhs.m_pString = 0;
+		rhs.m_pString = nullptr;
 		return *this;
 	}
-#endif
 
 	~CUtlString();
 
