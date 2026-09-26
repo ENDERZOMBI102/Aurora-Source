@@ -14,7 +14,9 @@
 	auto CLauncherMgr::Connect( CreateInterfaceFn factory ) -> bool {
 		return true;
 	}
-	auto CLauncherMgr::Disconnect() -> void { }
+	auto CLauncherMgr::Disconnect() -> void {
+
+	}
 	auto CLauncherMgr::QueryInterface( const char* pInterfaceName ) -> void* {
 		if ( V_strcmp( pInterfaceName, INTERFACE_VERSION ) == 0 ) {
 			return this;
@@ -22,32 +24,34 @@
 		return nullptr;
 	}
 	auto CLauncherMgr::Init() -> InitReturnVal_t {
-		if ( not SDL_InitSubSystem( SDL_INIT_VIDEO ) ) {
+		if ( not SDL_InitSubSystem( SDL_INIT_EVENTS | SDL_INIT_VIDEO ) ) {
 			Warning( "[LauncherMgr] Failed to initialize SDL video subsystem (%s)\n", SDL_GetError() );
 			return INIT_FAILED;
 		}
 		return INIT_OK;
 	}
 	auto CLauncherMgr::Shutdown() -> void {
-		SDL_QuitSubSystem( SDL_INIT_VIDEO );
+		SDL_QuitSubSystem( SDL_INIT_EVENTS | SDL_INIT_VIDEO );
 	}
 
 	auto CLauncherMgr::CreateGameWindow( const char* const pTitle, const bool pWindowed, const int pWidth, const int pHeight ) -> bool {
-		uint32 flags{ SDL_WINDOWPOS_CENTERED | SDL_WINDOW_HIGH_PIXEL_DENSITY };
+		uint64 flags{ SDL_WINDOWPOS_CENTERED | SDL_WINDOW_HIGH_PIXEL_DENSITY };
 		if ( CommandLine()->FindParm( "-vulkan" ) ) {
 			flags |= SDL_WINDOW_VULKAN;
 		} else if constexpr ( IsPlatformOpenGL() ) {
 			flags |= SDL_WINDOW_OPENGL;
 		}
 		flags |= pWindowed ? 0 : SDL_WINDOW_FULLSCREEN;
+		flags |= SDL_WINDOW_HIGH_PIXEL_DENSITY;
+		flags |= SDL_WINDOW_MOUSE_CAPTURE;
 
 		m_Window = SDL_CreateWindow( pTitle, pWidth, pHeight, flags );
 
 		// if we're on an ogl platform, also create the context
-		// if constexpr ( IsPlatformOpenGL() ) {
-			// m_MainContext = SDL_GL_CreateContext( m_Window );
-			// AssertFatalMsg( m_MainContext, "Failed to create OGL context: %s\n", SDL_GetError() );
-		// }
+		if constexpr ( IsPlatformOpenGL() ) {
+			m_MainContext = SDL_GL_CreateContext( m_Window );
+			AssertFatalMsg( m_MainContext, "Failed to create OGL context: %s\n", SDL_GetError() );
+		}
 
 		return m_Window != nullptr;
 	}
@@ -56,9 +60,11 @@
 		m_WindowRefCount += 1;
 	}
 	auto CLauncherMgr::DecWindowRefCount() -> void {
-		// TODO: Destroy window on reach 0?
 		if ( m_WindowRefCount > 0 ) {
 			m_WindowRefCount -= 1;
+		}
+		if ( m_WindowRefCount == 0 ) {
+			SDL_DestroyWindow( m_Window );
 		}
 	}
 
@@ -73,14 +79,16 @@
 
 	auto CLauncherMgr::SetCursorPosition( const int x, const int y ) -> void {
 		if ( not SDL_WarpMouseGlobal( x, y ) ) {
-			Warning( "SDL_WarpMouseGlobal failed: %s", SDL_GetError() );
+			Warning( "[%s] SDL_WarpMouseGlobal failed: %s\n", __FUNCTION__, SDL_GetError() );
 		}
 	}
 
 	auto CLauncherMgr::SetWindowFullScreen( const bool pFullScreen, const int pWidth, const int pHeight ) -> void {
 		m_Fullscreen = pFullScreen;
 		if ( not SDL_SetWindowFullscreen( m_Window, true ) ) {
-			Warning( "SDL_SetWindowFullscreen failed: %s", SDL_GetError() );
+			Warning( "[%s] SDL_SetWindowFullscreen failed: %s", __FUNCTION__, SDL_GetError() );
+		} else if ( not pFullScreen and not SDL_SetWindowSize( m_Window, pWidth, pHeight ) ) {
+			Warning( "[%s] SDL_SetWindowSize failed: %s\n", __FUNCTION__, SDL_GetError() );
 		}
 	}
 	auto CLauncherMgr::IsWindowFullScreen() -> bool {
@@ -88,12 +96,12 @@
 	}
 	auto CLauncherMgr::MoveWindow( const int x, const int y ) -> void {
 		if ( not SDL_SetWindowPosition( m_Window, x, y ) ) {
-			Warning( "SDL_SetWindowPosition failed: %s", SDL_GetError() );
+			Warning( "[%s] SDL_SetWindowPosition failed: %s\n", __FUNCTION__, SDL_GetError() );
 		}
 	}
 	auto CLauncherMgr::SizeWindow( const int pWidth, const int pHeight ) -> void {
 		if ( not SDL_SetWindowSize( m_Window, pWidth, pHeight ) ) {
-			Warning( "SDL_SetWindowSize failed: %s", SDL_GetError() );
+			Warning( "[%s] SDL_SetWindowSize failed: %s\n", __FUNCTION__, SDL_GetError() );
 		}
 	}
 	auto CLauncherMgr::PumpWindowsMessageLoop() -> void {
@@ -103,25 +111,30 @@
 	auto CLauncherMgr::DestroyGameWindow() -> void {
 		SDL_DestroyWindow( m_Window );
 		m_Window = nullptr;
+		if ( m_WindowRefCount ) {
+			Log( "[%s] Asked to destroy window while there still are %d refs!\n", __FUNCTION__, m_WindowRefCount );
+		}
+		m_WindowRefCount = 0;
 	}
 	auto CLauncherMgr::SetApplicationIcon( const char* const pAppIconFile ) -> void {
+		Warning("Setting icon to %s\n", pAppIconFile);
 		// open image
 		const auto ops{ SDL_IOFromFile( pAppIconFile, "rb" ) };
 		if ( not ops ) {
-			Warning( "Failed to open icon at `%s`: %s", pAppIconFile, SDL_GetError() );
+			Warning( "Failed to open icon at `%s`: %s\n", pAppIconFile, SDL_GetError() );
 			return;
 		}
 		// load image
 		const auto surface{ SDL_LoadBMP_IO( ops, true ) };
 		if ( not surface ) {
-			Warning( "Failed to load icon: %s", SDL_GetError() );
+			Warning( "Failed to load icon: %s\n", SDL_GetError() );
 			return;
 		}
 		SDL_SetWindowIcon( m_Window, surface );
 		SDL_DestroySurface( surface );
 	}
 	auto CLauncherMgr::GetMouseDelta( int& x, int& y, bool bIgnoreNextMouseDelta ) -> void {
-
+		
 	}
 
 	auto CLauncherMgr::GetNativeDisplayInfo( int nDisplay, uint& nWidth, uint& nHeight, uint& nRefreshHz ) -> void {
@@ -144,7 +157,9 @@
 		nHeight = rect.h;
 		nRefreshHz = static_cast<uint>( mode->refresh_rate );
 	}
-	auto CLauncherMgr::RenderedSize( uint& oWidth, uint& oHeight, bool pSet ) -> void { AssertUnreachable(); }
+	auto CLauncherMgr::RenderedSize( uint& oWidth, uint& oHeight, bool pSet ) -> void {
+		AssertUnreachable();
+	}
 	auto CLauncherMgr::DisplayedSize( uint& oWidth, uint& oHeight ) -> void {
 		// TODO: Is this correct?
 		int width{};
@@ -161,8 +176,14 @@
 			AssertMsg( ctx, "Failed to get GL context: %s\n", SDL_GetError() );
 			return ctx;
 		}
-		auto CLauncherMgr::GetGLContextForWindow( void* windowref ) -> PseudoGLContextPtr { AssertUnreachable(); return {}; }
-		auto CLauncherMgr::CreateExtraContext() -> PseudoGLContextPtr { AssertUnreachable(); return {}; }
+		auto CLauncherMgr::GetGLContextForWindow( void* windowref ) -> PseudoGLContextPtr {
+			AssertUnreachable();
+			return {};
+		}
+		auto CLauncherMgr::CreateExtraContext() -> PseudoGLContextPtr {
+			AssertUnreachable();
+			return {};
+		}
 		auto CLauncherMgr::DeleteContext( PseudoGLContextPtr pContext ) -> void {
 			const auto res{ SDL_GL_DestroyContext( static_cast<SDL_GLContext>( pContext ) ) };
 			AssertMsg( res, "Failed to destroy GL context: %s\n", SDL_GetError() );
@@ -173,15 +194,21 @@
 		auto CLauncherMgr::GetDisplayDB() -> GLMDisplayDB* {
 			return &m_DisplayDb;
 		}
-		auto CLauncherMgr::GetDesiredPixelFormatAttribsAndRendererInfo( uint** ptrOut, uint* countOut, GLMRendererInfoFields* rendInfoOut ) -> void { AssertUnreachable(); }
-		auto CLauncherMgr::ShowPixels( CShowPixelsParams* params ) -> void { AssertUnreachable(); }
+		auto CLauncherMgr::GetDesiredPixelFormatAttribsAndRendererInfo( uint** ptrOut, uint* countOut, GLMRendererInfoFields* rendInfoOut ) -> void {
+			AssertUnreachable();
+		}
+		auto CLauncherMgr::ShowPixels( CShowPixelsParams* params ) -> void {
+			AssertUnreachable();
+		}
 	#endif
 
 	auto CLauncherMgr::GetStackCrawl( CStackCrawlParams* params ) -> void {
 		AssertUnreachable();
 	}
 
-	auto CLauncherMgr::WaitUntilUserInput( int msSleepTime ) -> void { AssertUnreachable(); }
+	auto CLauncherMgr::WaitUntilUserInput( int msSleepTime ) -> void {
+		AssertUnreachable();
+	}
 
 	auto CLauncherMgr::GetWindowRef() -> void* {
 		if constexpr ( IsWindows() ) {
@@ -196,18 +223,26 @@
 
 	auto CLauncherMgr::SetMouseVisible( const bool pState ) -> void {
 		if ( pState ) {
-			SDL_ShowCursor();
+			if ( not SDL_ShowCursor() ) {
+				Warning( "[%s] SDL_ShowCursor failed: %s\n", __FUNCTION__, SDL_GetError() );
+			}
 		} else {
-			SDL_HideCursor();
+			if ( not SDL_HideCursor() ) {
+				Warning( "[%s] SDL_HideCursor failed: %s\n", __FUNCTION__, SDL_GetError() );
+			}
 		}
 	}
 	auto CLauncherMgr::SetMouseCursor( SDL_Cursor* pCursor ) -> void {
-		SDL_SetCursor( pCursor );
+		if ( not SDL_SetCursor( pCursor ) ) {
+			Warning( "[%s] SDL_SetCursor failed: %s\n", __FUNCTION__, SDL_GetError() );
+		}
 	}
 	auto CLauncherMgr::SetForbidMouseGrab( bool bForbidMouseGrab ) -> void { AssertUnreachable(); }
 	auto CLauncherMgr::OnFrameRendered() -> void { AssertUnreachable(); }
 
-	auto CLauncherMgr::SetGammaRamp( const uint16* pRed, const uint16* pGreen, const uint16* pBlue ) -> void { AssertUnreachable(); }
+	auto CLauncherMgr::SetGammaRamp( const uint16* pRed, const uint16* pGreen, const uint16* pBlue ) -> void {
+		AssertUnreachable();
+	}
 
 	auto CLauncherMgr::GetPrevGLSwapWindowTime() -> double {
 		return m_PrevSwapTime;
