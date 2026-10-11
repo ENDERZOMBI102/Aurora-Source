@@ -3,6 +3,7 @@
 # asource_option( $name $desc $default (BOOL|STRING|PATH|ENUM $entry...) )
 #   Declares a cmake configure, user-facing, option for the project.
 #   All declared options are prefixed by `ASOURCE_`, to namespace them.
+#   This will also create a string representation of all the options.
 function( asource_option name desc default )
     cmake_parse_arguments( AO "BOOL;STRING;PATH" "" "ENUM" ${ARGN} )
     # first get the actual value, we don't want to override the user's option by accident
@@ -15,19 +16,34 @@ function( asource_option name desc default )
     # define the option
     if ( ${AO_BOOL} )
         option( ASOURCE_${name} ${desc} ${default} )
+        if ( ${actual} )
+            file( APPEND "${CMAKE_BINARY_DIR}/asource_options.txt" "1" )
+        else ()
+            file( APPEND "${CMAKE_BINARY_DIR}/asource_options.txt" "0" )
+        endif ()
     elseif ( ${AO_STRING} )
         set( ASOURCE_${name} ${actual} CACHE STRING ${desc} )
+        file( APPEND "${CMAKE_BINARY_DIR}/asource_options.txt" "'${actual}'" )
     elseif ( ${AO_PATH} )
         set( ASOURCE_${name} ${actual} CACHE PATH ${desc} )
+        if ( "${actual}" STREQUAL "" )
+            file( APPEND "${CMAKE_BINARY_DIR}/asource_options.txt" "p" )
+        else ()
+            file( APPEND "${CMAKE_BINARY_DIR}/asource_options.txt" "P" )
+        endif ()
         # TODO: Check path
     elseif ( NOT "${AO_ENUM}" STREQUAL "" )
         set( ASOURCE_${name} ${actual} CACHE STRING ${desc} )
         set_property( CACHE ASOURCE_${name} PROPERTY STRINGS ${AO_ENUM} )
+        list( FIND AO_ENUM "${actual}" idx )
+        file( APPEND "${CMAKE_BINARY_DIR}/asource_options.txt" "${idx}" )
     else ()
         message( WARNING "No known option type was passed to `asource_option` for ${name}" )
     endif ()
 endfunction()
 
+
+file( REMOVE "${CMAKE_BINARY_DIR}/asource_options.txt" )
 
 asource_option( BUILD_GROUP "What targets to define" "game" ENUM "everything" "engine" "game" "tools" "shaders" )
 asource_option( BUILD_GAME "Which game/mod to build" "hl2mp" ENUM "hl2mp" "sdk" )
@@ -46,3 +62,5 @@ asource_option( DX9SDK_PATH "Absolute path to the dx9 sdk" "" PATH )
 set( IS_SOURCESDK 1 )
 set( RAD_TELEMETRY_DISABLED ${IS_SOURCESDK} )
 set( TF_BETA 0 )
+
+file( READ "${CMAKE_BINARY_DIR}/asource_options.txt" ASOURCE_OPTIONS_STRING )
