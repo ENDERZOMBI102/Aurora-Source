@@ -51,6 +51,7 @@ asource_option( BUILD_GAME "Which game/mod to build" "hl2mp" ENUM "hl2mp" "sdk" 
 asource_option( RETAIL "Build in retail mode" OFF BOOL )
 asource_option( STAGING_ONLY "Build with staging asserts and code enabled" OFF BOOL )
 asource_option( USE_TOGL "Use the `togl` translation layer" ${IS_LINUX} BOOL )
+asource_option( USE_SDL  "Use the SDL3 instead of Win32, required on non-Windows platforms" ${IS_LINUX} BOOL )
 asource_option( BUILD_REPLAY "Build replay support" OFF BOOL )
 asource_option( OVERRIDE_MALLOC "Enable the tier0 global allocator override (memalloc.cpp)" OFF BOOL )
 asource_option( 3RD_PARTY_LOGS "Toggles 3rd party libraries cmake output" OFF BOOL )

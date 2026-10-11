@@ -181,7 +181,7 @@ list( APPEND DEFINES
     $<$<BOOL:${ASOURCE_RETAIL}>:PLATFORM_RETAIL>
 
     # misc
-    USE_SDL # We use SDL instead of whatever windows provides
+    $<$<BOOL:${ASOURCE_USE_SDL}>:USE_SDL> # We use SDL instead of whatever windows provides
     _DLL_EXT=${CMAKE_SHARED_LIBRARY_SUFFIX}
     FRAME_POINTER_OMISSION_DISABLED
 	$<$<NOT:$<BOOL:${ASOURCE_OVERRIDE_MALLOC}>>:NO_MALLOC_OVERRIDE>
