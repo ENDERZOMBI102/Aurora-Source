@@ -6,7 +6,7 @@ Result = typing.Union[str, bool]
 
 
 def CUtlVector_T_SummaryVis( valobj: lldb.SBValue, _, options: lldb.SBTypeSummaryOptions ) -> Result:
-	""" A summary visualizer for Slice<T>, which is shown as just its size """
+	""" A summary visualizer for CUtlVector<T>, which is shown as just its size """
 	_ = options
 	obj: lldb.SBValue = valobj.GetNonSyntheticValue()
 	pointer = obj.GetChildMemberWithName( 'm_pElements' ).GetValueAsUnsigned( 0 )
